@@ -1,0 +1,27 @@
+# torch
+# tqdm
+# transformers
+# numpy
+# pandas
+# emoji==0.6.0
+# # wordcloud
+# Werkzeug==2.2.2
+# vaderSentiment
+# Pillow
+# Flask==2.2.2
+# pymongo
+# xformers
+
+torch
+tqdm
+transformers
+numpy
+pandas
+emoji==0.6.0
+# wordcloud
+Werkzeug
+vaderSentiment
+Pillow
+Flask
+pymongo
+# xformers

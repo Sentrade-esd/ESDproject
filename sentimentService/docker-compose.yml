@@ -1,0 +1,73 @@
+version: '2'
+
+services:
+  # app:
+  #   build: ./app
+  #   # command: ./healthcheck.sh
+  #   command: python -u app.py
+  #   ports:
+  #     - "5001:5001"
+  #   networks:
+  #     - sentiment_network
+  #   environment:
+  #     - SENTIMENT_SERVICE_URL=http://service:5002/
+  #     - DB_URL=http://sentiment_db:27017/
+
+  #   depends_on:
+  #     - service
+  app:
+    build: 
+      context: ./sentiment_express
+      dockerfile: Dockerfile
+    command: npm start
+    ports:
+      - "5001:5001"
+    networks:
+      - sentiment_network
+    environment:
+      - SENTIMENT_SERVICE_URL=http://service:5002/
+      - DB_URL=sentiment_db:27017
+    depends_on:
+      - db
+      - service
+
+  service:
+    build: ./sentiment_service
+    command: python -u sentimentApp.py
+    hostname: service
+    ports:
+      - "5002:5002"
+    networks:
+      - sentiment_network
+    # volumes:
+    #   - pycache:/app/__pycache__
+
+    # healthcheck:
+    #   test: ["CMD-SHELL", "curl --silent --fail http://localhost:5002/healthcheck || exit 1"]
+    #   interval: 1m30s
+    #   start_period: 30s
+
+  db:
+    image: mongo:latest
+    hostname: sentiment_db
+    ports:
+      - "27017:27017"
+
+    environment:
+      - MONGO_INITDB_DATABASE=sentiments
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+
+    volumes:
+      - sentiment_db:/data/db
+
+    networks:
+      - sentiment_network
+
+volumes:
+  sentiment_db:
+  # pycache:
+
+networks:
+  sentiment_network:
+    driver: bridge
