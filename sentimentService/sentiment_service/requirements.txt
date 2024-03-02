@@ -24,4 +24,5 @@ vaderSentiment
 Pillow
 Flask
 pymongo
+gunicorn
 # xformers
