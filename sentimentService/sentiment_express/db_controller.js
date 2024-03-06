@@ -127,17 +127,44 @@ SentimentController.post("/comment", async (req, res) => {
         console.log(results.score, results.emotion, search_term);
 
 
-        console.log("Inserting...");
-        let newComment = new Comment({
-            search: search_term,
-            sentiment_score: results.score,
-            emotion: results.emotion
-        });
+        try {
+            // chekc if DB has a record
+            // if record exists, returned object will be this:
+                // "search": search_term
+                // sentiment_score: int
+                // emotion: {
+                    // "joy": 0, 
+                    // "others": 0, 
+                    // "surprise": 0,
+                    // "sadness": 0, 
+                    // "fear": 0, 
+                    // "anger": 0, 
+                    // "disgust": 0
+                // }
 
-        console.log("saving...");
-        await newComment.save();
+            // update object 
+                // sentiment score + result
+                // emotion[returned emotion] ++
+            
+            
+            
 
-        return res.json({ result: newComment });
+        } catch (error) {
+            
+
+        }
+
+        // console.log("Inserting...");
+        // let newComment = new Comment({
+        //     search: search_term,
+        //     sentiment_score: results.score,
+        //     emotion: results.emotion
+        // });
+
+        // console.log("saving...");
+        // await newComment.save();
+
+        // return res.json({ result: newComment });
 
     } catch (error) {
         
