@@ -102,7 +102,9 @@ app.get('/pullPrice/:query', async (req, res) => {
 async function stockPrice(query){
 
     // replace the "demo" apikey below with your own key from https://www.alphavantage.co/support/#api-key
-    var url = `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${query}&interval=5min&apikey=${process.env.ALPHA_VANTAGE_API_KEY}`;
+    // var url = `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${query}&interval=5min&apikey=${process.env.ALPHA_VANTAGE_API_KEY}`;
+    var url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${query}&outputsize=full&apikey=${process.env.ALPHA_VANTAGE_API_KEY}`;
+
     let parsedData = {};
     let response = await axios.get(url);
 
@@ -113,23 +115,24 @@ async function stockPrice(query){
         let data = response.data;
         console.log("data", data);
 
-        let timeSeries = data['Time Series (5min)'];
-        let firstKey = Object.keys(timeSeries)[0];
+        // let timeSeries = data['Time Series (5min)'];
+        // let firstKey = Object.keys(timeSeries)[0];
 
-        parsedData =
-        {
-            "symbol": data["Meta Data"]["2. Symbol"],
-            "lastRefreshed": data["Meta Data"]["3. Last Refreshed"],
-            "interval": data["Meta Data"]["4. Interval"],
-            "price":{
-                "open": timeSeries[firstKey]['1. open'],
-                "high": timeSeries[firstKey]['2. high'],
-                "low": timeSeries[firstKey]['3. low'],
-                "close": timeSeries[firstKey]['4. close'],
-                "volume": timeSeries[firstKey]['5. volume']
-            }
-        }
-        console.log("cleaned data: ", parsedData);
+        // parsedData =
+        // {
+        //     "symbol": data["Meta Data"]["2. Symbol"],
+        //     "lastRefreshed": data["Meta Data"]["3. Last Refreshed"],
+        //     "interval": data["Meta Data"]["4. Interval"],
+        //     "price":{
+        //         "open": timeSeries[firstKey]['1. open'],
+        //         "high": timeSeries[firstKey]['2. high'],
+        //         "low": timeSeries[firstKey]['3. low'],
+        //         "close": timeSeries[firstKey]['4. close'],
+        //         "volume": timeSeries[firstKey]['5. volume']
+        //     }
+        // }
+        // console.log("cleaned data: ", parsedData);
+        return data;
     }
     return parsedData;
 
