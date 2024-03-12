@@ -35,11 +35,10 @@ const commentSchema = new mongoose.Schema({
     // if it is not then a new sentiment object will be created
     // will reset every 24 hours at 12:00am
 
-    // datetime: {
-    //     type: Date,
-    //     default: Date.now
-    // },
-
+    datetime: {
+        type: Date,
+        default: Date.now
+    },
 
     search: {
         type: String,

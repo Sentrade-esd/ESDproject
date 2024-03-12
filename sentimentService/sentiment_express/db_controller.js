@@ -19,7 +19,8 @@ try {
         datetime: Date.now(),
         search: "test",
         sentiment_score: 0,
-        emotion: "test",
+        emotion: {"joy": 0, "others": 0, "surprise": 0, 
+        "sadness": 0, "fear": 0, "anger": 0, "disgust": 0},
         keyword: {"test": 0}
     });
 
@@ -33,9 +34,11 @@ try {
 
     // insert test document
     let newComment = new Comment({
+        datetime: Date.now(),
         search: "test",
         sentiment_score: 0,
-        emotion: "test"
+        emotion: {"joy": 100, "others": 0, "surprise": 0, 
+        "sadness": 0, "fear": 0, "anger": 0, "disgust": 0}
     });
 
     console.log("saving comment test");
@@ -61,28 +64,28 @@ SentimentController.get("/", (req, res) => {
 SentimentController.get("/query", async (req, res) => {
     const search_term = req.query.search_term;
     console.log(search_term);
+    
+    // Sentiment.findOne
 
-    const sentiments = await Sentiment.find({search: search_term});
-    const comments = await Comment.find({search: search_term});         // TO USE: combine comments and news sentiments and return 
+    let sentiments = await Sentiment.findOne({search: search_term});
+    let comments = await Comment.findOne({search: search_term});         // TO USE: combine comments and news sentiments and return 
 
-    const sentiment_output = [];
+    // const sentiment_output = [];
 
     let sentiment_flag = false;
 
     if (sentiments) {
-        for (let sentiment of sentiments) {
-            if ((Date.now() - sentiment.datetime) / 1000 < 3600) {
-                sentiment_output.push(sentiment);
-            }
-        }
-
-        if (sentiment_output.length > 0) {
+        if ((Date.now() - sentiments.datetime) / 1000 < 86400) {
             console.log("In DB. Returning data...");
-            // return res.json({data_source:"DB", result: sentiment_output});
+            // sentiment_output.push(sentiments);
         } else {
             sentiment_flag = true;
         }
+
+    } else {
+        sentiment_flag = true;
     }
+
 
     if (sentiment_flag) {
         console.log("Not in DB. Getting data...");
@@ -98,7 +101,7 @@ SentimentController.get("/query", async (req, res) => {
     
         try {
             // Wait for the promise to resolve and store the result in the variable 'results'
-            results = await db_methods.add_sentiments(response);
+            let results = await db_methods.add_sentiments(response);
             console.log(results);
         
             console.log("Inserting...");
@@ -115,10 +118,9 @@ SentimentController.get("/query", async (req, res) => {
             await newSentiment.save();
 
             if (newSentiment) {
-                sentiment_output.push({
-                    data_source: "Scraper",
-                    result: newSentiment
-                })
+                // set the result to the sentiments variable
+                sentiments = newSentiment;
+
             }
         
             // return res.json({ result: newSentiment });
@@ -133,49 +135,55 @@ SentimentController.get("/query", async (req, res) => {
 
 
 
-    const comments_output = [];
+    // const comments_output = [];
+    let comments_flag = false;
 
     if (comments) {
-        for (let comment of comments) {
-            // at most 24 hours old
-            if ((Date.now() - comment.datetime) / 1000 < 86400) {
-                comments_output.push(comment);
-            }
+        if ((Date.now() - comments.datetime) / 1000 < 86400) {
+            console.log("comment in db. Returning data...");
+            // comments_output.push(comments);
+        } else {
+            console.log("comment in db expired");
+            
+            comments_flag = true;
         }
-
-        if (comments_output.length > 0) {
-            console.log("In DB. Returning data...");
-            // return res.json({data_source:"DB", result: comments_output});
-        }
+    } else {
+        console.log("No comments in DB");
+        comments_flag = true;
     }
 
     // now we need to combine the two arrays and return the result
     // the sentiment score for both must be added and the emotion must be combined
     // include keyword results
 
-    let temp_sentiment = sentiment_output[0];
-    let temp_comments = comments_output[0];
+    // let temp_sentiment = sentiment_output[0];
+    // let temp_comments = comments_output[0];
 
     let combined_sentiment = {};
-
-    if (temp_sentiment && temp_comments) {
+    
+    if (sentiments && comments && !comments_flag) {
+        console.log("combining sentiment and comments");
         combined_sentiment = {
-            search: temp_sentiment.search,
-            sentiment_score: temp_sentiment.sentiment_score + temp_comments.sentiment_score,
+            search: search_term,
+            sentiment_score: sentiments.sentiment_score + comments.sentiment_score,
             emotion: {
-                "joy": temp_sentiment.emotion.joy + temp_comments.emotion.joy,
-                "others": temp_sentiment.emotion.others + temp_comments.emotion.others,
-                "surprise": temp_sentiment.emotion.surprise + temp_comments.emotion.surprise,
-                "sadness": temp_sentiment.emotion.sadness + temp_comments.emotion.sadness,
-                "fear": temp_sentiment.emotion.fear + temp_comments.emotion.fear,
-                "anger": temp_sentiment.emotion.anger + temp_comments.emotion.anger,
-                "disgust": temp_sentiment.emotion.disgust + temp_comments.emotion.disgust
+                "joy": sentiments.emotion.joy + comments.emotion.joy,
+                "others": sentiments.emotion.others + comments.emotion.others,
+                "surprise": sentiments.emotion.surprise + comments.emotion.surprise,
+                "sadness": sentiments.emotion.sadness + comments.emotion.sadness,
+                "fear": sentiments.emotion.fear + comments.emotion.fear,
+                "anger": sentiments.emotion.anger + comments.emotion.anger,
+                "disgust": sentiments.emotion.disgust + comments.emotion.disgust
             },
-            keyword: temp_sentiment.keyword
+            keyword: sentiments.keyword
         }
+        return res.json({result: combined_sentiment});
+    } else {
+        // return just the sentiment
+        console.log("returning just sentiment");
+        return res.json({result: sentiments});
     }
 
-    return res.json({result: combined_sentiment});
 
 
 
@@ -199,32 +207,48 @@ SentimentController.post("/comment", async (req, res) => {
 
         try {
             // chekc if DB has a record
-            // if record exists, returned object will be this:
-                // "search": search_term
-                // sentiment_score: int
-                // emotion: {
-                    // "joy": 0, 
-                    // "others": 0, 
-                    // "surprise": 0,
-                    // "sadness": 0, 
-                    // "fear": 0, 
-                    // "anger": 0, 
-                    // "disgust": 0
-                // }
+            let exisiting_comments = await Comment.findOne({search: search_term});
 
-            // update object 
-                // sentiment score + result
-                // emotion[returned emotion] ++
+            if (exisiting_comments) {
+                console.log("comment exists");
 
-            // save object
+                // override existing values with .replaceOnce method
+                exisiting_comments.sentiment_score += results.score;
+                exisiting_comments.emotion[results.emotion] += 1;
 
-            
-            
+                let updateComment = await Comment.replaceOne({_id: exisiting_comments.id}, {
+                    datetime: exisiting_comments.datetime,
+                    search: exisiting_comments.search,
+                    sentiment_score: exisiting_comments.sentiment_score,
+                    emotion: exisiting_comments.emotion
+                });
+
+                console.log("saving existing comment");
+                return res.json({ result: exisiting_comments });
+                
+
+            } else {
+
+                // if no record exists, create a new one
+                let newComment = new Comment({
+                    datetime: Date.now(),
+                    search: search_term,
+                    sentiment_score: results.score,
+                    emotion: {"joy":0, "others":0, "surprise":0, "sadness":0, "fear":0, "anger":0, "disgust":0}
+                });
+    
+                newComment.emotion[results.emotion] += 1;
+    
+                console.log("saving new comment");
+                await newComment.save();
+    
+                return res.json({ result: newComment });
+            }
+
             
 
         } catch (error) {
-            
-
+            return res.status(500).json({ error: "Internal Server Error" });
         }
 
         // console.log("Inserting...");
