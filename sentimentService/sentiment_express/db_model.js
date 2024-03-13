@@ -54,7 +54,29 @@ const commentSchema = new mongoose.Schema({
     }
 });
 
+
+const cronJobSchema = new mongoose.Schema({
+    // datetime: {
+    //     type: Date,
+    //     default: Date.now
+    // },
+    search: {
+        type: String,
+        required: true
+    },
+    sentiment_score: {
+        type: Number,
+        required: true
+    },
+    // emotion: {
+    //     type: Object,
+    //     required: true
+    // }
+});
+
+
 // export both schemas
 export const Sentiment = mongoose.model("Sentiment", sentimentSchema);
 export const Comment = mongoose.model("Comment", commentSchema);
+export const CronJob = mongoose.model("CronJob", cronJobSchema);
 // export default mongoose.model("Sentiment", sentimentSchema);

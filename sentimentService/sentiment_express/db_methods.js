@@ -62,6 +62,10 @@ const db_methods = {
         })
     },
 
+    // difference_tracker: async (oldSentiment, newSentiment, ) => {
+
+    // }
+
     scraper: async (search_term) => {
         // const url = "http://localhost:5000/api/scraper";
         // const response = await axios.get(url, {
