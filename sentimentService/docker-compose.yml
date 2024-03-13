@@ -1,20 +1,6 @@
-version: '2'
+version: '3'
 
 services:
-  # app:
-  #   build: ./app
-  #   # command: ./healthcheck.sh
-  #   command: python -u app.py
-  #   ports:
-  #     - "5001:5001"
-  #   networks:
-  #     - sentiment_network
-  #   environment:
-  #     - SENTIMENT_SERVICE_URL=http://service:5002/
-  #     - DB_URL=http://sentiment_db:27017/
-
-  #   depends_on:
-  #     - service
   app:
     build: 
       context: ./sentiment_express
@@ -24,6 +10,7 @@ services:
       - "5001:5001"
     networks:
       - sentiment_network
+      - queue_network
     environment:
       - SENTIMENT_SERVICE_URL=http://service:5002/
       - DB_URL=sentiment_db:27017
@@ -39,13 +26,14 @@ services:
       - "5002:5002"
     networks:
       - sentiment_network
-    # volumes:
-    #   - pycache:/app/__pycache__
 
-    # healthcheck:
-    #   test: ["CMD-SHELL", "curl --silent --fail http://localhost:5002/healthcheck || exit 1"]
-    #   interval: 1m30s
-    #   start_period: 30s
+  rabbitmq:
+    image: 'rabbitmq:3-management'
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    networks:
+      - queue_network
 
   db:
     image: mongo:latest
@@ -70,6 +58,8 @@ volumes:
 
 networks:
   sentiment_network:
+    driver: bridge
+  queue_network:
     driver: bridge
 
 

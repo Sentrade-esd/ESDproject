@@ -2,7 +2,7 @@ import express from "express";
 
 import {Sentiment, Comment} from './db_model.js';
 
-import db_methods from "./db_methods.js";
+import db_methods from "./methods.js";
 
 const SentimentController = express.Router();
 
