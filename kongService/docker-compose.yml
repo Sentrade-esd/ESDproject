@@ -1,0 +1,29 @@
+version: '1'
+
+services:
+  kong:
+    image: kong:latest
+    container_name: kong
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /etc/kong/kong.yml
+    volumes:
+      - ./kong.yml:/etc/kong/kong.yml
+
+    networks:
+      - sentimentservice_sentiment_network
+
+  kong-database:
+    image: postgres:9.6
+    container_name: kong-database
+    environment:
+      POSTGRES_USER: kong
+      POSTGRES_DB: kong
+      POSTGRES_PASSWORD: kong
+
+networks:
+  sentimentservice_sentiment_network:
+    external: true

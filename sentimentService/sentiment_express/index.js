@@ -41,7 +41,7 @@ app.get('/', (req, res) => {
     }
 );
 
-app.use('/api', SentimentController);
+app.use('/sentimentAPI', SentimentController);
 
 
 // cron job for every 20 sec
