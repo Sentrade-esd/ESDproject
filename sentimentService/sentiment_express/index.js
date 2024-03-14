@@ -6,16 +6,10 @@ import cors from 'cors';
 
 import cron from "node-cron";
 
-import fetch from 'node-fetch';
-
-import { Mongoose } from 'mongoose';
-import {MongoClient} from 'mongodb';
-import axios from 'axios';
-
-// import { DB_client } from './db_client.js';
 import './db_client.js';
 import SentimentController from './db_controller.js';
 import { Sentiment, Comment, CronJob } from './db_model.js';
+import sentiment_methods from "./methods.js";
 
 const app = express();
 
@@ -87,11 +81,10 @@ cron.schedule("*/1 * * * *", async () => {
     all_cron.forEach((cron) => {
       if (combined_sentiments[cron.search]) {
         // if percentage change is +/- 10%
-        if (Math.abs((combined_sentiments[cron.search] - cron.sentiment_score) / cron.sentiment_score) > 0.1) {
-          // difference_flag = true;
+        if (Math.abs((combined_sentiments[cron.search] - cron.sentiment_score) / Math.abs(cron.sentiment_score)) > 0.1) {
           difference_search.push({
             search: cron.search,
-            change: (combined_sentiments[cron.search] - cron.sentiment_score) / cron.sentiment_score,
+            change: (combined_sentiments[cron.search] - cron.sentiment_score) / Math.abs(cron.sentiment_score),
             new_score: combined_sentiments[cron.search]
           });
         }
@@ -100,7 +93,10 @@ cron.schedule("*/1 * * * *", async () => {
   
     console.log("combined sentiments: " + JSON.stringify(combined_sentiments));
     console.log("difference search: " + JSON.stringify(difference_search));
-
+    
+    if (difference_search.length > 0) {
+      sentiment_methods.produceNotification(difference_search)
+    }
   } catch (error) {
     console.log("cron job failed");
     console.log(error);
@@ -108,6 +104,7 @@ cron.schedule("*/1 * * * *", async () => {
 
 
   // do method to push to AMQP then proceed with stage 2
+
 
   // stage 2: after comparison, update the cron collection
   try {

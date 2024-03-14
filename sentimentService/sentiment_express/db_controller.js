@@ -2,7 +2,7 @@ import express from "express";
 
 import {Sentiment, Comment} from './db_model.js';
 
-import db_methods from "./methods.js";
+import sentiment_methods from "./methods.js";
 
 const SentimentController = express.Router();
 
@@ -92,7 +92,7 @@ SentimentController.get("/query", async (req, res) => {
         console.log("Not in DB. Getting data...");
         // const response = await axios.get(`your_scraper_url?search_term=${search_term}`);
         
-        const response = await db_methods.scraper(search_term);
+        const response = await sentiment_methods.scraper(search_term);
         console.log(response);
         // return res.json({result: response});
     
@@ -102,7 +102,7 @@ SentimentController.get("/query", async (req, res) => {
     
         try {
             // Wait for the promise to resolve and store the result in the variable 'results'
-            let results = await db_methods.add_sentiments(response);
+            let results = await sentiment_methods.add_sentiments(response);
             console.log(results);
         
             console.log("Inserting...");
@@ -191,7 +191,7 @@ SentimentController.post("/comment", async (req, res) => {
     console.log(search_term);
 
     try {
-        const results = await db_methods.analyse_comment(comment);
+        const results = await sentiment_methods.analyse_comment(comment);
 
         console.log("controller");
         console.log(results, typeof results);

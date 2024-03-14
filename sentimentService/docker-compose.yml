@@ -14,6 +14,7 @@ services:
     environment:
       - SENTIMENT_SERVICE_URL=http://service:5002/
       - DB_URL=sentiment_db:27017
+      - AMQP_SERVER=amqp://rabbitmq:5672
     depends_on:
       - db
       - service
@@ -34,6 +35,8 @@ services:
       - '15672:15672'
     networks:
       - queue_network
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
 
   db:
     image: mongo:latest
@@ -54,6 +57,7 @@ services:
 
 volumes:
   sentiment_db:
+  rabbitmq_data:
   # pycache:
 
 networks:
