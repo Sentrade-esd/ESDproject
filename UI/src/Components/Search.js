@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
+import { Button } from 'react-bootstrap'
 import axios from 'axios';
 
 
@@ -117,27 +118,47 @@ function Search() {
         }
     };
 
+    const selectCompany = (companyName) => {
+        // here you will handle company selection, maybe navigate to a detailed company page, etc.
+        console.log(companyName + ' selected');
+     };
+
     return (
         <Container>
-            <Row className="justify-content-center">
-                <Col md={10} lg={10}>
-                    <h1>Just imagine the search box works</h1>
-                    <div className="input-group rounded">
-                    <input type="search" className="form-control rounded" placeholder="Search for a Company here to find out more about it!"
-                    value={search} onChange={handleInputChange} onKeyDown={handleInputKeyDown} ref={searchInputRef} />
-                        <button onClick={clearSearch} className="input-group-text border-0" id="search-addon" aria-label="Clear search field">
-                            <i className="fas fa-search" aria-hidden="true"></i>
-                        </button>
-                    </div>
-                    {/* For each result, create a new p tag with the result */}
-                    {results.map((result, index) => <p key={index}>{result}</p>)}
-                </Col>
-            </Row>
-        </Container>
-    )
-}
+        <Row className="justify-content-center">
+            <Col md={10} lg={10}>
+                {/* <h1 id='searchInstruction'>Just imagine the search box works</h1> */}
+                <h1>Search for company information</h1>
+                <div className="input-group rounded" role="search">
+                    {/* <label htmlFor="companySearch">Search for company information</label> */}
+                    <input id="companySearch" type="search" className="form-control rounded" placeholder="Search for a Company here to find out more about it!"
+                    value={search} onChange={handleInputChange} onKeyDown={handleInputKeyDown} ref={searchInputRef}/>
+                    <button onClick={clearSearch} className="input-group-text border-0" id="search-addon">
+                        <i className="fas fa-search" aria-hidden="true"></i>
+                    </button>
+                </div>
+                {/* <div className="companyResults" aria-live='polite'>
+                    {results.map((result, index) => 
+                        <Button key={index} onClick={() => selectCompany(result)} className="companyResultButton">{result}</Button>
+                    )}
+                </div> */}
 
-export default Search;
+
+                {results.map((result, index) => 
+                    <Row key={index}>
+                        <Col>
+                            <Button onClick={() => selectCompany(result)} className="companyResultButton">{result}</Button>
+                        </Col>
+                    </Row>
+                )}
+
+            </Col>
+        </Row>
+    </Container>
+    )
+  }
+  
+  export default Search;
 
 
 // This was old code that would dynamically udpate the companies listed as you typed
