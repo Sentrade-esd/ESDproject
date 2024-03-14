@@ -1,8 +1,39 @@
 import axios from "axios";
+import amqplib from "amqplib";
 
-const db_methods = {
+// async function createConnection() {
+//     let connection = await amqplib.connect(sentiment_methods.amqpServer);
+//     return connection;
+//   }
+
+const sentiment_methods = {
 
     sentiment_service_url: process.env.SENTIMENT_SERVICE_URL,
+    amqpServer: process.env.AMQP_SERVER,
+
+    connection: null,
+
+    init: function() {
+        return new Promise((resolve, reject) => {
+          amqplib.connect(sentiment_methods.amqpServer)
+            .then(connection => {
+              this.connection = connection;
+              resolve();
+            })
+            .catch(error => {
+              console.error('Error connecting to AMQPlib:', error);
+              reject(error);
+            });
+        });
+    },
+    
+    // createConnection: async () => {
+    //     console.log("Initialising sentiment ");
+    //     let connection = await amqplib.connect(sentiment_methods.amqpServer);
+    //     return connection;
+    // },
+
+
 
     add_sentiments: async (json_data) => {
 
@@ -11,10 +42,10 @@ const db_methods = {
             // let keyword_results = null;
 
             try {
-                axios.post(db_methods.sentiment_service_url + "/analyse_headlines", json_data)
+                axios.post(sentiment_methods.sentiment_service_url + "/analyse_headlines", json_data)
                 .then(response => {
                     console.log("analyse headlines is valid");
-                    console.log(response.data);
+                    // console.log(response.data);
                     
                     resolve(response.data);
                     // sentiment_results = response.data;
@@ -25,7 +56,7 @@ const db_methods = {
                     reject(error);
                 });
 
-                // axios.post(db_methods.sentiment_service_url + "/analyse_keywords", json_data)
+                // axios.post(sentiment_methods.sentiment_service_url + "/analyse_keywords", json_data)
 
                 
             } catch (error) {
@@ -42,7 +73,8 @@ const db_methods = {
         return new Promise((resolve, reject) => {
             try {
                 // console.log(comment);
-                axios.post(db_methods.sentiment_service_url + "/analyse_comment", {"comment":comment})
+                console.log(sentiment_methods.sentiment_service_url)
+                axios.post(sentiment_methods.sentiment_service_url + "/analyse_comment", {"comment":comment})
                 .then(response => {
                     console.log("analyse comment is valid");
 
@@ -60,6 +92,34 @@ const db_methods = {
                 reject(error);
             }
         })
+    },
+
+    produceNotification: async (json_data) => {
+        if (!sentiment_methods.connection) {
+            try {
+                await sentiment_methods.init();
+                // Connection is established, you can use sentiment_methods.connection here
+            } catch (error) {
+                console.error('Error initializing sentiment_methods:', error);
+            }
+        }
+        try {
+            console.log('Producing notification');
+            const channel = await sentiment_methods.connection.createChannel();
+            const exchange = 'notifications';
+            const queue = 'sentiment_notification';
+            const routingKey = 'notify';
+          
+            let temp1 = await channel.assertExchange(exchange, 'direct', { durable: true });
+            let temp2 = await channel.assertQueue(queue, { durable: true });
+            let temp3 = await channel.bindQueue(queue, exchange, routingKey);
+          
+            channel.publish(exchange, routingKey, Buffer.from(JSON.stringify(json_data)), { persistent: true });
+            console.log('Message sent to RabbitMQ');
+          } catch (error) {
+            console.error('An error occurred:', error);
+          }
+
     },
 
     scraper: async (search_term) => {
@@ -102,4 +162,4 @@ const db_methods = {
 
 };
 
-export default db_methods;
+export default sentiment_methods;
