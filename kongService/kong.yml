@@ -5,18 +5,18 @@ services:
     routes:
       - name: welcome-route
         paths:
-          - /
+          - /sentimentAPI
         methods:
           - GET
 
       - name: query-route
         paths:
-          - /sentimentAPI/query  # Define the full path including the base path
+          - /sentimentAPI/sentiment_query  # Define the full path including the base path
         methods:
           - GET
 
       - name: comment-route
         paths:
-          - /sentimentAPI/comment  # Define the full path including the base path
+          - /sentimentAPI/sentiment_comment  # Define the full path including the base path
         methods:
           - POST

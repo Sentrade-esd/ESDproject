@@ -60,7 +60,7 @@ SentimentController.get("/", (req, res) => {
 
 
 
-SentimentController.get("/query", async (req, res) => {
+SentimentController.get("/sentiment_query", async (req, res) => {
     const search_term = req.query.search_term;
     console.log(search_term);
     
@@ -183,7 +183,7 @@ SentimentController.get("/query", async (req, res) => {
 
 });
 
-SentimentController.post("/comment", async (req, res) => {
+SentimentController.post("/sentiment_comment", async (req, res) => {
     const comment = req.body.comment;
     const search_term = req.body.search_term;
 
