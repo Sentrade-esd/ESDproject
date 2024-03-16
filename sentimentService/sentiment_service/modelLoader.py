@@ -42,7 +42,6 @@ class ModelLoader:
     def extract_keywords(self, batch_headlines):
         batch_results = self.keyword_ext_model(batch_headlines)
 
-
         for result in batch_results:
             keyword = result['word']
 

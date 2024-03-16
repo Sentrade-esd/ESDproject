@@ -15,15 +15,15 @@ services:
     networks:
       - sentimentservice_sentiment_network
 
-  kong-database:
-    image: postgres:9.6
-    container_name: kong-database
-    environment:
-      POSTGRES_USER: kong
-      POSTGRES_DB: kong
-      POSTGRES_PASSWORD: kong
-    networks:
-      - sentimentservice_sentiment_network
+  # kong-database:
+  #   image: postgres:9.6
+  #   container_name: kong-database
+  #   environment:
+  #     POSTGRES_USER: kong
+  #     POSTGRES_DB: kong
+  #     POSTGRES_PASSWORD: kong
+  #   networks:
+  #     - sentimentservice_sentiment_network
 
 networks:
   sentimentservice_sentiment_network:

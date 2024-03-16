@@ -26,13 +26,6 @@ const sentiment_methods = {
             });
         });
     },
-    
-    // createConnection: async () => {
-    //     console.log("Initialising sentiment ");
-    //     let connection = await amqplib.connect(sentiment_methods.amqpServer);
-    //     return connection;
-    // },
-
 
 
     add_sentiments: async (json_data) => {
@@ -116,6 +109,7 @@ const sentiment_methods = {
           
             channel.publish(exchange, routingKey, Buffer.from(JSON.stringify(json_data)), { persistent: true });
             console.log('Message sent to RabbitMQ');
+            
           } catch (error) {
             console.error('An error occurred:', error);
           }

@@ -62,7 +62,7 @@ SentimentController.get("/", (req, res) => {
 
 SentimentController.get("/sentiment_query", async (req, res) => {
     const search_term = req.query.search_term;
-    console.log(search_term);
+    // console.log(search_term);
     
     // Sentiment.findOne
 
@@ -93,7 +93,7 @@ SentimentController.get("/sentiment_query", async (req, res) => {
         // const response = await axios.get(`your_scraper_url?search_term=${search_term}`);
         
         const response = await sentiment_methods.scraper(search_term);
-        console.log(response);
+        // console.log(response);
         // return res.json({result: response});
     
         console.log("Analysing...");
@@ -103,7 +103,7 @@ SentimentController.get("/sentiment_query", async (req, res) => {
         try {
             // Wait for the promise to resolve and store the result in the variable 'results'
             let results = await sentiment_methods.add_sentiments(response);
-            console.log(results);
+            // console.log(results);
         
             console.log("Inserting...");
         
@@ -187,15 +187,9 @@ SentimentController.post("/sentiment_comment", async (req, res) => {
     const comment = req.body.comment;
     const search_term = req.body.search_term;
 
-    console.log(comment);
-    console.log(search_term);
 
     try {
         const results = await sentiment_methods.analyse_comment(comment);
-
-        console.log("controller");
-        console.log(results, typeof results);
-        console.log(results.score, results.emotion, search_term);
 
 
         try {
