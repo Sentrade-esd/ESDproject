@@ -4,6 +4,13 @@ npm install react-bootstrap bootstrap
 axois:
 npm install axios
 
+wordcloud: (Works with react16)
+npm install react-wordcloud 
+
+wordcloud: (ignore dependencies)
+npm install --legacy-peer-deps react-wordcloud
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
