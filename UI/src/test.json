@@ -1,0 +1,36 @@
+{
+    "result": {
+        "search": "tesla",
+        "sentiment_score": -5,
+        "emotion": {
+            "joy": 1,
+            "others": 16,
+            "surprise": 0,
+            "sadness": 0,
+            "fear": 0,
+            "anger": 4,
+            "disgust": 0
+        },
+        "keyword": {
+            "Bernard": 4,
+            "Coca": 4,
+            "Cola": 4,
+            "Donald": 4,
+            "Ellison": 4,
+            "Jeff": 4,
+            "Joe": 4,
+            "Larry": 4,
+            "McDonald": 4,
+            "Trump": 4,
+            "Ware": 4,
+            "administration": 4,
+            "dollars": 4,
+            "electric": 4,
+            "game": 4,
+            "show": 4,
+            "tax": 4,
+            "trillion": 8,
+            "vehicle": 4
+        }
+    }
+}

@@ -39,7 +39,7 @@ const Navigation = () => {
         <Nav className="me-auto">
           <Nav.Link href="home">Home</Nav.Link>
           <Nav.Link href="search">Search</Nav.Link>
-          {isLoggedIn && <Nav.Link href="trade">Trade</Nav.Link>}
+          {/* {isLoggedIn && <Nav.Link href="trade">Trade</Nav.Link>} */}
         </Nav>
         {isLoggedIn ? (
           <React.Fragment>

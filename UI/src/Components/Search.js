@@ -4,6 +4,7 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import { Button } from 'react-bootstrap'
 import axios from 'axios';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 
 function Search() {
@@ -17,89 +18,55 @@ function Search() {
         setResults([]);
     };
 
-    // const performSearch = (query) => {
-    //     // Replace this with actual API call or search within your data
-    //     // Here as a mock, we randomly return array of 10 results
-    //     return new Promise(resolve => {
-    //         setTimeout(() => {
-    //             resolve(Array(10).fill(0).map((_, i) => `Result ${i + 1}`));
-    //         }, 2000);
-    //     });
-    // }
+    const navigate = useNavigate();
+
+    const goToNewPage = () => {
+        navigate("/trade"); 
+    };
+
 
     const performSearch = async(query) => {
-        const API_KEY = 'GIC3VJ1I8N8DXJAO';
+        // TQXOA5D8XQ2ATY3J
+        // GIC3VJ1I8N8DXJAO
+        // YJ3Q75JEFR08G0VB
+        // FIYS7MOLA3SBBAK0
+        // GIEADKJM8OSQN0AR
+        // D0I97I0VKG0GRK4O
+        const API_KEY = 'D0I97I0VKG0GRK4O';
         const searchUrl = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${query}&apikey=${API_KEY}`;
     
         try {
             const response = await axios.get(searchUrl);
-            // console.log(response.data.Information);
-            if (response.data.Information) {  //Information is only returned on rate limit reached
+            console.log(response.data.Information);
+            if (response.data.Information) {
                 setResults([response.data.Information]);
-                return
+                return [];
             }
-            console.log("working");
+            console.log("Working");
             // Check for US ONLY, TODO(?): Let user set the limit of results returned
             const usResults = response.data.bestMatches.filter(match => match['4. region'] === 'United States');
+            
             // Return new array where match a single element from the usResults array in each iteration. 
-            //For each match (which is likely an object based on the usage), it accesses the value of the property '2. name'. Which is the comapny name 
             console.log(usResults);
             console.log(usResults.data);
-            return usResults.map(match => match['2. name']) || []; 
+            //For each match access the value of the property '2. name'. Which is the comapny name 
+            // return usResults.map(match => match['2. name']) || []; 
+            return usResults.map(match => ({ name: match['2. name'], symbol: match['1. symbol'] })) || [];
+            
             
         } catch (error) {
             console.log("caught");
             // If there's any other error, set the state to show the error message on the screen
             setResults(['Error retrieving search results: ' + error.message]);
-            return
+            return ["Rate Limit"];
             
         }
     }
-
-    // const handleSearchChange = async(e) => {
-    //     const value = e.target.value;
-    //     setSearch(value);
-    //     if (value) {
-    //         const res = await performSearch(value);
-    //         setResults(res);
-    //     } else {
-    //         setResults([]);
-    //     }
-    // }
+    
 
     const handleInputChange = (e) => {
         setSearch(e.target.value);
     };
-
-    // const handleInputChange = async (e) => {
-    //     const value = e.target.value;
-    //     setSearch(value);
-    //     if(value) {
-    //         const words = value.split(' ');
-    //         let allResults = [];
-    //         for(let word of words) {
-    //             let wordResults = await performSearch(word);
-    //             allResults.push(...wordResults);
-    //         }
-    //         setResults(allResults);
-    //     } else {
-    //         setResults([]);
-    //     }
-    // };
-
-    // const handleInputKeyDown = async(e) => {
-    //     if (e.key === 'Enter') {
-    //         const value = e.target.value.trim();
-    //         if (value !== '') {
-    //             // const res = await performSearch(value);
-    //             // setResults(res || ['No results found']);
-    //             await performSearch(value);
-    //         } else {
-    //             setResults([]);
-    //         }
-    //     }
-    // };
-
 
     const handleInputKeyDown = async(e) => {
         if (e.key === 'Enter') {
@@ -118,10 +85,17 @@ function Search() {
         }
     };
 
-    const selectCompany = (companyName) => {
-        // here you will handle company selection, maybe navigate to a detailed company page, etc.
-        console.log(companyName + ' selected');
-     };
+    const selectCompany = (companyName, companySymbol) => {
+        console.log(companyName + ' - ' + companySymbol);
+
+        sessionStorage.setItem('companyName', companyName);
+        sessionStorage.setItem('companySymbol', companySymbol);
+
+        // Navigate to the Trade page using state
+        navigate("/trade", {
+            state: { companyName, companySymbol },
+        });
+    };
 
     return (
         <Container>
@@ -146,8 +120,10 @@ function Search() {
 
                 {results.map((result, index) => 
                     <Row key={index}>
-                        <Col>
-                            <Button onClick={() => selectCompany(result)} className="companyResultButton">{result}</Button>
+                        <Col>        
+                        <Button onClick={() => selectCompany(result['2. name'], result['1. symbol'])} className="companyResultButton">
+                            {result}
+                        </Button>
                         </Col>
                     </Row>
                 )}
