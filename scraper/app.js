@@ -1,0 +1,195 @@
+// Requiring module
+const express = require('express');
+
+// Axios module
+const axios = require('axios');
+
+// dotenv
+require('dotenv').config();
+
+// Parser module
+const xml2js = require('xml2js');
+const jsdom = require('jsdom');
+const {JSDOM} = jsdom;
+
+var request = require('request');
+
+
+// Creating express object
+const app = express();
+
+// Handling GET request
+app.get('/', (req, res) => { 
+	res.send('A Google News Scraper '
+		+ '/scrape/:query to have a suprise') 
+	res.end()
+})
+
+// Handling GET query scrape
+app.get('/scrape/:query', async (req, res) => { 
+    const {query} = req.params;
+    console.log(query);
+    // run scrapping script
+    // return response
+    let response = await scrape(query);
+    res.send(response);
+})
+
+
+// Port Number
+const PORT = process.env.PORT ||5000;
+
+// Server Setup
+app.listen(PORT,console.log(
+`Server started on port ${PORT}`));
+
+
+async function scrape(query){
+    let url = `https://news.google.com/rss/search?q=${query}&hl=en-SG&gl=SG&ceid=SG:en`
+    let response = await axios.get(url);
+    let content = response.data;
+
+    // Convert xml2js.parseString to return a Promise
+    let result = await new Promise((resolve, reject) => {
+        xml2js.parseString(content, function (err, result){
+            if (err) reject(err);
+            else resolve(result);
+        });
+    });
+
+    let items = result.rss.channel[0].item;
+    for(let i = 0; i < 10; i++) {
+        let item = items[i];
+        let title = item.title[0];
+        let pubDate = item.pubDate[0];
+        // Change pubDate to sgt
+        let date = new Date(pubDate);
+        let sgtDate = new Date(date.getTime() + 8*60*60*1000); // SGT => UTC+8
+        pubDate = sgtDate.toISOString();
+
+        
+        // Parse the HTML in the description to extract the text
+        let dom = new JSDOM(item.description[0]);
+        let description = dom.window.document.querySelector('a').textContent;
+
+        let link = item.link[0];
+        let obj = {
+            title,
+            description,
+            link,
+            pubDate
+        }
+        console.log(obj);
+    }
+
+    // Now you can return items or use it elsewhere in your code
+    return items;
+}
+
+
+
+// Handling GET query scrape
+app.get('/scraper/pullPrice/:ticker/:targetDate', async (req, res) => { 
+    const {ticker, targetDate} = req.params;
+    console.log(ticker, targetDate);
+    // run scrapping script
+    // return response
+    let response = await stockPrice(ticker, targetDate);
+    console.log('response', response);
+    res.send(response);
+})
+
+async function stockPrice(query, targetDate){
+
+    // replace the "demo" apikey below with your own key from https://www.alphavantage.co/support/#api-key
+    // var url = `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${query}&interval=5min&apikey=${process.env.ALPHA_VANTAGE_API_KEY}`;
+    var url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${query}&outputsize=full&apikey=${process.env.ALPHA_VANTAGE_API_KEY}`;
+
+    let response = await axios.get(url);
+
+    if (response.status !== 200){
+        console.log("Status", response.status);
+    }
+    else {
+        let data = response.data;
+        console.log("data", data);
+        let metaData = data['Meta Data'];
+        let prices = data['Time Series (Daily)'];
+
+        // find number of days targetDate to today Date
+        let today = new Date();
+        let target = new Date(targetDate);
+        let diffTime = Math.abs(today - target);
+        let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        let returnList = {};
+        let n = 0;
+        for (let dateKey of Object.keys(prices)){
+            if (n === diffDays){
+                break;
+            }
+            returnList[dateKey] = prices[dateKey];
+            n += 1;
+        }
+
+        console.log("return List:" ,returnList);
+
+        // let timeSeries = data['Time Series (5min)'];
+        // let firstKey = Object.keys(timeSeries)[0];
+
+        // parsedData =
+        // {
+        //     "symbol": data["Meta Data"]["2. Symbol"],
+        //     "lastRefreshed": data["Meta Data"]["3. Last Refreshed"],
+        //     "interval": data["Meta Data"]["4. Interval"],
+        //     "price":{
+        //         "open": timeSeries[firstKey]['1. open'],
+        //         "high": timeSeries[firstKey]['2. high'],
+        //         "low": timeSeries[firstKey]['3. low'],
+        //         "close": timeSeries[firstKey]['4. close'],
+        //         "volume": timeSeries[firstKey]['5. volume']
+        //     }
+        // }
+        // console.log("cleaned data: ", parsedData);
+        return returnList;
+    }
+
+
+
+    
+
+    // let parsedData = {};
+    // let response = axios.get({
+    //     url: url,
+    //     json: true,
+    //     headers: {'User-Agent': 'request'}
+    // }, (err, res, data) => {
+    //     if (err) {
+    //     console.log('Error:', err);
+    //     } else if (res.statusCode !== 200) {
+    //     console.log('Status:', res.statusCode);
+    //     } else {
+    //     // data is successfully parsed as a JSON object:
+    //     console.log('data', data);
+    //     let timeSeries = data['Time Series (5min)'];
+    //     let firstKey = Object.keys(timeSeries)[0];
+
+    //     parsedData = 
+    //     {
+    //         "symbol": data["Meta Data"]["2. Symbol"],
+    //         "lastRefreshed": data["Meta Data"]["3. Last Refreshed"],
+    //         "interval": data["Meta Data"]["4. Interval"],
+    //         "price":{
+    //             "open": timeSeries[firstKey]['1. open'],
+    //             "high": timeSeries[firstKey]['2. high'],
+    //             "low": timeSeries[firstKey]['3. low'],
+    //             "close": timeSeries[firstKey]['4. close'],
+    //             "volume": timeSeries[firstKey]['5. volume']
+    //         }
+    //     }
+    //     console.log("cleaned data: ", parsedData);
+    //     return parsedData;
+    //     }
+    // });
+    return response;
+}
