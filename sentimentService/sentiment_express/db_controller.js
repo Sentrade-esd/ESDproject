@@ -129,7 +129,7 @@ SentimentController.get("/sentiment_query", async (req, res) => {
         } catch (error) {
             // Handle any errors that occur during promise resolution
             console.error("Error:", error);
-            return res.status(500).json({ error: "Internal Server Error" });
+            return res.status(500).json({ error: "Adding to DB failed"});
         }
 
     }
