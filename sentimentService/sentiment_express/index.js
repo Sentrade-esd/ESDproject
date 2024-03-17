@@ -10,6 +10,7 @@ import './db_client.js';
 import SentimentController from './db_controller.js';
 import { Sentiment, Comment, CronJob } from './db_model.js';
 import sentiment_methods from "./methods.js";
+import axios from 'axios';
 
 const app = express();
 
@@ -88,6 +89,17 @@ cron.schedule("*/1 * * * *", async () => {
             new_score: combined_sentiments[cron.search]
           });
         }
+
+        // anybody with a stop loss of 5-25% (steps of 5), send to a endpoint with the search term and percentage change
+        // if ((combined_sentiments[cron.search] - cron.sentiment_score) / Math.abs(cron.sentiment_score) <= -0.05) {
+        //   let size = Math.abs(Math.floor((combined_sentiments[cron.search] - cron.sentiment_score) / Math.abs(cron.sentiment_score) / 0.05));
+
+        //   axios.post("whatever endpoint this is", {
+        //     search: cron.search,
+        //     size: size*5
+        //   })
+        // }
+
       }
     });
   
