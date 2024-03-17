@@ -99,7 +99,7 @@ const sentiment_methods = {
         try {
             console.log('Producing notification');
             const channel = await sentiment_methods.connection.createChannel();
-            const exchange = 'notifications';
+            const exchange = 'notifications'; 
             const queue = 'sentiment_notification';
             const routingKey = 'notify';
           
