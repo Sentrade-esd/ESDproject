@@ -1,25 +1,25 @@
 _format_version: "1.1"
 services:
   - name: sentiment-service
-    url: http://app:5001/sentimentAPI
+    url: http://app:5001/
     routes:
       - name: welcome-route
         paths:
-          - 
+          - /sentimentAPI
         methods:
           - GET
         strip_path: false
 
       - name: query-route
         paths:
-          - /sentiment_query  # Define the full path including the base path
+          - /sentimentAPI/sentiment_query  # Define the full path including the base path
         methods:
           - GET
         strip_path: false
 
       - name: comment-route
         paths:
-          - /sentiment_comment  # Define the full path including the base path
+          - /sentimentAPI/sentiment_comment  # Define the full path including the base path
         methods:
           - POST
         strip_path: false
