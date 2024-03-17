@@ -1,20 +1,6 @@
-version: '2'
+version: '3'
 
 services:
-  # app:
-  #   build: ./app
-  #   # command: ./healthcheck.sh
-  #   command: python -u app.py
-  #   ports:
-  #     - "5001:5001"
-  #   networks:
-  #     - sentiment_network
-  #   environment:
-  #     - SENTIMENT_SERVICE_URL=http://service:5002/
-  #     - DB_URL=http://sentiment_db:27017/
-
-  #   depends_on:
-  #     - service
   app:
     build: 
       context: ./sentiment_express
@@ -24,9 +10,11 @@ services:
       - "5001:5001"
     networks:
       - sentiment_network
+      - queue_network
     environment:
       - SENTIMENT_SERVICE_URL=http://service:5002/
       - DB_URL=sentiment_db:27017
+      - AMQP_SERVER=amqp://rabbitmq:5672
     depends_on:
       - db
       - service
@@ -39,13 +27,16 @@ services:
       - "5002:5002"
     networks:
       - sentiment_network
-    # volumes:
-    #   - pycache:/app/__pycache__
 
-    # healthcheck:
-    #   test: ["CMD-SHELL", "curl --silent --fail http://localhost:5002/healthcheck || exit 1"]
-    #   interval: 1m30s
-    #   start_period: 30s
+  rabbitmq:
+    image: 'rabbitmq:3-management'
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    networks:
+      - queue_network
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
 
   db:
     image: mongo:latest
@@ -66,8 +57,73 @@ services:
 
 volumes:
   sentiment_db:
+  rabbitmq_data:
   # pycache:
 
 networks:
   sentiment_network:
     driver: bridge
+  queue_network:
+    driver: bridge
+
+
+# To configure overlay networks in Docker Compose, you can follow these steps:
+
+# 1. **Define an Overlay Network**:
+#    - In your `docker-compose.yml` file, specify the network configuration under the `networks` section.
+#    - Use the `driver` key to specify the network driver as `overlay`.
+#    - Optionally, you can define other network options such as `attachable`, `external`, etc.
+
+# 2. **Connect Services to the Overlay Network**:
+#    - For each service that needs to be connected to the overlay network, add it to the `networks` section of the service definition.
+#    - Specify the name of the overlay network created in the previous step as the network to connect to.
+
+# Here's an example `docker-compose.yml` file demonstrating how to configure overlay networks:
+
+# ```yaml
+# version: '3'
+
+# services:
+#   service1:
+#     image: your_image1
+#     networks:
+#       - overlay_network
+
+#   service2:
+#     image: your_image2
+#     networks:
+#       - overlay_network
+
+# networks:
+#   overlay_network:
+#     driver: overlay
+#     attachable: true  # Optional: Allows other services on different nodes to attach to this network
+# ```
+
+# In this example:
+# - Two services (`service1` and `service2`) are defined.
+# - Both services are connected to the `overlay_network`.
+# - The `overlay_network` is configured with the `overlay` driver.
+
+# To deploy this configuration, you can use the `docker-compose up` command as usual. Docker Compose will create the overlay network and connect the services to it automatically.
+
+# Make sure that your Docker swarm is initialized and that you have multiple Docker nodes to utilize the overlay network for multi-host communication.
+
+# To attach computer B to the same Docker overlay network as computer A, you need to ensure that both computers are part of the same Docker swarm. Here are the general steps to achieve this:
+
+# 1. **Join Computer B to the Docker Swarm**:
+#    - On Computer B, you need to join the Docker swarm that Computer A is already a part of. You can do this by running the `docker swarm join` command with the appropriate parameters. 
+#    - You'll need the swarm token and the IP address (or hostname) of the manager node (Computer A) to join the swarm.
+
+# 2. **Verify Joining**:
+#    - After running the `docker swarm join` command on Computer B, verify that Computer B has successfully joined the Docker swarm by running `docker node ls` on Computer A. Computer B should now appear as a worker node in the swarm.
+
+# 3. **Deploy Services**:
+#    - With both computers now part of the same Docker swarm, you can deploy services using Docker Compose as shown in the previous response.
+#    - Ensure that the services in your `docker-compose.yml` file are configured to use the overlay network, and they should automatically be accessible to each other across the swarm.
+
+# 4. **Test Communication**:
+#    - Once the services are deployed on both Computer A and Computer B, you can test communication between them. Services running on different nodes should be able to communicate with each other using their service names as hostnames.
+
+# By following these steps, both Computer A and Computer B will be attached to the same Docker overlay network, allowing seamless communication between containers across the swarm.
+
