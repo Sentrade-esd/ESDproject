@@ -1,6 +1,8 @@
 import axios from "axios";
 import amqplib from "amqplib";
 
+import { Comment } from "./db_model";
+
 // async function createConnection() {
 //     let connection = await amqplib.connect(sentiment_methods.amqpServer);
 //     return connection;
@@ -114,6 +116,105 @@ const sentiment_methods = {
             console.error('An error occurred:', error);
           }
 
+    },
+
+    consumeNotification: async () => {
+        if (!sentiment_methods.connection) {
+            try {
+                await sentiment_methods.init();
+                // Connection is established, you can use sentiment_methods.connection here
+            } catch (error) {
+                console.error('Error initializing sentiment_methods:', error);
+            }
+        }
+        try {
+            console.log('Consuming notification');
+            const channel = await sentiment_methods.connection.createChannel();
+            const exchange = 'comments';
+            const queue = 'new_comment';
+            const routingKey = 'comment';
+
+            let temp1 = await channel.assertExchange(exchange, 'direct', { durable: true });
+            await channel.assertQueue(queue, { durable: true });
+
+            channel.consume(queue, async (message) => {
+                const content = JSON.parse(message.content.toString());
+                const search_term = content.company;
+                const comment = content.comment;
+
+                const results = await sentiment_methods.analyse_comment(comment);
+
+                try {
+                    // chekc if DB has a record
+                    let exisiting_comments = await Comment.findOne({search: search_term});
+        
+                    if (exisiting_comments) {
+        
+                        if ((Date.now() - exisiting_comments.datetime) / 1000 < 86400){
+                            
+                            console.log("comment exists");
+            
+                            // override existing values with .replaceOnce method
+                            exisiting_comments.sentiment_score += results.score;
+                            exisiting_comments.emotion[results.emotion] += 1;
+            
+                            let updateComment = await Comment.replaceOne({_id: exisiting_comments.id}, {
+                                datetime: exisiting_comments.datetime,
+                                search: exisiting_comments.search,
+                                sentiment_score: exisiting_comments.sentiment_score,
+                                emotion: exisiting_comments.emotion
+                            });
+            
+                            console.log("saving existing comment");
+                            // return res.json({ result: exisiting_comments });
+                        } else {
+                            console.log("comment in db expired");
+                            await Comment.deleteOne({search: search_term});
+        
+                            let newComment = new Comment({
+                                datetime: Date.now(),
+                                search: search_term,
+                                sentiment_score: results.score,
+                                emotion: {"joy":0, "others":0, "surprise":0, "sadness":0, "fear":0, "anger":0, "disgust":0}
+                            });
+        
+                            newComment.emotion[results.emotion] += 1;
+        
+                            console.log("saving new comment");
+                            await newComment.save();
+        
+                            // return res.json({ result: newComment });
+                        }
+                    } else {
+                        // if no record exists, create a new one
+                        let newComment = new Comment({
+                            datetime: Date.now(),
+                            search: search_term,
+                            sentiment_score: results.score,
+                            emotion: {"joy":0, "others":0, "surprise":0, "sadness":0, "fear":0, "anger":0, "disgust":0}
+                        });
+            
+                        newComment.emotion[results.emotion] += 1;
+            
+                        console.log("saving new comment");
+                        await newComment.save();
+            
+                        // return res.json({ result: newComment });
+                    }
+        
+                } catch (error) {
+                    console.error('An error occurred:', error);
+                }
+
+                channel.ack(message);
+            });
+
+
+
+
+          } catch (error) {
+            console.error('An error occurred:', error);
+          }
     },
 
     scraper: async (search_term) => {

@@ -28,16 +28,6 @@ services:
     networks:
       - sentiment_network
 
-  rabbitmq:
-    image: 'rabbitmq:3-management'
-    ports:
-      - '5672:5672'
-      - '15672:15672'
-    networks:
-      - queue_network
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-
   db:
     image: mongo:latest
     hostname: sentiment_db
@@ -63,8 +53,9 @@ volumes:
 networks:
   sentiment_network:
     driver: bridge
+    name: sentiment_network
   queue_network:
-    driver: bridge
+    external: true
 
 
 # To configure overlay networks in Docker Compose, you can follow these steps:

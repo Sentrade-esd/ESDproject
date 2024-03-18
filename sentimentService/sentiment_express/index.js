@@ -115,8 +115,6 @@ cron.schedule("*/1 * * * *", async () => {
   }
 
 
-  // do method to push to AMQP then proceed with stage 2
-
 
   // stage 2: after comparison, update the cron collection
   try {
@@ -144,37 +142,6 @@ cron.schedule("*/1 * * * *", async () => {
     console.log(error);
   }
 
-  // if (all_sentiments.length > 0) {
-  //   all_sentiments.forEach(async (sentiment) => {
-  //     let newCron = new CronJob({
-  //       search: sentiment.search,
-  //       sentiment_score: sentiment.sentiment_score,
-  //     });
-  //     await newCron.save();
-  //   });
-  // }
-
-  // // if all comments not empty, add it to the sentiment score in cron collection if it exists in the sentiment collection
-  // // if it does not exist, create a new sentiment object
-  // if (all_comments.length > 0) {
-  //   all_comments.forEach(async (comment) => {
-  //     let cronSentiment = await CronJob.findOne({search: comment.search});
-
-  //     if (cronSentiment) {
-  //       cronSentiment.sentiment_score += comment.sentiment_score;
-  //       await cronSentiment.save();
-
-  //     } else {
-  //       let newCron = new CronJob({
-  //         search: comment.search,
-  //         sentiment_score: comment.sentiment_score,
-  //       });
-
-  //       await newCron.save();
-  //     }
-  //   });
-  // }
-
 
   
 });
@@ -183,6 +150,9 @@ cron.schedule("*/1 * * * *", async () => {
 // cron.schedule("*/15 * * * *", async () => {
 //   console.log('Running a task every 15 minutes');
 // });
+
+// consume amqp queue
+
 
 
  

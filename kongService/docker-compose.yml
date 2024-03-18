@@ -26,5 +26,5 @@ services:
   #     - sentimentservice_sentiment_network
 
 networks:
-  sentimentservice_sentiment_network:
+  sentiment_network:
     external: true
