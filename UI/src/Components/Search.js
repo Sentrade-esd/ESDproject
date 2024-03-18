@@ -40,7 +40,8 @@ function Search() {
             console.log(response.data.Information);
             if (response.data.Information) {
                 setResults([response.data.Information]);
-                return [];
+                console.log("Info get");
+                return;
             }
             console.log("Working");
             // Check for US ONLY, TODO(?): Let user set the limit of results returned
@@ -58,7 +59,7 @@ function Search() {
             console.log("caught");
             // If there's any other error, set the state to show the error message on the screen
             setResults(['Error retrieving search results: ' + error.message]);
-            return ["Rate Limit"];
+            return;
             
         }
     }
@@ -121,9 +122,11 @@ function Search() {
                 {results.map((result, index) => 
                     <Row key={index}>
                         <Col>        
-                        <Button onClick={() => selectCompany(result['2. name'], result['1. symbol'])} className="companyResultButton">
-                            {result}
-                        </Button>
+                            <Button 
+                                onClick={() => selectCompany(result.name, result.symbol)} 
+                                className="companyResultButton">
+                                {result.name} - {result.symbol}
+                            </Button>
                         </Col>
                     </Row>
                 )}

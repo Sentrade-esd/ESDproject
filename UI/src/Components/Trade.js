@@ -34,9 +34,9 @@ function Trade() {
     
     // This is the company and ticker information coming over from search
     const location = useLocation();
-    const companyName = location.state.companyName;
-    const companySymbol = location.state.companySymbol;
-
+    const companyName = location.state?.companyName;
+    const companySymbol = location.state?.companySymbol;
+    
     const keywordData = jsonData.result.keyword;
 
     // Convert the keyword data object into an array of objects with text and value properties
