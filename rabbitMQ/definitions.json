@@ -25,22 +25,36 @@
     {
       "name": "notifications_exchange",
       "vhost": "/",
-      "type": "direct"
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
     },
     {
       "name": "comments_exchange",
       "vhost": "/",
-      "type": "direct"
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
     }
   ],
   "queues": [
     {
       "name": "sentiment_notification_queue",
-      "vhost": "/"
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
     },
     {
       "name": "new_comment_queue",
-      "vhost": "/"
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
     }
   ],
   "bindings": [
@@ -49,14 +63,16 @@
         "vhost":"/", 
         "destination":"sentiment_notification_queue", 
         "destination_type":"queue", 
-        "routing_key":"notify"
+        "routing_key":"notify",
+        "arguments": {}
       },
       {
-          "source":"comments_exchange", 
-          "vhost":"/", 
-          "destination":"new_comment_queue", 
-          "destination_type":"queue", 
-          "routing_key":"comment"
+        "source":"comments_exchange", 
+        "vhost":"/", 
+        "destination":"new_comment_queue", 
+        "destination_type":"queue", 
+        "routing_key":"comment",
+        "arguments": {}
       }
   ]
 }
