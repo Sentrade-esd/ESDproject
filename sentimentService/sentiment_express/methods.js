@@ -101,8 +101,8 @@ const sentiment_methods = {
         try {
             console.log('Producing notification');
             const channel = await sentiment_methods.connection.createChannel();
-            const exchange = 'notifications'; 
-            const queue = 'sentiment_notification';
+            const exchange = 'notifications_exchange'; 
+            const queue = 'sentiment_notification_queue';
             const routingKey = 'notify';
           
             let temp1 = await channel.assertExchange(exchange, 'direct', { durable: true });
@@ -130,8 +130,8 @@ const sentiment_methods = {
         try {
             console.log('Consuming notification');
             const channel = await sentiment_methods.connection.createChannel();
-            const exchange = 'comments';
-            const queue = 'new_comment';
+            const exchange = 'comments_exchange';
+            const queue = 'new_comment_queue';
             const routingKey = 'comment';
 
             let temp1 = await channel.assertExchange(exchange, 'direct', { durable: true });
