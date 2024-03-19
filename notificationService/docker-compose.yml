@@ -47,7 +47,7 @@ services:
       - BOT_TOKEN=7039505633:AAFoCvJc3XwP8N7bUd1XsjkCP5rH311TrWQ
       - BOT_URL=https://api.telegram.org/bot
 
-  db:
+  watchlist_db:
     image: mongo:latest
     hostname: watchlist_db
     ports:

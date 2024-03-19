@@ -90,24 +90,22 @@ const sentiment_methods = {
     },
 
     produceNotification: async (json_data) => {
+        const channel = null
         if (!sentiment_methods.connection) {
             try {
                 await sentiment_methods.init();
                 // Connection is established, you can use sentiment_methods.connection here
+                channel = await sentiment_methods.connection.createChannel();
             } catch (error) {
                 console.error('Error initializing sentiment_methods:', error);
             }
         }
         try {
             console.log('Producing notification');
-            const channel = await sentiment_methods.connection.createChannel();
+            
             const exchange = 'notifications_exchange'; 
             const queue = 'sentiment_notification_queue';
             const routingKey = 'notify';
-          
-            let temp1 = await channel.assertExchange(exchange, 'direct', { durable: true });
-            let temp2 = await channel.assertQueue(queue, { durable: true });
-            let temp3 = await channel.bindQueue(queue, exchange, routingKey);
           
             channel.publish(exchange, routingKey, Buffer.from(JSON.stringify(json_data)), { persistent: true });
             console.log('Message sent to RabbitMQ');

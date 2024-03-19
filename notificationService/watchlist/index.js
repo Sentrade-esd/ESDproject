@@ -11,10 +11,11 @@ app.use(express.json());
 const { Schema } = mongoose;
 // const uri = "mongodb://127.0.0.1:27017/watchlist";
 
-const uri = process.env.DB_URL || "mongodb://127.0.0.1:27017";
+const DB_service_url = process.env.DB_URL || "mongodb://127.0.0.1:27017/watchlist";
+console.log('mongodb://' + DB_service_url + '/watchlist')
 
-
-mongoose.connect(`${uri}/watchlist`, {})
+mongoose.connect('mongodb://' + DB_service_url + '/watchlist', {})
+// mongoose.connect(`${uri}/watchlist`, {})
   .then(() => {
     console.log("Connected to the database!");
   })
