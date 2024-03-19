@@ -17,8 +17,7 @@ services:
 
 networks:
   queue_network:
-    driver: bridge
-    name: queue_network
+    external: true
 
 volumes:
   rabbitmq_data:

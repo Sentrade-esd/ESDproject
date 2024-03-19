@@ -13,7 +13,7 @@ services:
     volumes:
       - ./kong.yml:/etc/kong/kong.yml
     networks:
-      - sentimentservice_sentiment_network
+      - sentiment_network
 
   # kong-database:
   #   image: postgres:9.6

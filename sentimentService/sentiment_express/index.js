@@ -152,6 +152,7 @@ cron.schedule("*/1 * * * *", async () => {
 // });
 
 // consume amqp queue
+sentiment_methods.consumeNotification();
 
 
 

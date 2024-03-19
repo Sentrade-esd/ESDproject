@@ -21,7 +21,7 @@ services:
 
   service:
     build: ./sentiment_service
-    command: gunicorn -w 2 --threads 2 -b :5002 --timeout 300 sentimentApp:app
+    command: gunicorn -w 1 --threads 2 -b :5002 --timeout 600 sentimentApp:app
     hostname: service
     ports:
       - "5002:5002"
@@ -55,7 +55,8 @@ networks:
     driver: bridge
     name: sentiment_network
   queue_network:
-    external: true
+    driver: bridge
+    name: queue_network
 
 
 # To configure overlay networks in Docker Compose, you can follow these steps:
