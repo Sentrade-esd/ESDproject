@@ -117,23 +117,24 @@ const sentiment_methods = {
     },
 
     consumeNotification: async () => {
+        const channel = null;
         if (!sentiment_methods.connection) {
             try {
                 await sentiment_methods.init();
                 // Connection is established, you can use sentiment_methods.connection here
+                channel = await sentiment_methods.connection.createChannel();
             } catch (error) {
                 console.error('Error initializing sentiment_methods:', error);
             }
         }
         // try {
         console.log('Consuming notification');
-        const channel = await sentiment_methods.connection.createChannel();
         const exchange = 'comments_exchange';
         const queue = 'new_comment_queue';
         const routingKey = 'comment';
 
-        let temp1 = await channel.assertExchange(exchange, 'direct', { durable: true });
-        await channel.assertQueue(queue, { durable: true });
+        // let temp1 = await channel.assertExchange(exchange, 'direct', { durable: true });
+        // await channel.assertQueue(queue, { durable: true });
 
         channel.consume(queue, async (message) => {
             const content = JSON.parse(message.content.toString());
