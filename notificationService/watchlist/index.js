@@ -3,11 +3,18 @@ const mongoose = require("mongoose");
 
 const app = express();
 const PORT = 3000;
+
+
 app.use(express.json());
+
+
 const { Schema } = mongoose;
-const uri = "mongodb://127.0.0.1:27017/watchlist";
-mongoose
-  .connect(uri, {})
+// const uri = "mongodb://127.0.0.1:27017/watchlist";
+
+const uri = process.env.DB_URL || "mongodb://127.0.0.1:27017";
+
+
+mongoose.connect(`${uri}/watchlist`, {})
   .then(() => {
     console.log("Connected to the database!");
   })
@@ -35,6 +42,9 @@ const CompanyWatchlisters = mongoose.model(
   "CompanyWatchlisters",
   companyWatchlistersSchema
 );
+
+
+
 app.post("/watchlist/add", async (req, res) => {
   const { userID, teleID, watchlistedCompany } = req.body;
 
@@ -61,6 +71,8 @@ app.post("/watchlist/add", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
+
 app.post("/watchlist/remove", async (req, res) => {
   const { userID, teleId, watchlistedCompany } = req.body;
 
@@ -82,6 +94,9 @@ app.post("/watchlist/remove", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
+
+
 app.get("/watchlist/user/:userId", async (req, res) => {
   const { userId } = req.params;
 
@@ -97,6 +112,9 @@ app.get("/watchlist/user/:userId", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
+
+
 app.get("/watchlist/company/:company", async (req, res) => {
   const { company } = req.params;
 
@@ -112,6 +130,8 @@ app.get("/watchlist/company/:company", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
+
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

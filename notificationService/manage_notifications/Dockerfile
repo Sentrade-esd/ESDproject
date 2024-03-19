@@ -42,5 +42,5 @@ COPY --from=dependencies /usr/src/app/prod_node_modules ./node_modules
 # copy app sources
 COPY . .
 # expose port and define CMD
-EXPOSE 3000
+EXPOSE 3001
 CMD ["npm", "start"]

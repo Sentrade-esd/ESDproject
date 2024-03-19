@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  app:
+  sentiment_app:
     build: 
       context: ./sentiment_express
       dockerfile: Dockerfile
@@ -11,15 +11,16 @@ services:
     networks:
       - sentiment_network
       - queue_network
+      - kong_network
     environment:
-      - SENTIMENT_SERVICE_URL=http://service:5002/
+      - SENTIMENT_SERVICE_URL=http://sentiment_service:5002/
       - DB_URL=sentiment_db:27017
       - AMQP_SERVER=amqp://rabbitmq:5672
     depends_on:
       - db
-      - service
+      - sentiment_service
 
-  service:
+  sentiment_service:
     build: ./sentiment_service
     command: gunicorn -w 1 --threads 2 -b :5002 --timeout 600 sentimentApp:app
     hostname: service
@@ -47,14 +48,14 @@ services:
 
 volumes:
   sentiment_db:
-  rabbitmq_data:
-  # pycache:
 
 networks:
   sentiment_network:
     driver: bridge
     name: sentiment_network
   queue_network:
+    external: true
+  kong_network:
     external: true
 
 

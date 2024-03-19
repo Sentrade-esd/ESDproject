@@ -13,7 +13,7 @@ services:
     volumes:
       - ./kong.yml:/etc/kong/kong.yml
     networks:
-      - sentiment_network
+      - kong_network
 
   # kong-database:
   #   image: postgres:9.6
@@ -26,5 +26,6 @@ services:
   #     - sentimentservice_sentiment_network
 
 networks:
-  sentiment_network:
-    external: true
+  kong_network:
+    driver: bridge
+    name: kong_network

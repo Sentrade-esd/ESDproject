@@ -1,6 +1,6 @@
 .DS_store
 /UI/node_modules
 
-/notificationService/manage_notification/node_modules
+/notificationService/manage_notifications/node_modules
 /notificationService/telebot_esd/node_modules
 /notificationService/watchlist/node_modules
