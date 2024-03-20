@@ -90,7 +90,7 @@ const sentiment_methods = {
     },
 
     produceNotification: async (json_data) => {
-        const channel = null
+        let channel = null
         if (!sentiment_methods.connection) {
             try {
                 await sentiment_methods.init();
@@ -117,7 +117,7 @@ const sentiment_methods = {
     },
 
     consumeNotification: async () => {
-        const channel = null;
+        let channel = null;
         if (!sentiment_methods.connection) {
             try {
                 await sentiment_methods.init();

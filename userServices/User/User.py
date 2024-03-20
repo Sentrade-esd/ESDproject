@@ -2,24 +2,37 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import hashlib
+import os
 
 app = Flask(__name__)
 # CORS(app)
-CORS(app, resources={r'/*': {'origins': '*'}})
+CORS(app, resources={r'/*': {'origins': '*'}})   ###### consider changing to accept from kong 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/esd'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/esd'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['SQL_URI'] + '/user_data' if 'SQL_URI' in os.environ else 'postgresql://postgres:root@user_db:5432/user_data'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+print(app.config['SQLALCHEMY_DATABASE_URI'])
+
 db = SQLAlchemy(app)
+print("Database connected successfully")
 
 class User(db.Model):
+    # __tablename__ = 'user'
+
+    # UserID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    # Email = db.Column(db.String(255), nullable=False)
+    # Password = db.Column(db.String(255), nullable=False)
+    # Telehandle = db.Column(db.String(255))
+    # TeleID = db.Column(db.Integer, nullable=True)
+
     __tablename__ = 'user'
 
-    UserID = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    Email = db.Column(db.String(255), nullable=False)
-    Password = db.Column(db.String(255), nullable=False)
-    Telehandle = db.Column(db.String(255))
-    TeleID = db.Column(db.Integer, nullable=True)
+    UserID = db.Column('userid', db.Integer, primary_key=True, autoincrement=True)
+    Email = db.Column('email', db.String(255), nullable=False)
+    Password = db.Column('password', db.String(255), nullable=False)
+    Telehandle = db.Column('telehandle', db.String(255))
+    TeleID = db.Column('teleid', db.Integer, nullable=True)
 
     def __init__(self, Email, Password, Telehandle, TeleID):
         self.Email = Email

@@ -23,7 +23,7 @@ services:
   sentiment_service:
     build: ./sentiment_service
     command: gunicorn -w 1 --threads 2 -b :5002 --timeout 600 sentimentApp:app
-    hostname: service
+    hostname: sentiment_service
     ports:
       - "5002:5002"
     networks:

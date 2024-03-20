@@ -1,0 +1,44 @@
+version: '1.1'
+
+services:
+  user_service:
+    build: ./User
+    command: gunicorn -w 1 --threads 2 -b :5000 --timeout 600 User:app
+    hostname: user_service
+    ports:
+      - "5000:5000"
+    environment:
+      - SQL_URI=postgresql://postgres:root@user_db:5432
+    networks:
+      - user_network
+      - kong_network
+
+  user_db:
+    hostname: user_db
+    image: postgres:alpine
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: root
+      POSTGRES_USER: postgres
+      POSTGRES_DB: user_db
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - user_db_data:/var/lib/postgresql/data
+      - ./User/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - user_network
+
+volumes:
+  user_db_data:
+
+networks:
+  user_network: 
+    driver: bridge
+    name: user_network
+  kong_network:
+    external: true
+
+
+# this is my docker compose with the postgres container. how do i contruct the uri?
