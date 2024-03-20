@@ -28,6 +28,29 @@ const sentiment_methods = {
             });
         });
     },
+    
+    start_aqmp: async () => {
+        try {
+            sentiment_methods.connection = await amqplib.connect('amqp://localhost');
+            channel = await connection.createChannel();
+        
+            connection.on('error', async (err) => {
+              if (err.message !== 'Connection closing') {
+                console.error('[AMQP] conn error', err.message);
+              }
+            });
+        
+            connection.on('close', () => {
+              console.error('[AMQP] reconnecting');
+              return setTimeout(start, 1000);
+            });
+        
+            console.log('[AMQP] connected');
+          } catch (err) {
+            console.error('[AMQP] could not connect', err.message);
+            return setTimeout(start, 1000);
+          }
+    },
 
 
     add_sentiments: async (json_data) => {
