@@ -14,42 +14,49 @@ const sentiment_methods = {
     amqpServer: process.env.AMQP_SERVER,
 
     connection: null,
+    channel: null,
 
-    init: function() {
-        return new Promise((resolve, reject) => {
-          amqplib.connect(sentiment_methods.amqpServer)
-            .then(connection => {
-              this.connection = connection;
-              resolve();
-            })
-            .catch(error => {
-              console.error('Error connecting to AMQPlib:', error);
-              reject(error);
-            });
-        });
-    },
+    // init: function() {
+    //     return new Promise((resolve, reject) => {
+    //       amqplib.connect(sentiment_methods.amqpServer)
+    //         .then(connection => {
+    //           this.connection = connection;
+    //           resolve();
+    //         })
+    //         .catch(error => {
+    //           console.error('Error connecting to AMQPlib:', error);
+    //           reject(error);
+    //         });
+    //     });
+    // },
     
-    start_aqmp: async () => {
-        try {
-            sentiment_methods.connection = await amqplib.connect('amqp://localhost');
-            channel = await connection.createChannel();
-        
-            connection.on('error', async (err) => {
-              if (err.message !== 'Connection closing') {
-                console.error('[AMQP] conn error', err.message);
-              }
-            });
-        
-            connection.on('close', () => {
-              console.error('[AMQP] reconnecting');
-              return setTimeout(start, 1000);
-            });
-        
-            console.log('[AMQP] connected');
-          } catch (err) {
-            console.error('[AMQP] could not connect', err.message);
-            return setTimeout(start, 1000);
-          }
+    start_amqp: () => {
+        return new Promise((resolve, reject) => {
+            const start = async () => {
+                try {
+                    sentiment_methods.connection = await amqplib.connect(sentiment_methods.amqpServer);
+                    sentiment_methods.channel = await sentiment_methods.connection.createChannel();
+    
+                    sentiment_methods.connection.on('error', async (err) => {
+                        if (err.message !== 'Connection closing') {
+                            console.error('[AMQP] conn error', err.message);
+                        }
+                    });
+    
+                    sentiment_methods.connection.on('close', () => {
+                        console.error('[AMQP] reconnecting');
+                        return setTimeout(start, 10000);
+                    });
+    
+                    console.log('[AMQP] connected');
+                    resolve();
+                } catch (err) {
+                    console.error('[AMQP] could not connect', err.message);
+                    return setTimeout(start, 10000);
+                }
+            };
+            start();
+        });
     },
 
 
@@ -113,16 +120,6 @@ const sentiment_methods = {
     },
 
     produceNotification: async (json_data) => {
-        let channel = null
-        if (!sentiment_methods.connection) {
-            try {
-                await sentiment_methods.init();
-                // Connection is established, you can use sentiment_methods.connection here
-                channel = await sentiment_methods.connection.createChannel();
-            } catch (error) {
-                console.error('Error initializing sentiment_methods:', error);
-            }
-        }
         try {
             console.log('Producing notification');
             
@@ -130,7 +127,7 @@ const sentiment_methods = {
             const queue = 'sentiment_notification_queue';
             const routingKey = 'notify';
           
-            channel.publish(exchange, routingKey, Buffer.from(JSON.stringify(json_data)), { persistent: true });
+            sentiment_methods.channel.publish(exchange, routingKey, Buffer.from(JSON.stringify(json_data)), { persistent: true });
             console.log('Message sent to RabbitMQ');
             
           } catch (error) {
@@ -140,16 +137,7 @@ const sentiment_methods = {
     },
 
     consumeNotification: async () => {
-        let channel = null;
-        if (!sentiment_methods.connection) {
-            try {
-                await sentiment_methods.init();
-                // Connection is established, you can use sentiment_methods.connection here
-                channel = await sentiment_methods.connection.createChannel();
-            } catch (error) {
-                console.error('Error initializing sentiment_methods:', error);
-            }
-        }
+
         // try {
         console.log('Consuming notification');
         const exchange = 'comments_exchange';
@@ -159,7 +147,7 @@ const sentiment_methods = {
         // let temp1 = await channel.assertExchange(exchange, 'direct', { durable: true });
         // await channel.assertQueue(queue, { durable: true });
 
-        channel.consume(queue, async (message) => {
+        sentiment_methods.channel.consume(queue, async (message) => {
             const content = JSON.parse(message.content.toString());
             const search_term = content.company;
             const comment = content.comment;
@@ -228,7 +216,7 @@ const sentiment_methods = {
                 console.error('An error occurred:', error);
             }
 
-            channel.ack(message);
+            sentiment_methods.channel.ack(message);
         });
 
 

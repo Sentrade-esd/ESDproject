@@ -20,8 +20,8 @@ app.use(cors());
 
 try {
   console.log("dropping cron");
-  CronJob.collection.drop();
-  CronJob.createCollection();
+  // CronJob.collection.drop();
+  // CronJob.createCollection();
 
   // insert test document
   let newCron = new CronJob({
@@ -151,8 +151,12 @@ cron.schedule("*/1 * * * *", async () => {
 //   console.log('Running a task every 15 minutes');
 // });
 
-// consume amqp queue
-sentiment_methods.consumeNotification();
+
+// start queue connection
+(async () => {
+  await sentiment_methods.start_amqp();
+  sentiment_methods.consumeNotification();
+})();
 
 
 

@@ -9,9 +9,9 @@ const SentimentController = express.Router();
 
 try {
     // // drop collection
-    console.log("dropping sentiment");
-    Sentiment.collection.drop();
-    Sentiment.createCollection();
+    // console.log("dropping sentiment");
+    // Sentiment.collection.drop();
+    // Sentiment.createCollection();
 
     // insert test document
     let newSentiment = new Sentiment({
@@ -26,10 +26,10 @@ try {
     console.log("saving sentiment test");
     await newSentiment.save();
 
-    console.log("dropping comment");
-    // drop collection
-    Comment.collection.drop();
-    Comment.createCollection();
+    // console.log("dropping comment");
+    // // drop collection
+    // Comment.collection.drop();
+    // Comment.createCollection();
 
     // insert test document
     let newComment = new Comment({
@@ -104,13 +104,13 @@ SentimentController.get("/sentiment_query", async (req, res) => {
                 emotion: results.results.emotions,
                 keyword: results.keyword_results
             });
+            sentiments = newSentiment;
         
             await newSentiment.save();
 
-            if (newSentiment) {
+            // if (newSentiment) {
                 // set the result to the sentiments variable
-                sentiments = newSentiment;
-            }
+            // }
     
         } catch (error) {
             // Handle any errors that occur during promise resolution
