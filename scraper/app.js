@@ -197,27 +197,31 @@ app.get('/scraper/scrapeCurrentPrice/:ticker', async (req, res) => {
     console.log('Current Price: ', response);
     res.send(response);
 })
-async function scrapePrice(query) {
-    let browser = await puppeteer.launch({
-        headless: "new",
-      });
 
+async function scrapePrice(query) {
+    let browser = await puppeteer.launch({ headless: 'new' });
     let page = await browser.newPage();
 
     let url = `https://sg.finance.yahoo.com/quote/${query}`;
+    // await page.goto(url);
+    await page.goto(url, {waitUntil: 'networkidle2'});
+    let priceSelector = '#quote-header-info > div.My\\(6px\\).Pos\\(r\\).smartphone_Mt\\(6px\\).W\\(100\\%\\) > div.D\\(ib\\).Va\\(m\\).Maw\\(65\\%\\).Ov\\(h\\) > div.D\\(ib\\).Mend\\(20px\\) > fin-streamer.Fw\\(b\\).Fz\\(36px\\).Mb\\(-4px\\).D\\(ib\\)';
+    let alternatePriceSelector = '#quote-header-info > div.My\\(6px\\).Pos\\(r\\).smartphone_Mt\\(6px\\).W\\(100\\%\\) > div.D\\(ib\\).Va\\(m\\).Maw\\(65\\%\\).Ov\\(h\\) > div > fin-streamer.Fw\\(b\\).Fz\\(36px\\).Mb\\(-4px\\).D\\(ib\\) > span'; // Replace with your alternate selector
 
-    page.goto(url);
+    let data;
+    try {
+        await page.waitForSelector(priceSelector, { timeout: 5000 }); // Wait for 5 seconds
+        data = await page.evaluate((priceSelector) => {
+            return document.querySelector(priceSelector).innerText;
+        }, priceSelector);
+    } catch (error) {
+        await page.waitForSelector(alternatePriceSelector, { timeout: 5000 }); // Wait for 5 seconds
+        data = await page.evaluate((alternatePriceSelector) => {
+            return document.querySelector(alternatePriceSelector).innerText;
+        }, alternatePriceSelector);
+    }
 
-    let priceSelector = '#quote-header-info > div.My\\(6px\\).Pos\\(r\\).smartphone_Mt\\(6px\\).W\\(100\\%\\) > div.D\\(ib\\).Va\\(m\\).Maw\\(65\\%\\).Ov\\(h\\) > div > fin-streamer.Fw\\(b\\).Fz\\(36px\\).Mb\\(-4px\\).D\\(ib\\) > span'
-    // await page.waitForNavigation({ waitUntil: "networkidle0" });
-    await page.waitForSelector(priceSelector);
-
-    let data = await page.evaluate((priceSelector) => {
-
-        return document.querySelector(priceSelector).innerText;
-    }, priceSelector);
-    browser.close();
-    // console.log(data);
+    await browser.close();
     return data;
 }
 
