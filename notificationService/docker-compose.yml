@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   watchlist:
-    platform: linux/amd64
+    # platform: linux/amd64
     build: 
       context: ./watchlist
       dockerfile: Dockerfile
@@ -18,7 +18,7 @@ services:
 
 
   notification_manager:
-    platform: linux/amd64
+    # platform: linux/amd64
     build: 
       context: ./manage_notifications
       dockerfile: Dockerfile
@@ -35,7 +35,7 @@ services:
       - TELEBOT_URL=http://telebot:3002/
 
   telebot:
-    platform: linux/amd64
+    # platform: linux/amd64
     build: 
       context: ./telebot_esd
       dockerfile: Dockerfile

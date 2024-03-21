@@ -3,7 +3,7 @@ version: '3.8'
 services:
   rabbitmq:
     # image: 'rabbitmq:3-management'
-    platform: linux/amd64
+    # platform: linux/amd64
     build:
       context: .
       dockerfile: Dockerfile
