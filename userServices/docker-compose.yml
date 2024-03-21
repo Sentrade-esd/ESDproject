@@ -14,8 +14,11 @@ services:
       - kong_network
 
   user_db:
+    # image: postgres:alpine
+    build: 
+      context: .
+      dockerfile: userDBDockerfile
     hostname: user_db
-    image: postgres:alpine
     restart: always
     ports:
       - 5432:5432

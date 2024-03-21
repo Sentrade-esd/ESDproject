@@ -2,8 +2,12 @@ version: '1'
 
 services:
   kong:
-    image: kong:latest
+    # image: kong:latest
+    build: 
+      context: .
+      dockerfile: Dockerfile
     container_name: kong
+    hostname: kong
     ports:
       - "8000:8000"
       - "8001:8001"
