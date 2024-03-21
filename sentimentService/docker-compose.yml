@@ -1,7 +1,8 @@
-version: '3'
+version: '3.8'
 
 services:
   sentiment_app:
+    platform: linux/amd64
     build: 
       context: ./sentiment_express
       dockerfile: Dockerfile
@@ -21,7 +22,10 @@ services:
       - sentiment_service
 
   sentiment_service:
-    build: ./sentiment_service
+    platform: linux/amd64
+    build: 
+      context: ./sentiment_service
+      dockerfile: Dockerfile
     command: gunicorn -w 1 --threads 2 -b :5002 --timeout 600 sentimentApp:app
     hostname: sentiment_service
     ports:

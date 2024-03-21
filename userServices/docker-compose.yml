@@ -1,8 +1,11 @@
-version: '1.1'
+version: '3.8'
 
 services:
   user_service:
-    build: ./User
+    platform: linux/amd64
+    build: 
+      context: ./User
+      dockerfile: Dockerfile
     command: gunicorn -w 1 --threads 2 -b :5000 --timeout 600 User:app
     hostname: user_service
     ports:
@@ -15,6 +18,7 @@ services:
 
   user_db:
     # image: postgres:alpine
+    platform: linux/amd64
     build: 
       context: .
       dockerfile: userDBDockerfile

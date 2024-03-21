@@ -1,8 +1,9 @@
-version: '1'
+version: '3.8'
 
 services:
   kong:
     # image: kong:latest
+    platform: linux/amd64
     build: 
       context: .
       dockerfile: Dockerfile
