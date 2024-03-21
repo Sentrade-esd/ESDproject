@@ -1,0 +1,229 @@
+version: '3.8'
+
+services:
+
+  ##########################
+  ###### Kong Service ######
+  ##########################
+
+  kong:
+    build: 
+      context: ./kongService
+      dockerfile: Dockerfile
+    container_name: kong
+    hostname: kong
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /etc/kong/kong.yml
+    # volumes:
+      # - ./kong.yml:/etc/kong/kong.yml
+    networks:
+      - kong_network
+
+  ##########################
+  # Notification Service ###
+  ##########################
+
+  watchlist:
+    build: 
+      context: ./notificationService/watchlist
+      dockerfile: Dockerfile
+    command: npm start
+    ports:
+      - 3000:3000
+    networks:
+      - notification_service
+      - kong_network
+
+    environment:
+      - DB_URL=watchlist_db:27017
+  
+  notification_manager:
+    build: 
+      context: ./notificationService/manage_notifications
+      dockerfile: Dockerfile
+    command: npm start
+    ports:
+      - 3001:3001
+    networks:
+      - notification_service
+      - queue_network
+
+    environment:
+      - AMQP_SERVER=amqp://rabbitmq:5672
+      - WATCHLIST_URL=http://watchlist:3000/
+      - TELEBOT_URL=http://telebot:3002/
+
+  telebot:
+    # platform: linux/amd64
+    build: 
+      context: ./notificationService/telebot_esd
+      dockerfile: Dockerfile
+    command: npm start
+    ports:
+      - 3002:3002
+    networks:
+      - notification_service
+
+    environment:
+      - AMQP_SERVER=amqp://rabbitmq:5672
+      - BOT_TOKEN=7039505633:AAFoCvJc3XwP8N7bUd1XsjkCP5rH311TrWQ
+      - BOT_URL=https://api.telegram.org/bot
+
+  watchlist_db:
+    build:
+      context: ./notificationService
+      dockerfile: watchlistDBDockerfile
+    hostname: watchlist_db
+    ports:
+      - "27018:27017"
+
+    environment:
+      - MONGO_INITDB_DATABASE=watchlist
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+
+    volumes:
+      - watchlist_db:/data/db
+    networks:
+      - notification_service
+
+
+  ##########################
+  ###### rabbit MQ    ######
+  ##########################
+
+  rabbitmq:
+    build:
+      context: ./rabbitMQ
+      dockerfile: Dockerfile
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    networks:
+      - queue_network
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      # - ./definitions.json:/etc/rabbitmq/definitions.json
+
+    environment:
+      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbitmq_management load_definitions "/etc/rabbitmq/definitions.json"
+  
+
+  ##########################
+  #### sentiment Service ###
+  ##########################
+
+
+  sentiment_app:
+    build: 
+      context: ./sentimentService/sentiment_express
+      dockerfile: Dockerfile
+    command: npm start
+    ports:
+      - "5001:5001"
+    networks:
+      - sentiment_network
+      - queue_network
+      - kong_network
+    environment:
+      - SENTIMENT_SERVICE_URL=http://sentiment_service:5002/
+      - DB_URL=sentiment_db:27017
+      - AMQP_SERVER=amqp://rabbitmq:5672
+    depends_on:
+      - sentiment_db
+      - sentiment_service
+      - rabbitmq
+
+  sentiment_service:
+    build: 
+      context: ./sentimentService/sentiment_service
+      dockerfile: Dockerfile
+    command: gunicorn -w 1 --threads 2 -b :5002 --timeout 600 sentimentApp:app
+    hostname: sentiment_service
+    ports:
+      - "5002:5002"
+    networks:
+      - sentiment_network
+
+  sentiment_db:
+    build:
+      context: ./sentimentService
+      dockerfile: sentimentDBDockerfile
+    hostname: sentiment_db
+    ports:
+      - "27017:27017"
+
+    environment:
+      - MONGO_INITDB_DATABASE=sentiments
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+    volumes:
+      - sentiment_db:/data/db
+    networks:
+      - sentiment_network
+
+
+  ##########################
+  #### USER Service   ######
+  ##########################
+
+  user_service:
+    build: 
+      context: ./userServices/User
+      dockerfile: Dockerfile
+    command: gunicorn -w 1 --threads 2 -b :5000 --timeout 600 User:app
+    hostname: user_service
+    ports:
+      - "4999:5000"
+    environment:
+      - SQL_URI=postgresql://postgres:root@user_db:5432
+    networks:
+      - user_network
+      - kong_network
+
+  user_db:
+    # image: postgres:alpine
+    # platform: linux/amd64
+    build: 
+      context: ./userServices
+      dockerfile: userDBDockerfile
+    hostname: user_db
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: root
+      POSTGRES_USER: postgres
+      POSTGRES_DB: user_db
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - user_db_data:/var/lib/postgresql/data
+    networks:
+      - user_network
+
+volumes:
+  watchlist_db:
+  rabbitmq_data:
+  sentiment_db:
+  user_db_data:
+
+networks:
+  kong_network:
+    driver: bridge
+    name: kong_network
+  queue_network:
+    driver: bridge
+    name: queue_network
+  notification_service:
+    driver: bridge
+    name: watchlist
+  sentiment_network:
+    driver: bridge
+    name: sentiment_network
+  user_network: 
+    driver: bridge
+    name: user_network

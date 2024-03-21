@@ -15,8 +15,8 @@ services:
     environment:
       KONG_DATABASE: "off"
       KONG_DECLARATIVE_CONFIG: /etc/kong/kong.yml
-    volumes:
-      - ./kong.yml:/etc/kong/kong.yml
+    # volumes:
+      # - ./kong.yml:/etc/kong/kong.yml
     networks:
       - kong_network
 

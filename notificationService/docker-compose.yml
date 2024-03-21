@@ -51,13 +51,15 @@ services:
       - BOT_URL=https://api.telegram.org/bot
 
   watchlist_db:
-    image: mongo:latest
+    build:
+      context: .
+      dockerfile: watchlistDBDockerfile
     hostname: watchlist_db
     ports:
       - "27018:27017"
 
     environment:
-      - MONGO_INITDB_DATABASE=sentiments
+      - MONGO_INITDB_DATABASE=watchlist
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=root
 

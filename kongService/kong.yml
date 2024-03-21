@@ -24,7 +24,7 @@ services:
           - POST
         strip_path: false
 
-  - name: 
+  - name: watchlist-service
     url: http://watchlist:3000/
     routes:
       - name: watchlist-add
@@ -55,7 +55,7 @@ services:
           - GET
         strip_path: false
 
-- name: user-service
+  - name: user-service
     url: http://user_service:5000/
     routes:
       - name: user
