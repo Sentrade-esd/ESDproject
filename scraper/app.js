@@ -1,5 +1,9 @@
 // Requiring module
 const express = require('express');
+let puppeteer = require("puppeteer-extra");
+
+require("dotenv").config();
+
 
 // Axios module
 const axios = require('axios');
@@ -12,8 +16,6 @@ const xml2js = require('xml2js');
 const jsdom = require('jsdom');
 const {JSDOM} = jsdom;
 
-var request = require('request');
-
 
 // Creating express object
 const app = express();
@@ -25,8 +27,8 @@ app.get('/', (req, res) => {
 	res.end()
 })
 
-// Handling GET query scrape
-app.get('/scrape/:query', async (req, res) => { 
+// Handling GET query scrape to news artcles about a company using the Google News
+app.get('/scraper/getNews/:query', async (req, res) => { 
     const {query} = req.params;
     console.log(query);
     // run scrapping script
@@ -34,16 +36,6 @@ app.get('/scrape/:query', async (req, res) => {
     let response = await scrape(query);
     res.send(response);
 })
-
-
-// Port Number
-const PORT = process.env.PORT ||5000;
-
-// Server Setup
-app.listen(PORT,console.log(
-`Server started on port ${PORT}`));
-
-
 async function scrape(query){
     let url = `https://news.google.com/rss/search?q=${query}&hl=en-SG&gl=SG&ceid=SG:en`
     let response = await axios.get(url);
@@ -58,7 +50,7 @@ async function scrape(query){
     });
 
     let items = result.rss.channel[0].item;
-    for(let i = 0; i < 10; i++) {
+    for(let i = 0; i < 30; i++) {
         let item = items[i];
         let title = item.title[0];
         let pubDate = item.pubDate[0];
@@ -87,25 +79,30 @@ async function scrape(query){
 }
 
 
-
-// Handling GET query scrape
+// Handling GET query scraper to scrape for the stock price using the Alpha Vantage API
 app.get('/scraper/pullPrice/:ticker/:targetDate', async (req, res) => { 
     const {ticker, targetDate} = req.params;
-    console.log(ticker, targetDate);
+    console.log("Ticker: ", ticker, "TargetDate :", targetDate);
     // run scrapping script
     // return response
     let response = await stockPrice(ticker, targetDate);
     console.log('response', response);
     res.send(response);
 })
-
 async function stockPrice(query, targetDate){
 
     // replace the "demo" apikey below with your own key from https://www.alphavantage.co/support/#api-key
     // var url = `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${query}&interval=5min&apikey=${process.env.ALPHA_VANTAGE_API_KEY}`;
     var url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${query}&outputsize=full&apikey=${process.env.ALPHA_VANTAGE_API_KEY}`;
 
-    let response = await axios.get(url);
+    let response; 
+
+    try {
+    response = await axios.get(url);
+    } catch(error){
+        console.error(`HTTP error! status: ${error.response?.status}`);
+        throw error;
+    }
 
     if (response.status !== 200){
         console.log("Status", response.status);
@@ -154,10 +151,6 @@ async function stockPrice(query, targetDate){
         return returnList;
     }
 
-
-
-    
-
     // let parsedData = {};
     // let response = axios.get({
     //     url: url,
@@ -193,3 +186,44 @@ async function stockPrice(query, targetDate){
     // });
     return response;
 }
+
+// Handling to get the currentPrice from yahoo finance
+app.get('/scraper/scrapeCurrentPrice/:ticker', async (req, res) => { 
+    const {ticker} = req.params;
+    console.log("Ticker: ", ticker);
+    // run scrapping script
+    // return response
+    let response = await scrapePrice(ticker);
+    console.log('Current Price: ', response);
+    res.send(response);
+})
+async function scrapePrice(query) {
+    let browser = await puppeteer.launch({
+        headless: "new",
+      });
+
+    let page = await browser.newPage();
+
+    let url = `https://sg.finance.yahoo.com/quote/${query}`;
+
+    page.goto(url);
+
+    let priceSelector = '#quote-header-info > div.My\\(6px\\).Pos\\(r\\).smartphone_Mt\\(6px\\).W\\(100\\%\\) > div.D\\(ib\\).Va\\(m\\).Maw\\(65\\%\\).Ov\\(h\\) > div > fin-streamer.Fw\\(b\\).Fz\\(36px\\).Mb\\(-4px\\).D\\(ib\\) > span'
+    // await page.waitForNavigation({ waitUntil: "networkidle0" });
+    await page.waitForSelector(priceSelector);
+
+    let data = await page.evaluate((priceSelector) => {
+
+        return document.querySelector(priceSelector).innerText;
+    }, priceSelector);
+    browser.close();
+    // console.log(data);
+    return data;
+}
+
+// Port Number
+const PORT = process.env.PORT ||5000;
+
+// Server Setup
+app.listen(PORT,console.log(
+`Server started on port ${PORT}`));
