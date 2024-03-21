@@ -11,9 +11,9 @@ TAGS=("tag1" "tag2" "tag3" "tag4" "tag5" "tag6" "tag7" "tag8" "tag9" "tag10")
 
 # Loop through each image and tag combination
 for ((i=0; i<${#IMAGES[@]}; i++)); do
-    # docker tag "${IMAGES[$i]}" "$USERNAME/${IMAGES[$i]}:${IMAGES[$i]}"
+    docker tag "${IMAGES[$i]}" "$USERNAME/${IMAGES[$i]}:latest"
 
-    # docker push "$USERNAME/${IMAGES[$i]}:${IMAGES[$i]}"
+    docker push "$USERNAME/${IMAGES[$i]}:latest"
 
-    docker push "$IMAGES[$i]:latest"
+    # docker push "$IMAGES[$i]:latest"
 done
