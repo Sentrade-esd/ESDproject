@@ -10,6 +10,7 @@ import './db_client.js';
 import SentimentController from './db_controller.js';
 import { Sentiment, Comment, CronJob } from './db_model.js';
 import sentiment_methods from "./methods.js";
+import axios from 'axios';
 
 const app = express();
 
@@ -19,8 +20,8 @@ app.use(cors());
 
 try {
   console.log("dropping cron");
-  CronJob.collection.drop();
-  CronJob.createCollection();
+  // CronJob.collection.drop();
+  // CronJob.createCollection();
 
   // insert test document
   let newCron = new CronJob({
@@ -88,6 +89,17 @@ cron.schedule("*/1 * * * *", async () => {
             new_score: combined_sentiments[cron.search]
           });
         }
+
+        // anybody with a stop loss of 5-25% (steps of 5), send to a endpoint with the search term and percentage change
+        // if ((combined_sentiments[cron.search] - cron.sentiment_score) / Math.abs(cron.sentiment_score) <= -0.05) {
+        //   let size = Math.abs(Math.floor((combined_sentiments[cron.search] - cron.sentiment_score) / Math.abs(cron.sentiment_score) / 0.05));
+
+        //   axios.post("whatever endpoint this is", {
+        //     search: cron.search,
+        //     size: size*5
+        //   })
+        // }
+
       }
     });
   
@@ -102,8 +114,6 @@ cron.schedule("*/1 * * * *", async () => {
     console.log(error);
   }
 
-
-  // do method to push to AMQP then proceed with stage 2
 
 
   // stage 2: after comparison, update the cron collection
@@ -132,37 +142,6 @@ cron.schedule("*/1 * * * *", async () => {
     console.log(error);
   }
 
-  // if (all_sentiments.length > 0) {
-  //   all_sentiments.forEach(async (sentiment) => {
-  //     let newCron = new CronJob({
-  //       search: sentiment.search,
-  //       sentiment_score: sentiment.sentiment_score,
-  //     });
-  //     await newCron.save();
-  //   });
-  // }
-
-  // // if all comments not empty, add it to the sentiment score in cron collection if it exists in the sentiment collection
-  // // if it does not exist, create a new sentiment object
-  // if (all_comments.length > 0) {
-  //   all_comments.forEach(async (comment) => {
-  //     let cronSentiment = await CronJob.findOne({search: comment.search});
-
-  //     if (cronSentiment) {
-  //       cronSentiment.sentiment_score += comment.sentiment_score;
-  //       await cronSentiment.save();
-
-  //     } else {
-  //       let newCron = new CronJob({
-  //         search: comment.search,
-  //         sentiment_score: comment.sentiment_score,
-  //       });
-
-  //       await newCron.save();
-  //     }
-  //   });
-  // }
-
 
   
 });
@@ -171,6 +150,14 @@ cron.schedule("*/1 * * * *", async () => {
 // cron.schedule("*/15 * * * *", async () => {
 //   console.log('Running a task every 15 minutes');
 // });
+
+
+// start queue connection
+(async () => {
+  await sentiment_methods.start_amqp();
+  sentiment_methods.consumeNotification();
+})();
+
 
 
  

@@ -1,6 +1,8 @@
 import axios from "axios";
 import amqplib from "amqplib";
 
+import { Comment } from "./db_model.js";
+
 // async function createConnection() {
 //     let connection = await amqplib.connect(sentiment_methods.amqpServer);
 //     return connection;
@@ -12,18 +14,48 @@ const sentiment_methods = {
     amqpServer: process.env.AMQP_SERVER,
 
     connection: null,
+    channel: null,
 
-    init: function() {
+    // init: function() {
+    //     return new Promise((resolve, reject) => {
+    //       amqplib.connect(sentiment_methods.amqpServer)
+    //         .then(connection => {
+    //           this.connection = connection;
+    //           resolve();
+    //         })
+    //         .catch(error => {
+    //           console.error('Error connecting to AMQPlib:', error);
+    //           reject(error);
+    //         });
+    //     });
+    // },
+    
+    start_amqp: () => {
         return new Promise((resolve, reject) => {
-          amqplib.connect(sentiment_methods.amqpServer)
-            .then(connection => {
-              this.connection = connection;
-              resolve();
-            })
-            .catch(error => {
-              console.error('Error connecting to AMQPlib:', error);
-              reject(error);
-            });
+            const start = async () => {
+                try {
+                    sentiment_methods.connection = await amqplib.connect(sentiment_methods.amqpServer);
+                    sentiment_methods.channel = await sentiment_methods.connection.createChannel();
+    
+                    sentiment_methods.connection.on('error', async (err) => {
+                        if (err.message !== 'Connection closing') {
+                            console.error('[AMQP] conn error', err.message);
+                        }
+                    });
+    
+                    sentiment_methods.connection.on('close', () => {
+                        console.error('[AMQP] reconnecting');
+                        return setTimeout(start, 10000);
+                    });
+    
+                    console.log('[AMQP] connected');
+                    resolve();
+                } catch (err) {
+                    console.error('[AMQP] could not connect', err.message);
+                    return setTimeout(start, 10000);
+                }
+            };
+            start();
         });
     },
 
@@ -88,32 +120,111 @@ const sentiment_methods = {
     },
 
     produceNotification: async (json_data) => {
-        if (!sentiment_methods.connection) {
-            try {
-                await sentiment_methods.init();
-                // Connection is established, you can use sentiment_methods.connection here
-            } catch (error) {
-                console.error('Error initializing sentiment_methods:', error);
-            }
-        }
         try {
             console.log('Producing notification');
-            const channel = await sentiment_methods.connection.createChannel();
-            const exchange = 'notifications';
-            const queue = 'sentiment_notification';
+            
+            const exchange = 'notifications_exchange'; 
+            const queue = 'sentiment_notification_queue';
             const routingKey = 'notify';
           
-            let temp1 = await channel.assertExchange(exchange, 'direct', { durable: true });
-            let temp2 = await channel.assertQueue(queue, { durable: true });
-            let temp3 = await channel.bindQueue(queue, exchange, routingKey);
-          
-            channel.publish(exchange, routingKey, Buffer.from(JSON.stringify(json_data)), { persistent: true });
+            sentiment_methods.channel.publish(exchange, routingKey, Buffer.from(JSON.stringify(json_data)), { persistent: true });
             console.log('Message sent to RabbitMQ');
             
           } catch (error) {
             console.error('An error occurred:', error);
           }
 
+    },
+
+    consumeNotification: async () => {
+
+        // try {
+        console.log('Consuming notification');
+        const exchange = 'comments_exchange';
+        const queue = 'new_comment_queue';
+        const routingKey = 'comment';
+
+        // let temp1 = await channel.assertExchange(exchange, 'direct', { durable: true });
+        // await channel.assertQueue(queue, { durable: true });
+
+        sentiment_methods.channel.consume(queue, async (message) => {
+            const content = JSON.parse(message.content.toString());
+            const search_term = content.company;
+            const comment = content.comment;
+
+            const results = await sentiment_methods.analyse_comment(comment);
+
+            try {
+                // chekc if DB has a record
+                let exisiting_comments = await Comment.findOne({search: search_term});
+    
+                if (exisiting_comments) {
+    
+                    if ((Date.now() - exisiting_comments.datetime) / 1000 < 86400){
+                        
+                        console.log("comment exists");
+        
+                        // override existing values with .replaceOnce method
+                        exisiting_comments.sentiment_score += results.score;
+                        exisiting_comments.emotion[results.emotion] += 1;
+        
+                        let updateComment = await Comment.replaceOne({_id: exisiting_comments.id}, {
+                            datetime: exisiting_comments.datetime,
+                            search: exisiting_comments.search,
+                            sentiment_score: exisiting_comments.sentiment_score,
+                            emotion: exisiting_comments.emotion
+                        });
+        
+                        console.log("saving existing comment");
+                        // return res.json({ result: exisiting_comments });
+                    } else {
+                        console.log("comment in db expired");
+                        await Comment.deleteOne({search: search_term});
+    
+                        let newComment = new Comment({
+                            datetime: Date.now(),
+                            search: search_term,
+                            sentiment_score: results.score,
+                            emotion: {"joy":0, "others":0, "surprise":0, "sadness":0, "fear":0, "anger":0, "disgust":0}
+                        });
+    
+                        newComment.emotion[results.emotion] += 1;
+    
+                        console.log("saving new comment");
+                        await newComment.save();
+    
+                        // return res.json({ result: newComment });
+                    }
+                } else {
+                    // if no record exists, create a new one
+                    let newComment = new Comment({
+                        datetime: Date.now(),
+                        search: search_term,
+                        sentiment_score: results.score,
+                        emotion: {"joy":0, "others":0, "surprise":0, "sadness":0, "fear":0, "anger":0, "disgust":0}
+                    });
+        
+                    newComment.emotion[results.emotion] += 1;
+        
+                    console.log("saving new comment");
+                    await newComment.save();
+        
+                    // return res.json({ result: newComment });
+                }
+    
+            } catch (error) {
+                console.error('An error occurred:', error);
+            }
+
+            sentiment_methods.channel.ack(message);
+        });
+
+
+
+
+        //   } catch (error) {
+        //     console.error('An error occurred:', error);
+        //   }
     },
 
     scraper: async (search_term) => {

@@ -1,0 +1,24 @@
+version: '1'
+
+services:
+  rabbitmq:
+    image: 'rabbitmq:3-management'
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    networks:
+      - queue_network
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - ./definitions.json:/etc/rabbitmq/definitions.json
+
+    environment:
+      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbitmq_management load_definitions "/etc/rabbitmq/definitions.json"
+
+networks:
+  queue_network:
+    driver: bridge
+    name: queue_network
+
+volumes:
+  rabbitmq_data:

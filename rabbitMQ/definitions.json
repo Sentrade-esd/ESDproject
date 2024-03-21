@@ -1,0 +1,78 @@
+{
+  "rabbit_version": "3.13.0",
+  "users": [
+    {
+      "name": "guest",
+      "password": "guest",
+      "tags": "administrator"
+    }
+  ],
+  "vhosts": [
+    {
+      "name": "/"
+    }
+  ],
+  "permissions": [
+    {
+      "user": "guest",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ],
+  "exchanges": [
+    {
+      "name": "notifications_exchange",
+      "vhost": "/",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "comments_exchange",
+      "vhost": "/",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "queues": [
+    {
+      "name": "sentiment_notification_queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "new_comment_queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": [
+      {
+        "source":"notifications_exchange", 
+        "vhost":"/", 
+        "destination":"sentiment_notification_queue", 
+        "destination_type":"queue", 
+        "routing_key":"notify",
+        "arguments": {}
+      },
+      {
+        "source":"comments_exchange", 
+        "vhost":"/", 
+        "destination":"new_comment_queue", 
+        "destination_type":"queue", 
+        "routing_key":"comment",
+        "arguments": {}
+      }
+  ]
+}

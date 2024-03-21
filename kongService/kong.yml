@@ -23,3 +23,53 @@ services:
         methods:
           - POST
         strip_path: false
+
+  - name: 
+    url: http://watchlist:3000/
+    routes:
+      - name: watchlist-add
+        paths:
+          - /watchlist/add
+        methods:
+          - POST
+        strip_path: false
+        
+      - name: watchlist-remove
+        paths:
+          - /watchlist/remove
+        methods:
+          - POST
+        strip_path: false
+
+      - name: watchlist-getuser
+        paths:
+          - /watchlist/user/:id
+        methods:
+          - GET
+        strip_path: false
+
+      - name: watchlist-getcompany
+        paths:
+          - /watchlist/company/:company
+        methods:
+          - GET
+        strip_path: false
+
+- name: user-service
+    url: http://user_service:5000/
+    routes:
+      - name: user
+        paths:
+          - /user
+        methods:
+          - GET
+          - POST
+        strip_path: false
+
+      - name: get-user
+        paths:
+          - /user/(.*)
+        methods:
+          - GET
+          - POST
+        strip_path: false

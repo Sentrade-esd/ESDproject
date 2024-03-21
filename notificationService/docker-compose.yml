@@ -1,0 +1,77 @@
+version: '1'
+
+services:
+  watchlist:
+    build: 
+      context: ./watchlist
+      dockerfile: Dockerfile
+    command: npm start
+    ports:
+      - 3000:3000
+    networks:
+      - notification_service
+      - kong_network
+
+    environment:
+      - DB_URL=watchlist_db:27017
+
+
+  notification_manager:
+    build: 
+      context: ./manage_notifications
+      dockerfile: Dockerfile
+    command: npm start
+    ports:
+      - 3001:3001
+    networks:
+      - notification_service
+      - queue_network
+
+    environment:
+      - AMQP_SERVER=amqp://rabbitmq:5672
+      - WATCHLIST_URL=http://watchlist:3000/
+      - TELEBOT_URL=http://telebot:3002/
+
+  telebot:
+    build: 
+      context: ./telebot_esd
+      dockerfile: Dockerfile
+    command: npm start
+    ports:
+      - 3002:3002
+    networks:
+      - notification_service
+
+    environment:
+      - AMQP_SERVER=amqp://rabbitmq:5672
+      - BOT_TOKEN=7039505633:AAFoCvJc3XwP8N7bUd1XsjkCP5rH311TrWQ
+      - BOT_URL=https://api.telegram.org/bot
+
+  watchlist_db:
+    image: mongo:latest
+    hostname: watchlist_db
+    ports:
+      - "27018:27017"
+
+    environment:
+      - MONGO_INITDB_DATABASE=sentiments
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+
+    volumes:
+      - watchlist_db:/data/db
+    networks:
+      - notification_service    
+
+volumes:
+  watchlist_db:
+
+
+networks:
+  notification_service:
+    driver: bridge
+    name: watchlist
+  queue_network:
+    external: true
+  kong_network:
+    external: true
