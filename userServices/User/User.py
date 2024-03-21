@@ -90,23 +90,23 @@ def users():
             }
         ), 201
 
-@app.route("/user/<int:UserID>")
-def find_by_UserID(UserID):
-    user = db.session.query(User).filter_by(UserID=UserID).first()
+# @app.route("/user/<int:UserID>")
+# def find_by_UserID(UserID):
+#     user = db.session.query(User).filter_by(UserID=UserID).first()
 
-    if user:
-        return jsonify(
-            {
-                "code": 200,
-                "data": user.json()
-            }
-        )
-    return jsonify(
-        {
-            "code": 404,
-            "message": "User not found."
-        }
-    ), 404
+#     if user:
+#         return jsonify(
+#             {
+#                 "code": 200,
+#                 "data": user.json()
+#             }
+#         )
+#     return jsonify(
+#         {
+#             "code": 404,
+#             "message": "User not found."
+#         }
+#     ), 404
 
 @app.route("/user/<string:email>")
 def find_by_email(email):

@@ -13,11 +13,13 @@ db = SQLAlchemy(app)
 class Transaction(db.Model):
     __tablename__ = 'transaction'
 
-    UserID = db.Column(db.Integer, primary_key=True)
+    TransactionID = db.Column(db.Integer, primary_key=True)
+    UserID = db.Column(db.Integer, nullable=False)
+    Email = db.Column(db.String(255), nullable=False)
     Company = db.Column(db.String(255), nullable=False)
     DateTimestamp = db.Column(db.DateTime, nullable=False)
     BuyAmount = db.Column(db.Float(precision=2), nullable=False)
-    SellAmount = db.Column(db.Float(precision=2), nullable=False)
+    SellAmount = db.Column(db.Float(precision=2), nullable=True)
     StopLossSentimentThreshold = db.Column(db.Float(precision=2), nullable=False)
     TotalAccountValue = db.Column(db.Float(precision=2), nullable=False)
 
@@ -57,9 +59,9 @@ def get_all():
     ), 404
 
 
-@app.route("/transaction/<int:UserID>")
-def find_by_UserID(UserID):
-    transaction = db.session.query(Transaction).filter_by(UserID=UserID).first()
+@app.route("/transaction/<string:email>")
+def find_by_email(Email):
+    transaction = db.session.query(Transaction).filter_by(UserID=Email).first()
 
     if transaction:
         return jsonify(
@@ -71,52 +73,33 @@ def find_by_UserID(UserID):
     return jsonify(
         {
             "code": 404,
-            "message": "Transaction not found."
+            "message": "Email not found."
         }
     ), 404
 
-
-@app.route("/transaction/<int:UserID>", methods=['POST'])
-def create_transaction(UserID):
-    if (db.session.scalars(
-        db.select(Transaction).filter_by(UserID=UserID).
-        limit(1)
-        ).first()
-        ):
-        return jsonify(
-            {
-                "code": 400,
-                "data": {
-                    "UserID": UserID
-                },
-                "message": "Transaction already exists."
-            }
-        ), 400
-
+@app.route("/transaction/checkBalance", methods=["GET"])
+def checkBalance():
     data = request.get_json()
-    # transaction = Transaction(UserID)
-    transaction = Transaction(UserID, data['Company'], data['DateTimestamp'], data['BuyAmount'], data['SellAmount'], data['StopLossSentimentThreshold'], data['TotalAccountValue'])
+    email = data["data"]["email"]
+    buy_amt = data["data"]["buyAmt"]
 
-    try:
-        db.session.add(transaction)
-        db.session.commit()
-    except:
-        return jsonify(
-            {
-                "code": 500,
-                "data": {
-                    "UserID": UserID
-                },
-                "message": "An error occurred creating the transaction."
-            }
-        ), 500
+    return get_latest_transaction(email, buy_amt)
 
-    return jsonify(
-        {
-            "code": 201,
-            "data": transaction.json()
-        }
-    ), 201
+
+def get_latest_transaction(email, buy_amt):
+    latest_transaction = db.session.query(Transaction).filter_by(Email=email).order_by(Transaction.DateTimestamp.desc()).first().BuyAmount
+
+    if not latest_transaction:
+        return False
+
+    if latest_transaction:
+        cur_total_value = latest_transaction.TotalAccountValue
+    
+    if buy_amt < cur_total_value:
+        return True
+    
+    return False
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
