@@ -29,6 +29,22 @@ const sentiment_methods = {
     //         });
     //     });
     // },
+
+    save_data: async (data, retries = 5, delay = 15000) => {
+        try {
+            await data.save();
+
+        } catch (error) {
+
+            if (retries === 0) {
+                console.error('Failed to save to MongoDB after several retries', error);
+                return;
+            }
+        
+            console.error(`Save failed, retrying in ${delay}ms`, error);
+            setTimeout(() => sentiment_methods.save_data(cronJob, retries - 1, delay), delay);
+        }
+    },
     
     start_amqp: () => {
         return new Promise((resolve, reject) => {

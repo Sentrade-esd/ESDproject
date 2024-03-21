@@ -121,7 +121,6 @@ cron.schedule("*/1 * * * *", async () => {
     
     console.log("dropping cron after comparison");
     CronJob.collection.drop();
-    CronJob.createCollection();
   
     // if all sentiments not empty, create a new cron item for each sentiment
   
@@ -133,7 +132,7 @@ cron.schedule("*/1 * * * *", async () => {
           search: search,
           sentiment_score: combined_sentiments[search],
         });
-        await newCron.save();
+        sentiment_methods.save_data(newCron);
       }
     }
 

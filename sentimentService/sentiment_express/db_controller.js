@@ -24,7 +24,8 @@ try {
     });
 
     console.log("saving sentiment test");
-    await newSentiment.save();
+    // await newSentiment.save();
+    sentiment_methods.save_data(newSentiment);
 
     // console.log("dropping comment");
     // // drop collection
@@ -41,7 +42,8 @@ try {
     });
 
     console.log("saving comment test");
-    await newComment.save();
+    // await newComment.save();
+    sentiment_methods.save_data(newComment);
 
     console.log("DB initialised");
 
@@ -106,7 +108,8 @@ SentimentController.get("/sentiment_query", async (req, res) => {
             });
             sentiments = newSentiment;
         
-            await newSentiment.save();
+            // await newSentiment.save();
+            sentiment_methods.save_data(newSentiment);
 
             // if (newSentiment) {
                 // set the result to the sentiments variable
@@ -218,7 +221,8 @@ SentimentController.post("/sentiment_comment", async (req, res) => {
                     newComment.emotion[results.emotion] += 1;
 
                     console.log("saving new comment");
-                    await newComment.save();
+                    // await newComment.save();
+                    sentiment_methods.save_data(newComment);
 
                     return res.json({ result: newComment });
                 }
@@ -234,7 +238,8 @@ SentimentController.post("/sentiment_comment", async (req, res) => {
                 newComment.emotion[results.emotion] += 1;
     
                 console.log("saving new comment");
-                await newComment.save();
+                // await newComment.save();
+                sentiment_methods.save_data(newComment);
     
                 return res.json({ result: newComment });
             }
