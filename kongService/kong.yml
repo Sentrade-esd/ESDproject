@@ -1,7 +1,7 @@
 _format_version: "1.1"
 services:
   - name: sentiment-service
-    url: http://app:5001/
+    url: http://sentiment_app:5001/
     routes:
       - name: welcome-route
         paths:
@@ -73,3 +73,5 @@ services:
           - GET
           - POST
         strip_path: false
+
+  
