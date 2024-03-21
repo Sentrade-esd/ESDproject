@@ -7,7 +7,7 @@ services:
   ######################
 
   kong:
-    image: nmywrld/kongservice-kong
+    image: nmywrld/kongservice-kong:latest
     container_name: kong
     ports:
       - "8000:8000"
@@ -39,7 +39,7 @@ services:
     # build: 
       # context: ./notificationService/watchlist
       # dockerfile: Dockerfile
-    image: nmywrld/notificationservice-watchlist
+    image: nmywrld/notificationservice-watchlist:latest
     command: npm start
     ports:
       - 3000:3000
@@ -55,7 +55,7 @@ services:
     # build: 
     #   context: ./notificationService/manage_notifications
       # dockerfile: Dockerfile
-    image: nmywrld/notificationservice-notification_manager
+    image: nmywrld/notificationservice-notification_manager:latest
     command: npm start
     ports:
       - 3001:3001
@@ -72,7 +72,7 @@ services:
     # build: 
     #   context: ./notificationService/telebot_esd
     #   dockerfile: Dockerfile
-    image: nmywrld/notificationservice-telebot
+    image: nmywrld/notificationservice-telebot:latest
     command: npm start
     ports:
       - 3002:3002
@@ -107,7 +107,7 @@ services:
 
 
   rabbitmq:
-    image: nmywrld/rabbitmq-rabbitmq
+    image: nmywrld/rabbitmq-rabbitmq:latest
     ports:
       - '5672:5672'
       - '15672:15672'
@@ -128,7 +128,7 @@ services:
     #   context: ./sentimentService/sentiment_express
     #   dockerfile: Dockerfile
 
-    image: nmywrld/sentimentservice-sentiment_app
+    image: nmywrld/sentimentservice-sentiment_app:latest
     command: npm start
     ports:
       - "5001:5001"
@@ -146,7 +146,7 @@ services:
 
   sentiment_service:
     # build: ./sentimentService/sentiment_service
-    image: nmywrld/sentimentservice-sentiment_service
+    image: nmywrld/sentimentservice-sentiment_service:latest
     command: gunicorn -w 1 --threads 2 -b :5002 --timeout 600 sentimentApp:app
     hostname: sentiment_service
     ports:
@@ -177,7 +177,7 @@ services:
 
   user_service:
     # build: ./userService/User
-    image: nmywrld/userservices-user_service
+    image: nmywrld/userservices-user_service:latest
     command: gunicorn -w 1 --threads 2 -b :5000 --timeout 600 User:app
     hostname: user_service
     ports:
@@ -190,7 +190,7 @@ services:
 
   user_db:
     # image: postgres:alpine
-    image: nmywrld/userservices-user_db
+    image: nmywrld/userservices-user_db:latest
     hostname: user_db
     restart: always
     ports:
