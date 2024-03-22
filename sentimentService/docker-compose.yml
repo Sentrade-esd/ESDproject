@@ -21,8 +21,8 @@ services:
     depends_on:
       - sentiment_db
       - sentiment_service
-    volumes:
-      - sentiment_data:/var/sentiment_app/data
+    # volumes:
+    #   - sentiment_data:/var/sentiment_app/data
     # restart: unless-stopped
 
   sentiment_service:
@@ -51,9 +51,11 @@ services:
     environment:
       - ALPHA_VANTAGE_API_KEY=youralphavantageapikey
       - PORT=5000
+      - DB_URL=scraper_db:27017
     # restart: unless-stopped
     networks:
       - sentiment_network
+      - scraper_network
   
 
   sentiment_db:
@@ -72,10 +74,28 @@ services:
     networks:
       - sentiment_network
     restart: unless-stopped
+  
+  scraper_db:
+    build:
+      context: .
+      dockerfile: scraperDBDockerfile
+    hostname: scraper_db
+    ports:
+      - "27018:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=sentiments
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+    volumes:
+      - scraper_db:/data/db
+    networks:
+      - scraper_network
+    restart: unless-stopped
 
 volumes:
   sentiment_db:
-  sentiment_data:
+  scraper_db:
+  # sentiment_data:
 
 networks:
   sentiment_network:
@@ -83,6 +103,8 @@ networks:
   queue_network:
     external: true
   kong_network:
+    external: true
+  scraper_network:
     external: true
 
 

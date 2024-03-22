@@ -78,7 +78,7 @@ services:
       dockerfile: watchlistDBDockerfile
     hostname: watchlist_db
     ports:
-      - "27018:27017"
+      - "27019:27017"
     environment:
       - MONGO_INITDB_DATABASE=watchlist
       - MONGO_INITDB_ROOT_USERNAME=root
@@ -160,9 +160,11 @@ services:
     environment:
       - ALPHA_VANTAGE_API_KEY=youralphavantageapikey
       - PORT=5000
+      - DB_URL=scraper_db:27017
     restart: unless-stopped
     networks:
       - sentiment_network
+      - scraper_network
 
   sentiment_db:
     build:
@@ -171,7 +173,6 @@ services:
     hostname: sentiment_db
     ports:
       - "27017:27017"
-
     environment:
       - MONGO_INITDB_DATABASE=sentiments
       - MONGO_INITDB_ROOT_USERNAME=root
@@ -180,6 +181,23 @@ services:
       - sentiment_db:/data/db
     networks:
       - sentiment_network
+    restart: unless-stopped
+
+  scraper_db:
+    build:
+      context: ./sentimentService
+      dockerfile: scraperDBDockerfile
+    hostname: scraper_db
+    ports:
+      - "27018:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=scraper
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+    volumes:
+      - scraper_db:/data/db
+    networks:
+      - scraper_network
     restart: unless-stopped
 
 
@@ -224,6 +242,7 @@ volumes:
   watchlist_db:
   rabbitmq_data:
   sentiment_db:
+  scraper_db:
   user_db_data:
 
 networks:
@@ -239,6 +258,9 @@ networks:
   sentiment_network:
     driver: bridge
     name: sentiment_network
+  scraper_network:  
+    driver: bridge
+    name: scraper_network
   user_network: 
     driver: bridge
     name: user_network
