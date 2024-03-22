@@ -9,7 +9,7 @@ services:
     command: gunicorn -w 1 --threads 2 -b :5000 --timeout 600 User:app
     hostname: user_service
     ports:
-      - "5000:5000"
+      - "6000:6000"
     environment:
       - SQL_URI=postgresql://postgres:root@user_db:5432
     networks:

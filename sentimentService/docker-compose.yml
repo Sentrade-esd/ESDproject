@@ -37,6 +37,24 @@ services:
       - sentiment_network
     restart: unless-stopped
 
+
+  scraper:
+    build:
+      context: ./scraper
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    # volumes:
+      # - .:/app
+    command: ["node", "app.js"]
+    environment:
+      - ALPHA_VANTAGE_API_KEY=youralphavantageapikey
+      - PORT=5000
+    # restart: unless-stopped
+    networks:
+      - sentiment_network
+  
+
   sentiment_db:
     build:
       context: .
