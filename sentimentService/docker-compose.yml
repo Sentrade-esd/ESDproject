@@ -22,6 +22,7 @@ services:
       - sentiment_service
     volumes:
       - sentiment_data:/var/sentiment_app/data
+    restart: unless-stopped
 
   sentiment_service:
     # platform: linux/amd64
@@ -34,6 +35,7 @@ services:
       - "5002:5002"
     networks:
       - sentiment_network
+    restart: unless-stopped
 
   sentiment_db:
     build:
@@ -42,17 +44,15 @@ services:
     hostname: sentiment_db
     ports:
       - "27017:27017"
-
     environment:
       - MONGO_INITDB_DATABASE=sentiments
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=root
-
     volumes:
       - sentiment_db:/data/db
-
     networks:
       - sentiment_network
+    restart: unless-stopped
 
 volumes:
   sentiment_db:

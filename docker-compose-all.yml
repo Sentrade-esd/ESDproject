@@ -10,7 +10,6 @@ services:
     build: 
       context: ./kongService
       dockerfile: Dockerfile
-    # container_name: kong
     hostname: kong
     ports:
       - "8000:8000"
@@ -22,6 +21,7 @@ services:
       - ./kongService/kong.yml:/etc/kong/kong.yml
     networks:
       - kong_network
+    restart: unless-stopped
 
   ##########################
   # Notification Service ###
@@ -37,9 +37,9 @@ services:
     networks:
       - notification_service
       - kong_network
-
     environment:
       - DB_URL=watchlist_db:27017
+    restart: unless-stopped
   
   notification_manager:
     build: 
@@ -51,14 +51,13 @@ services:
     networks:
       - notification_service
       - queue_network
-
     environment:
       - AMQP_SERVER=amqp://rabbitmq:5672
       - WATCHLIST_URL=http://watchlist:3000/
       - TELEBOT_URL=http://telebot:3002/
+    restart: unless-stopped
 
   telebot:
-    # platform: linux/amd64
     build: 
       context: ./notificationService/telebot_esd
       dockerfile: Dockerfile
@@ -67,11 +66,11 @@ services:
       - 3002:3002
     networks:
       - notification_service
-
     environment:
       - AMQP_SERVER=amqp://rabbitmq:5672
       - BOT_TOKEN=7039505633:AAFoCvJc3XwP8N7bUd1XsjkCP5rH311TrWQ
       - BOT_URL=https://api.telegram.org/bot
+    restart: unless-stopped
 
   watchlist_db:
     build:
@@ -80,16 +79,15 @@ services:
     hostname: watchlist_db
     ports:
       - "27018:27017"
-
     environment:
       - MONGO_INITDB_DATABASE=watchlist
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=root
-
     volumes:
       - watchlist_db:/data/db
     networks:
       - notification_service
+    restart: unless-stopped
 
 
   ##########################
@@ -108,9 +106,9 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
       # - ./definitions.json:/etc/rabbitmq/definitions.json
-
     environment:
       - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbitmq_management load_definitions "/etc/rabbitmq/definitions.json"
+    restart: unless-stopped
   
 
   ##########################
@@ -137,8 +135,7 @@ services:
       - sentiment_db
       - sentiment_service
       # - rabbitmq
-    volumes:
-      - sentiment_data:/var/sentiment_app/data
+    restart: unless-stopped
 
   sentiment_service:
     build: 
@@ -150,6 +147,7 @@ services:
       - "5002:5002"
     networks:
       - sentiment_network
+    restart: unless-stopped
 
   sentiment_db:
     build:
@@ -167,6 +165,7 @@ services:
       - sentiment_db:/data/db
     networks:
       - sentiment_network
+    restart: unless-stopped
 
 
   ##########################
@@ -186,15 +185,13 @@ services:
     networks:
       - user_network
       - kong_network
+    restart: unless-stopped
 
   user_db:
-    # image: postgres:alpine
-    # platform: linux/amd64
     build: 
       context: ./userServices
       dockerfile: userDBDockerfile
     hostname: user_db
-    restart: always
     ports:
       - 5432:5432
     environment:
@@ -206,13 +203,13 @@ services:
       - user_db_data:/var/lib/postgresql/data
     networks:
       - user_network
+    restart: unless-stopped
 
 volumes:
   watchlist_db:
   rabbitmq_data:
   sentiment_db:
   user_db_data:
-  sentiment_data:
 
 networks:
   kong_network:
