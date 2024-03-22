@@ -12,6 +12,8 @@ FROM base AS dependencies
 # install node packages
 RUN npm set progress=false && npm config set depth 0
 RUN npm install --only=production 
+RUN npm install selenium-webdriver
+
 # copy production node_modules aside
 RUN cp -R node_modules prod_node_modules
 # install ALL node_modules, including 'devDependencies'

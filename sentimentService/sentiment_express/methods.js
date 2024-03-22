@@ -2,6 +2,7 @@ import axios from "axios";
 import amqplib from "amqplib";
 
 import { Comment } from "./db_model.js";
+import { ElementNotSelectableError } from "selenium-webdriver/lib/error.js";
 
 // async function createConnection() {
 //     let connection = await amqplib.connect(sentiment_methods.amqpServer);
@@ -12,6 +13,7 @@ const sentiment_methods = {
 
     sentiment_service_url: process.env.SENTIMENT_SERVICE_URL,
     amqpServer: process.env.AMQP_SERVER,
+    scraper_url: process.env.SCRAPER_URL,
 
     connection: null,
     channel: null,
@@ -208,7 +210,7 @@ const sentiment_methods = {
                             datetime: Date.now(),
                             search: search_term,
                             sentiment_score: results.score,
-                            emotion: {"joy":0, "others":0, "surprise":0, "sadness":0, "fear":0, "anger":0, "disgust":0}
+                            emotion: {"joy":0, "others":0, "surprise":0, "sadness":0, "fear":0, "anger":0, "disgust":0,"love":0}
                         });
     
                         newComment.emotion[results.emotion] += 1;
@@ -224,7 +226,7 @@ const sentiment_methods = {
                         datetime: Date.now(),
                         search: search_term,
                         sentiment_score: results.score,
-                        emotion: {"joy":0, "others":0, "surprise":0, "sadness":0, "fear":0, "anger":0, "disgust":0}
+                        emotion: {"joy":0, "others":0, "surprise":0, "sadness":0, "fear":0, "anger":0, "disgust":0,"love":0}
                     });
         
                     newComment.emotion[results.emotion] += 1;
@@ -251,42 +253,70 @@ const sentiment_methods = {
     },
 
     scraper: async (search_term) => {
-        // const url = "http://localhost:5000/api/scraper";
-        // const response = await axios.get(url, {
-        //     params: {
-        //         search_term: search_term
-        //     }
-        // });
+        const url = `${sentiment_methods.scraper_url}/scraper/getNews/${search_term}`;
+        const response = await axios.get(url);
 
-        // return response;
-        return [
-            {
-                "datetime" : "2024-01-28T04:50:27Z",
-                "headline" : "Elon Musk joins Trump Republicans to slam rumored Senate border deal",
-                "description" : "Elon Musk joined Donald Trump and Republican critics to denounce the contentious Senate border deal that President Joe Biden touted as the “toughest and fairest set of reforms.” “No laws need to be passed” to halt the US border crisis Musk the worlds riche…"
-            },
-            {
-                "datetime" : "2024-01-28T00:10:36Z",
-                "headline" : "Tesla battery explodes in Cary home after being removed and charged inside",
-                "description" : "Tesla battery explodes in Cary home after being removed and charged insidewral.com"
-            },
-            {
-                "datetime" : "2024-01-27T21:01:05Z",
-                "headline" : "Here's why Biden's multi-billion-dollar EV charging program has short-circuited",
-                "description" : "By Will Kessler Daily Caller News Foundation The Biden administration has designated billions of taxpayer dollars to build electric vehicle (EV) chargers but lagging market demand and government red tape are getting in the way according to experts who spoke"
-            },
-            {
-                "datetime" : "2024-01-27T20:42:00Z",
-                "headline" : "Who wants to be a trillionaire': The game show is nearing its climax",
-                "description" : "A trillion dollars can purchase shares of all shares of McDonald's PepsiCo Coca-Cola and more. Elon Musk is predicted to become the first trillionaire by 2032 followed by  Bernard Arnault Jeff Bezos Larry Ellison and Wareen Buffett. The term 'trilliona"
-            },
-            {
-                "datetime": "2024-01-27T16:00:00Z",
-                "headline": "ARGHH FUCK THIS",
-                "description" : "test"
-            }
-        ]        
-    }
+        // json parse response.data
+        const data = response.data;
+
+        // for each item in data, parse it
+        let parsed_data = [];
+
+        for (let i = 0; i < data.length; i++) {
+            let newsObject = data[i];
+            let parsed_news = await sentiment_methods.parse_scraper(newsObject);
+            parsed_data.push(parsed_news);
+            if (i == 50) break;
+        }
+
+        return parsed_data;
+        // return [
+        //     {
+        //         "datetime" : "2024-01-28T04:50:27Z",
+        //         "headline" : "Elon Musk joins Trump Republicans to slam rumored Senate border deal",
+        //         "description" : "Elon Musk joined Donald Trump and Republican critics to denounce the contentious Senate border deal that President Joe Biden touted as the “toughest and fairest set of reforms.” “No laws need to be passed” to halt the US border crisis Musk the worlds riche…"
+        //     },
+        //     {
+        //         "datetime" : "2024-01-28T00:10:36Z",
+        //         "headline" : "Tesla battery explodes in Cary home after being removed and charged inside",
+        //         "description" : "Tesla battery explodes in Cary home after being removed and charged insidewral.com"
+        //     },
+        //     {
+        //         "datetime" : "2024-01-27T21:01:05Z",
+        //         "headline" : "Here's why Biden's multi-billion-dollar EV charging program has short-circuited",
+        //         "description" : "By Will Kessler Daily Caller News Foundation The Biden administration has designated billions of taxpayer dollars to build electric vehicle (EV) chargers but lagging market demand and government red tape are getting in the way according to experts who spoke"
+        //     },
+        //     {
+        //         "datetime" : "2024-01-27T20:42:00Z",
+        //         "headline" : "Who wants to be a trillionaire': The game show is nearing its climax",
+        //         "description" : "A trillion dollars can purchase shares of all shares of McDonald's PepsiCo Coca-Cola and more. Elon Musk is predicted to become the first trillionaire by 2032 followed by  Bernard Arnault Jeff Bezos Larry Ellison and Wareen Buffett. The term 'trilliona"
+        //     },
+        //     {
+        //         "datetime": "2024-01-27T16:00:00Z",
+        //         "headline": "ARGHH FUCK THIS",
+        //         "description" : "test"
+        //     }
+        // ]        
+    },
+
+    parse_scraper: async (newsObject) => {
+        const pubDate = new Date(newsObject.pubDate[0]).toDateString();
+
+        // Extract the title
+        const title = newsObject.title[0];
+
+        // Extract the description
+        const description = newsObject.description[0].replace(/<[^>]*>?/gm, '');
+
+        // Create the output object
+        const result = {
+            datetime: pubDate,
+            headline: title.replace(/ - .*/, ''), // Remove everything after " - "
+            description: description.replace(/&nbsp;/g, ' ').replace(/&\w+;/g, ''), // Replace HTML entities
+        };
+
+        return result
+    },
 
 };
 

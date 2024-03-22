@@ -12,10 +12,10 @@ class ModelLoader:
     # keyword_model = None
 
     valid_emotions = ['joy', 'others', 'surprise',
-                  'sadness', 'fear', 'anger', 'disgust']
+                  'sadness', 'fear', 'anger', 'disgust', 'love']
 
     emotions =  {"joy": 0, "others": 0, "surprise": 0, 
-                "sadness": 0, "fear": 0, "anger": 0, "disgust": 0}
+                "sadness": 0, "fear": 0, "anger": 0, "disgust": 0, "love": 0}
 
     keywords = {}
 
@@ -30,7 +30,8 @@ class ModelLoader:
             model="siebert/sentiment-roberta-large-english")
         
         self.emotion_model = pipeline(
-            model="finiteautomata/bertweet-base-emotion-analysis")
+            # model="finiteautomata/bertweet-base-emotion-analysis")
+            model="transformersbook/distilbert-base-uncased-finetuned-emotion")
         
         self.keyword_ext_model = pipeline(
             model="yanekyuk/bert-keyword-extractor")

@@ -131,6 +131,7 @@ services:
       - SENTIMENT_SERVICE_URL=http://sentiment_service:5002/
       - DB_URL=sentiment_db:27017
       - AMQP_SERVER=amqp://rabbitmq:5672
+      - SCRAPER_URL=http://scraper:5000
     depends_on:
       - sentiment_db
       - sentiment_service

@@ -19,7 +19,7 @@ try {
         search: "test",
         sentiment_score: 0,
         emotion: {"joy": 0, "others": 0, "surprise": 0, 
-        "sadness": 0, "fear": 0, "anger": 0, "disgust": 0},
+        "sadness": 0, "fear": 0, "anger": 0, "disgust": 0, "love":0},
         keyword: {"test": 0}
     });
 
@@ -38,7 +38,7 @@ try {
         search: "test",
         sentiment_score: 0,
         emotion: {"joy": 100, "others": 0, "surprise": 0, 
-        "sadness": 0, "fear": 0, "anger": 0, "disgust": 0}
+        "sadness": 0, "fear": 0, "anger": 0, "disgust": 0, "love":0}
     });
 
     console.log("saving comment test");
@@ -76,7 +76,9 @@ SentimentController.get("/sentiment_query", async (req, res) => {
             console.log("In DB. Returning data...");
         } else {
             sentiment_flag = true;
-            difference_flag = true;
+            // delete expired sentiment
+
+            await Sentiment.deleteOne({search: search_term});
         }
 
     } else {
@@ -88,6 +90,7 @@ SentimentController.get("/sentiment_query", async (req, res) => {
         console.log("Not in DB. Getting data...");
         
         const response = await sentiment_methods.scraper(search_term);
+        // console.log(response)
 
     
         console.log("Analysing...");
@@ -158,7 +161,8 @@ SentimentController.get("/sentiment_query", async (req, res) => {
                 "sadness": sentiments.emotion.sadness + comments.emotion.sadness,
                 "fear": sentiments.emotion.fear + comments.emotion.fear,
                 "anger": sentiments.emotion.anger + comments.emotion.anger,
-                "disgust": sentiments.emotion.disgust + comments.emotion.disgust
+                "disgust": sentiments.emotion.disgust + comments.emotion.disgust,
+                "love": sentiments.emotion.love + comments.emotion.love
             },
             keyword: sentiments.keyword
         }
@@ -215,7 +219,7 @@ SentimentController.post("/sentiment_comment", async (req, res) => {
                         datetime: Date.now(),
                         search: search_term,
                         sentiment_score: results.score,
-                        emotion: {"joy":0, "others":0, "surprise":0, "sadness":0, "fear":0, "anger":0, "disgust":0}
+                        emotion: {"joy":0, "others":0, "surprise":0, "sadness":0, "fear":0, "anger":0, "disgust":0, "love":0}
                     });
 
                     newComment.emotion[results.emotion] += 1;
@@ -232,7 +236,7 @@ SentimentController.post("/sentiment_comment", async (req, res) => {
                     datetime: Date.now(),
                     search: search_term,
                     sentiment_score: results.score,
-                    emotion: {"joy":0, "others":0, "surprise":0, "sadness":0, "fear":0, "anger":0, "disgust":0}
+                    emotion: {"joy":0, "others":0, "surprise":0, "sadness":0, "fear":0, "anger":0, "disgust":0, "love":0}
                 });
     
                 newComment.emotion[results.emotion] += 1;
