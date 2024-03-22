@@ -30,7 +30,8 @@ try {
   });
 
   console.log("saving cron test");
-  await newCron.save();
+  // await newCron.save();
+  sentiment_methods.save_data(newCron);
 } catch (error) {
   console.log("DB initialisation failed");
   console.log(error);

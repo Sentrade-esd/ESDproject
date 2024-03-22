@@ -137,6 +137,8 @@ services:
       - sentiment_db
       - sentiment_service
       # - rabbitmq
+    volumes:
+      - sentiment_data:/var/sentiment_app/data
 
   sentiment_service:
     build: 
@@ -210,6 +212,7 @@ volumes:
   rabbitmq_data:
   sentiment_db:
   user_db_data:
+  sentiment_data:
 
 networks:
   kong_network:

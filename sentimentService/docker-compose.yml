@@ -20,6 +20,8 @@ services:
     depends_on:
       - sentiment_db
       - sentiment_service
+    volumes:
+      - sentiment_data:/var/sentiment_app/data
 
   sentiment_service:
     # platform: linux/amd64
@@ -54,6 +56,7 @@ services:
 
 volumes:
   sentiment_db:
+  sentiment_data:
 
 networks:
   sentiment_network:

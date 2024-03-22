@@ -31,19 +31,26 @@ const sentiment_methods = {
     // },
 
     save_data: async (data, retries = 5, delay = 15000) => {
+        console.log('Attempting to save data');
         try {
             await data.save();
-
+            console.log('Data saved successfully');
+            return;
         } catch (error) {
-
-            if (retries === 0) {
-                console.error('Failed to save to MongoDB after several retries', error);
-                return;
-            }
-        
-            console.error(`Save failed, retrying in ${delay}ms`, error);
-            setTimeout(() => sentiment_methods.save_data(cronJob, retries - 1, delay), delay);
+            console.error('Initial save failed', error);
         }
+
+        // If the initial save fails, start the interval
+        const intervalId = setInterval(async () => {
+            console.log('Attempting to save data');
+            try {
+                await data.save();
+                console.log('Data saved successfully');
+                clearInterval(intervalId); // If save is successful, clear the interval
+            } catch (error) {
+                console.error(`Save failed, retrying in ${delay}ms`, error);
+            }
+        }, delay);
     },
     
     start_amqp: () => {
