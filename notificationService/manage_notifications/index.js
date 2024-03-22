@@ -66,17 +66,18 @@ async function start_amqp() {
 
       // Send message to Telegram bot
       const telegramIds = response.data; // Replace this with the actual array of Telegram IDs
-      const message = `The company ${company} has a change of ${change}.`; // Replace this with the actual message
+      const teleMessage = `The company ${company} has a change of ${change}.`; // Replace this with the actual message
 
       await axios.post(`${telebut_url}teleBot/send_message`, {
         telegramIds,
-        message,
+        teleMessage,
       });
+      channel.ack(message);
+
     } catch (error) {
       console.error(`Error getting watchlist for company ${company}:`, error);
     }
 
-    channel.ack(message);
   });
 
 })();
