@@ -61,7 +61,7 @@ class ModelLoader:
             for idx in range(total_headlines):
                 row = headlines_df.iloc[idx]
                 headline = row['headline']
-                description = row['description']
+                # description = row['description']
 
 
                 result = self.sentiment_model(headline)
@@ -72,14 +72,14 @@ class ModelLoader:
                 elif label == 'NEGATIVE':
                     headlines_df.at[idx, 'headline_sentiment'] = -1
 
-                ## analyse description ##               
-                result = self.sentiment_model(description)
-                label = result[0]['label']
+                # ## analyse description ##               
+                # result = self.sentiment_model(description)
+                # label = result[0]['label']
 
-                if label == 'POSITIVE':
-                    headlines_df.at[idx, 'description_sentiment'] = 1
-                elif label == 'NEGATIVE':
-                    headlines_df.at[idx, 'description_sentiment'] = -1
+                # if label == 'POSITIVE':
+                #     headlines_df.at[idx, 'description_sentiment'] = 1
+                # elif label == 'NEGATIVE':
+                #     headlines_df.at[idx, 'description_sentiment'] = -1
                 
 
                 ## analyse emotions ##
@@ -101,12 +101,12 @@ class ModelLoader:
         
         # sum up the sentiment scores for the headlines and descriptions and store in a variable
         headlines_score = headlines_df['headline_sentiment'].sum()
-        description_score = headlines_df['description_sentiment'].sum()
+        # description_score = headlines_df['description_sentiment'].sum()
 
 
         return {
             "headlines_score": int(headlines_score),
-            "description_score": int(description_score),
+            # "description_score": int(description_score),
             "emotions": self.emotions
         }
     

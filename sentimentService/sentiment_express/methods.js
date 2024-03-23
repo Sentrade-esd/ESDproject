@@ -258,18 +258,28 @@ const sentiment_methods = {
 
         // json parse response.data
         const data = response.data;
+        // console.log(data);
 
         // for each item in data, parse it
-        let parsed_data = [];
+        let headlinesArray = [];
+        let UIArray = [];
 
         for (let i = 0; i < data.length; i++) {
             let newsObject = data[i];
             let parsed_news = await sentiment_methods.parse_scraper(newsObject);
-            parsed_data.push(parsed_news);
-            if (i == 50) break;
+            let copy_news = { ...parsed_news };
+            delete parsed_news.link
+
+            headlinesArray.push(parsed_news);
+            UIArray.push(copy_news);
+            // if (i == 50) break;
         }
 
-        return parsed_data;
+        console.log(headlinesArray);
+        console.log("====================================");
+        console.log(UIArray);
+
+        return [headlinesArray, UIArray];
         // return [
         //     {
         //         "datetime" : "2024-01-28T04:50:27Z",
@@ -305,17 +315,28 @@ const sentiment_methods = {
         // Extract the title
         const title = newsObject.title[0];
 
-        // Extract the description
-        const description = newsObject.description[0].replace(/<[^>]*>?/gm, '');
+        // Extract the link
+        const link = newsObject.link[0];
 
         // Create the output object
         const result = {
             datetime: pubDate,
             headline: title.replace(/ - .*/, ''), // Remove everything after " - "
-            description: description.replace(/&nbsp;/g, ' ').replace(/&\w+;/g, ''), // Replace HTML entities
+            link: link
         };
 
         return result
+    },
+
+    getNewsFromDB: async (ticker) => {
+        // const url = `${sentiment_methods.scraper_url}/scraper/getNews/${search_term}`;
+        const url = ``
+        const response = await axios.get(url);
+
+        // json parse response.data
+        const data = response.data;
+        
+        return data
     },
 
 };

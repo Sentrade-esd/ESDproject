@@ -19,19 +19,22 @@ app.use(bodyParser.json());
 app.use(cors());
 
 try {
-  console.log("dropping cron");
+  // console.log("dropping cron");
   // CronJob.collection.drop();
   // CronJob.createCollection();
 
   // insert test document
-  let newCron = new CronJob({
+  let newCron = {
       search: "test",
       sentiment_score: 0,
-  });
+  };
 
-  console.log("saving cron test");
-  // await newCron.save();
-  sentiment_methods.save_data(newCron);
+  const docTest1 = await CronJob.findOneAndReplace(
+      { search: "test" }, 
+      newCron, 
+      { new: true, upsert: true },
+  );
+
 } catch (error) {
   console.log("DB initialisation failed");
   console.log(error);
@@ -128,7 +131,7 @@ cron.schedule("*/1 * * * *", async () => {
     if (Object.keys(combined_sentiments).length > 0) {
       // for each item in senitments, create a new cron item
       for (let search of Object.keys(combined_sentiments)) {
-        console.log("search: " + search);
+        // console.log("search: " + search);
         let newCron = new CronJob({
           search: search,
           sentiment_score: combined_sentiments[search],
