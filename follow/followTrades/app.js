@@ -34,8 +34,8 @@ app.get('/', (req, res) => {
 app.post('/followTrade/buy', async (req, res) => {
     let response;
     try {
-        const {email, ticker, targetDate, buyAmountPerFiling, maxBuyAmount} = req.body;
-        response = await followTrade(email, ticker, targetDate, buyAmountPerFiling, maxBuyAmount);
+        const {userId, ticker, targetDate, buyAmountPerFiling, maxBuyAmount} = req.body;
+        response = await followTrade(userId, ticker, targetDate, buyAmountPerFiling, maxBuyAmount);
     }
     catch(error){
         console.log(error);
@@ -44,10 +44,10 @@ app.post('/followTrade/buy', async (req, res) => {
     
 });
 
-async function followTrade(email, ticker, targetDate, buyAmountPerFiling, maxBuyAmount){
+async function followTrade(userId, ticker, targetDate, buyAmountPerFiling, maxBuyAmount){
     // Promise request to get user account balance, stock price, senator filings
     let data = {};
-    let updateBalanceStatus = await checkBalance(email, maxBuyAmount);
+    let updateBalanceStatus = await checkBalance(userId, maxBuyAmount);
     if (updateBalanceStatus){
         try {
             let [
@@ -108,40 +108,41 @@ async function followTrade(email, ticker, targetDate, buyAmountPerFiling, maxBuy
 }
 
 
-async function checkBalance(email, amount){
+async function checkBalance(userId, maxBuyAmount){
     // Get account balance
     // return account balance
-    let action = 'deduct';
-    let accountBalance = 5000;
-    console.log("Amount:", amount);
+    // let action = 'deduct';
+    // let accountBalance = 5000;
+    // console.log("Amount:", amount);
 
-    if (action === "deduct") {
-        // Add amount to account balance
-        console.log('deducting')
-        console.log("Acount Balance:", accountBalance);
-        if (accountBalance < amount){
-            return false;
-        }else {
-            accountBalance -= amount;
-            return true;
-        }
+
+    try {
+        let data = {};
+        data['userId']= userId;
+        // give me the latest key of stock price
+        data['maxBuyAmount'] = maxBuyAmount;
+        console.log(data);
+        const body =  {status: 'success', data};
+        const response = await axios.post(`${TRANSACTION_URL}checkBalance`, body);
+        // console.log(response.data);
+        return response.data;
+    } catch (error) {
+        console.error(`HTTP error! status: ${error.response.status}`);
+        throw error;
     }
 
-
-
-    // try {
-    //     let data = {};
-    //     data['email']= email;
-    //     // give me the latest key of stock price
-    //     data['maxBuyAmount'] = maxBuyAmount;
-    //     const body =  {status: 'success', data};
-    //     const response = await axios.post(`http://localhost:5000/transactions/checkBalance`, body);
-    //     // console.log(response.data);
-    //     return response.data;
-    // } catch (error) {
-    //     console.error(`HTTP error! status: ${error.response.status}`);
-    //     throw error;
+    // if (action === "deduct") {
+    //     // Add amount to account balance
+    //     console.log('deducting')
+    //     console.log("Acount Balance:", accountBalance);
+    //     if (accountBalance < amount){
+    //         return false;
+    //     }else {
+    //         accountBalance -= amount;
+    //         return true;
+    //     }
     // }
+
 
 }
 

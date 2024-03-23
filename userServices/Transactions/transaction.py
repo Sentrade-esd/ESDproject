@@ -214,17 +214,17 @@ def update_transaction():
 
 
 
-@app.route("/transaction/checkBalance", methods=["GET"])
+@app.route("/checkBalance", methods=["POST"])
 def checkBalance():
     data = request.get_json()
-    email = data["data"]["email"]
-    buy_amt = data["data"]["buyAmt"]
+    UserID = data["data"]["userId"]
+    buy_amt = data["data"]["maxBuyAmount"]
 
-    return get_latest_transaction(email, buy_amt)
+    return get_latest_transaction(UserID, buy_amt)
 
 
-def get_latest_transaction(email, buy_amt):
-    latest_transaction = db.session.query(Transaction).filter_by(Email=email).order_by(Transaction.DateTimestamp.desc()).first().BuyAmount
+def get_latest_transaction(UserID, buy_amt):
+    latest_transaction = db.session.query(Transaction).filter_by(UserID=UserID).order_by(Transaction.DateTimestamp.desc()).first().BuyAmount
 
     if not latest_transaction:
         return False
