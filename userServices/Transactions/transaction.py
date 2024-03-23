@@ -164,13 +164,40 @@ def add_new_transaction():
         UserID=data["UserID"],
         Email=data["Email"],
         DateTimestamp=data["Date"], 
-        BuyAmount=data["Buy_amount"],
-        SellAmount=data["Sell_amount"],  
+        BuyAmount=data["Buy_amount"], 
         StopLossSentimentThreshold=data["Threshold"],
-        TotalAccountValue=0.0  
+        TotalAccountValue= get_current_account_value(data["UserID"]) - data["Buy_amount"]
     )
 
     
+    db.session.add(new_transaction)
+    db.session.commit() 
+
+    return jsonify(
+        {
+            "code": 200,
+            "data": new_transaction.json(),
+            "message": "New transaction successfully added."
+        }
+    )
+
+
+@app.route("/transaction/updateTrade/", methods=["POST"])
+def update_transaction():
+    data = request.get_json()
+    
+
+    new_transaction = Transaction(
+        UserID=data["UserID"],
+        Email=data["Email"],
+        DateTimestamp=data["Date"], 
+        BuyAmount=data["Buy_amount"],
+        SellAmount=data["Sell_amount"],  
+        StopLossSentimentThreshold=data["Threshold"],
+        TotalAccountValue = get_current_account_value(data["UserID"]) + data["Sell_amount"]
+    )
+
+    # Adding the new transaction to the session and committing it to save it in the database.
     db.session.add(new_transaction)
     db.session.commit() 
 
@@ -182,34 +209,6 @@ def add_new_transaction():
         }
     )
 
-
-@app.route("/transaction/updateTrade/", methods=["POST"])
-def update_transaction():
-    data = request.get_json()
-
-    
-
-    new_transaction = Transaction(
-        UserID=data["UserID"],
-        Email=data["Email"],
-        DateTimestamp=data["Date"], 
-        BuyAmount=data["Buy_amount"],
-        SellAmount=None,  
-        StopLossSentimentThreshold=data["Threshold"],
-        TotalAccountValue=0.0  
-    )
-
-    # Adding the new transaction to the session and committing it to save it in the database.
-    db.session.add(new_transaction)
-    db.session.commit() 
-
-    return jsonify(
-        {
-            "code": 200,
-            "data": new_transaction.json(),
-            "message": "New transaction successfully added."
-        }
-    )
 
 
 
@@ -237,6 +236,10 @@ def get_latest_transaction(email, buy_amt):
         return True
     
     return False
+
+def get_current_account_value(UserID):
+    current_value = db.session.query(Transaction).filter_by(UserID=UserID).order_by(Transaction.DateTimestamp.desc()).first().TotalAccountValue
+    return current_value
 
 
 
@@ -291,20 +294,30 @@ def follow_trade_transaction():
 
         db.session.commit()
 
+    # return jsonify(
+    #     {
+    #         "code": 200,
+    #         "data": {
+    #             "Company": transaction.Company,
+    #             "buyAmount": transaction.BuyAmount,
+    #             "sellAmount": transaction.SellAmount,
+    #             "totalAccountValue": transaction.TotalAccountValue
+    #         }
+    #     }
+    # )
+
+
     return jsonify(
         {
             "code": 200,
             "data": {
-                "PnL": "{:.2f}".format(profit_loss),
-                "fractionalSharesBought": "{:.2f}".format(total_percentage_of_stock),
-                "boughtAmount": "{:.2f}".format(bought_amount),
-                "sellAmount": "{:.2f}".format(sellAmount)
+                "Company": transaction.Company,
+                "buyAmount": transaction.BuyAmount,
+                "sellAmount": transaction.SellAmount,
+                "totalAccountValue": transaction.TotalAccountValue
             }
         }
-    )
-
-
-    return {"PnL":"{:.2f}".format(profit_loss), "fractionalSharesBought":"{:.2f}".format(total_percentage_of_stock), "boughtAmount":"{:.2f}".format(bought_amount), "sellAmount":"{:.2f}".format(sellAmount)}
+    ), {"PnL":"{:.2f}".format(profit_loss), "fractionalSharesBought":"{:.2f}".format(total_percentage_of_stock), "boughtAmount":"{:.2f}".format(bought_amount), "sellAmount":"{:.2f}".format(sellAmount)}
 
 
 
