@@ -104,23 +104,53 @@ services:
   - name: transactions-service
     url: http://transactions:6002/
     routes:
-      - name: transaction-email-route
+      - name: transaction-all-route
         paths:
-        - /transaction/:email
+        - /transaction
+        methods:
+        - GET
+        strip_path: false
+
+      - name: transaction-by-id-route
+        paths:
+        - /transaction/:UserID
+        methods:
+        - GET
+        strip_path: false
+
+      - name: transaction-total-by-id-route
+        paths:
+        - /transaction/total/:UserID
+        methods:
+        - GET
+        strip_path: false
+
+      - name: transaction-newTrade-route
+        paths:
+        - /transaction/newTrade
+        methods:
+        - POST
+        strip_path: false
+
+      - name: transaction-updateTrade-route
+        paths:
+        - /transaction/updateTrade
+        methods:
+        - POST
         strip_path: false
 
       - name: transaction-checkBalance-route
-        methods:
-        - GET
         paths:
         - /transaction/checkBalance
+        methods:
+        - GET
         strip_path: false
 
       - name: followTradeTransaction-route
-        methods:
-        - POST
         paths:
         - /followTradeTransaction
+        methods:
+        - POST
         strip_path: false
 
   - name: follow-trade-service

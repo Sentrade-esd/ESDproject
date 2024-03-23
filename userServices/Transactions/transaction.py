@@ -183,7 +183,7 @@ def add_new_transaction():
     )
 
 
-@app.route("/transaction/updateTrade/", methods=["POST"])
+@app.route("/transaction/updateTrade", methods=["POST"])
 def update_transaction():
     data = request.get_json()
 

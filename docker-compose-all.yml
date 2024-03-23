@@ -70,7 +70,7 @@ services:
       - AMQP_SERVER=amqp://rabbitmq:5672
       - BOT_TOKEN=7039505633:AAFoCvJc3XwP8N7bUd1XsjkCP5rH311TrWQ
       - BOT_URL=https://api.telegram.org/bot
-    restart: unless-stopped
+    # restart: unless-stopped
 
   watchlist_db:
     build:
@@ -324,6 +324,9 @@ services:
       - transactions_network
     environment:
       - PORT=4001
+      - TRANSACTION_URL=http://transactions:6002/
+      - SCRAPER_URL=http://scraper:5000/
+      - SENATOR_URL=http://senator_filings:4002/
   
   senator_filings:
     build: 

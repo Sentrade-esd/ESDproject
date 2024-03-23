@@ -14,6 +14,10 @@ const {JSDOM} = jsdom;
 
 var request = require('request');
 
+const TRANSACTION_URL = process.env.TRANSACTION_URL || 'http://localhost:5004/';
+const SCRAPER_URL = process.env.SCRAPER_URL || 'http://localhost:5000/';
+const SENATOR_URL = process.env.SENATOR_URL || 'http://localhost:5001/';
+
 
 // Creating express object
 const app = express();
@@ -84,7 +88,8 @@ async function followTrade(email, ticker, targetDate, buyAmountPerFiling, maxBuy
             data['maxBuyAmount'] = maxBuyAmount;
             data['buyAmountPerFiling'] = buyAmountPerFiling;
             const body =  {status: 'success', data};
-            const response = await axios.post(`http://localhost:5004/followTradeTransaction`, body);
+            console.log(`${TRANSACTION_URL}followTradeTransaction`);
+            const response = await axios.post(`${TRANSACTION_URL}followTradeTransaction`, body);
             console.log(response.data);
             boughtAmount = response.data['boughtAmount'];
             fractionalSharesBought = response.data['fractionalSharesBought'];
@@ -141,19 +146,31 @@ async function checkBalance(email, amount){
 }
 
 async function getStockPrice(ticker, targetDate){
+    // try {
+    //     const response = await axios.get(`${SCRAPER_URL}/scraper/pullPrice/${ticker}/${targetDate}`);
+    //     // console.log(response.data);
+    //     return response.data;
+    // } catch (error) {
+    //     console.error(`HTTP error! status: ${error.response.status}`);
+    //     throw error;
+    // }
     try {
-        const response = await axios.get(`http://localhost:5000/scraper/pullPrice/${ticker}/${targetDate}`);
+        const response = await axios.get(`${SCRAPER_URL}scraper/pullPrice/${ticker}/${targetDate}`);
+        if (!response) {
+            console.error('No response received from the request');
+            return;
+        }
         // console.log(response.data);
         return response.data;
     } catch (error) {
-        console.error(`HTTP error! status: ${error.response.status}`);
+        console.error(`HTTP error! status: ${error.response?.status}`);
         throw error;
     }
 }
 
 async function getSenatorFilings(ticker, targetDate){
     try {
-        const response = await axios.get(`http://localhost:5001/senatorFilings/getFilings/${ticker}/${targetDate}`);
+        const response = await axios.get(`${SENATOR_URL}senatorFilings/getFilings/${ticker}/${targetDate}`);
         // console.log(response.data);
         return response.data;
     } catch (error) {
