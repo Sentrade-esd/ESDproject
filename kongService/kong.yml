@@ -23,14 +23,15 @@ services:
         methods:
           - POST
         strip_path: false
+
   - name: scraper-service
     url: http://scraper:5000/
     routes:
       - name: scrapeCurrentPrice-route
         methods:
-        - GET
+          - GET
         paths:
-        - /scraper/scrapeCurrentPrice/:ticker
+          - /scraper/scrapeCurrentPrice/:ticker
         strip_path: false
 
   - name: watchlist-service
