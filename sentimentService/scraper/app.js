@@ -3,7 +3,7 @@ const express = require('express');
 let puppeteer = require("puppeteer-extra");
 require("dotenv").config();
 
-require('./scraperDBclient.js');
+// require('./scraperDBclient.js');
 
 
 // Axios module
@@ -16,7 +16,7 @@ require('dotenv').config();
 const xml2js = require('xml2js');
 const jsdom = require('jsdom');
 const {JSDOM} = jsdom;
-const scraperDBMethods = require('./scraperDBmethods');
+// const scraperDBMethods = require('./scraperDBmethods');
 
 // Creating express object
 const app = express();

@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from flask_cors import CORS
 import os
+import json
 
 app = Flask(__name__)
 PORT = os.environ.get('PORT', 5004)
@@ -217,25 +218,26 @@ def update_transaction():
 @app.route("/checkBalance", methods=["POST"])
 def checkBalance():
     data = request.get_json()
-    UserID = data["data"]["userId"]
-    buy_amt = data["data"]["maxBuyAmount"]
+    UserID = data["userId"]
+    buy_amt = data["maxBuyAmount"]
+    print(type(buy_amt))
 
     return get_latest_transaction(UserID, buy_amt)
 
 
 def get_latest_transaction(UserID, buy_amt):
-    latest_transaction = db.session.query(Transaction).filter_by(UserID=UserID).order_by(Transaction.DateTimestamp.desc()).first().BuyAmount
-
+    latest_transaction = db.session.query(Transaction).filter_by(UserID=UserID).order_by(Transaction.DateTimestamp.desc()).first().TotalAccountValue
+    print(type(latest_transaction))
     if not latest_transaction:
-        return False
+        return json.dumps(False)
 
-    if latest_transaction:
-        cur_total_value = latest_transaction.TotalAccountValue
+    # if latest_transaction:
+    #     cur_total_value = latest_transaction.TotalAccountValue
     
-    if buy_amt < cur_total_value:
-        return True
+    if buy_amt < latest_transaction:
+        return json.dumps(True)
     
-    return False
+    return json.dumps(False)
 
 def get_current_account_value(UserID):
     current_value = db.session.query(Transaction).filter_by(UserID=UserID).order_by(Transaction.DateTimestamp.desc()).first().TotalAccountValue
