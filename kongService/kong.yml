@@ -24,7 +24,7 @@ services:
           - POST
         strip_path: false
   - name: scraper-service
-    url: http://scraper:5000
+    url: http://scraper:5000/
     routes:
       - name: scrapeCurrentPrice-route
         methods:
