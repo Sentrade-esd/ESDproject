@@ -35,7 +35,7 @@ services:
     ports:
       - 3000:3000
     networks:
-      - notification_service
+      - watchlist_network
       - kong_network
     environment:
       - DB_URL=watchlist_db:27017
@@ -50,6 +50,7 @@ services:
       - 3001:3001
     networks:
       - notification_service
+      - watchlist_network
       - queue_network
     environment:
       - AMQP_SERVER=amqp://rabbitmq:5672
@@ -86,7 +87,7 @@ services:
     volumes:
       - watchlist_db:/data/db
     networks:
-      - notification_service
+      - watchlist_network
     restart: unless-stopped
 
 
@@ -247,7 +248,7 @@ services:
     ports:
       - "6001:6001"
     networks:
-      - comments_netowork
+      - comments_network
       - kong_network
       - queue_network
     environment:
@@ -269,7 +270,7 @@ services:
     volumes:
       - comments_db:/data/db
     networks:
-      - comments_netowork
+      - comments_network
     restart: unless-stopped
 
   transactions:
@@ -287,6 +288,7 @@ services:
       - transactions_network
       - kong_network
       - sentiment_network
+      - follow_trades_network
 
   transactions_db:
     build: 
@@ -357,6 +359,9 @@ networks:
   queue_network:
     driver: bridge
     name: queue_network
+  watchlist_network:
+    driver: bridge
+    name: watchlist_network
   notification_service:
     driver: bridge
     name: watchlist
@@ -369,7 +374,7 @@ networks:
   user_network: 
     driver: bridge
     name: user_network
-  comments_netowork:
+  comments_network:
     driver: bridge
     name: comments_network
   transactions_network:
