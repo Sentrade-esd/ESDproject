@@ -2,30 +2,65 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from flask_cors import CORS
+import os
 
 app = Flask(__name__)
+PORT = os.environ.get('PORT', 5004)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/esd'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/esd'
+# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['SQL_URI'] + '/transaction_data' if 'SQL_URI' in os.environ else 'postgresql://postgres:root@user_db:5432/transaction_data'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+print(app.config['SQLALCHEMY_DATABASE_URI'])
 
 db = SQLAlchemy(app)
 CORS(app)
 
 class Transaction(db.Model):
+    # __tablename__ = 'transaction'
+
+    # TransactionID = db.Column(db.Integer, primary_key=True)
+    # UserID = db.Column(db.Integer, nullable=False)
+    # Email = db.Column(db.String(255), nullable=False)
+    # Company = db.Column(db.String(255), nullable=False)
+    # DateTimestamp = db.Column(db.DateTime, nullable=False)
+    # BuyAmount = db.Column(db.Float(precision=2), nullable=False)
+    # SellAmount = db.Column(db.Float(precision=2), nullable=True)
+    # StopLossSentimentThreshold = db.Column(db.Float(precision=2), nullable=False)
+    # TotalAccountValue = db.Column(db.Float(precision=2), nullable=False)
+
+    # def __init__(self, UserID, Company, DateTimestamp, BuyAmount, SellAmount, StopLossSentimentThreshold, TotalAccountValue):
+    #     self.UserID = UserID
+    #     self.Company = Company
+    #     self.DateTimestamp = DateTimestamp
+    #     self.BuyAmount = BuyAmount
+    #     self.SellAmount = SellAmount
+    #     self.StopLossSentimentThreshold = StopLossSentimentThreshold
+    #     self.TotalAccountValue = TotalAccountValue
+
+    # def json(self):
+    #     return {"UserID": self.UserID, "Company": self.Company, "DateTimestamp": self.DateTimestamp,
+    #             "BuyAmount": self.BuyAmount, "SellAmount": self.SellAmount,
+    #             "StopLossSentimentThreshold": self.StopLossSentimentThreshold,
+    #             "TotalAccountValue": self.TotalAccountValue}
+
     __tablename__ = 'transaction'
 
-    TransactionID = db.Column(db.Integer, primary_key=True)
-    UserID = db.Column(db.Integer, nullable=False)
-    Email = db.Column(db.String(255), nullable=False)
-    Company = db.Column(db.String(255), nullable=False)
-    DateTimestamp = db.Column(db.DateTime, nullable=False)
-    BuyAmount = db.Column(db.Float(precision=2), nullable=False)
-    SellAmount = db.Column(db.Float(precision=2), nullable=True)
-    StopLossSentimentThreshold = db.Column(db.Float(precision=2), nullable=False)
-    TotalAccountValue = db.Column(db.Float(precision=2), nullable=False)
+    TransactionID = db.Column('transactionid', db.Integer, primary_key=True, autoincrement=True)
+    UserID = db.Column('userid', db.Integer, nullable=False)
+    Email = db.Column('email', db.String(255), nullable=False)
+    Company = db.Column('company', db.String(255), nullable=False)
+    DateTimestamp = db.Column('datetimestamp', db.DateTime, nullable=False)
+    BuyAmount = db.Column('buyamount', db.Float(precision=2), nullable=False)
+    SellAmount = db.Column('sellamount', db.Float(precision=2), nullable=True)
+    StopLossSentimentThreshold = db.Column('stoplosssentimentthreshold', db.Float(precision=2), nullable=False)
+    TotalAccountValue = db.Column('totalaccountvalue', db.Float(precision=2), nullable=False)
 
-    def __init__(self, UserID, Company, DateTimestamp, BuyAmount, SellAmount, StopLossSentimentThreshold, TotalAccountValue):
+    def __init__(self, UserID, Email, Company, DateTimestamp, BuyAmount, SellAmount, StopLossSentimentThreshold, TotalAccountValue):
         self.UserID = UserID
+        self.Email = Email
         self.Company = Company
         self.DateTimestamp = DateTimestamp
         self.BuyAmount = BuyAmount
@@ -34,7 +69,8 @@ class Transaction(db.Model):
         self.TotalAccountValue = TotalAccountValue
 
     def json(self):
-        return {"UserID": self.UserID, "Company": self.Company, "DateTimestamp": self.DateTimestamp,
+        return {"TransactionID": self.TransactionID, "UserID": self.UserID, 
+                "Email": self.Email, "Company": self.Company, "DateTimestamp": self.DateTimestamp,
                 "BuyAmount": self.BuyAmount, "SellAmount": self.SellAmount,
                 "StopLossSentimentThreshold": self.StopLossSentimentThreshold,
                 "TotalAccountValue": self.TotalAccountValue}
@@ -274,6 +310,6 @@ def follow_trade_transaction():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5004, debug=True)
+    app.run(host='0.0.0.0', port=PORT, debug=True)
 
 

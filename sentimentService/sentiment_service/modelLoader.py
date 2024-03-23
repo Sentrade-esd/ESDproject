@@ -11,11 +11,15 @@ class ModelLoader:
     # emotion_model = None
     # keyword_model = None
 
-    valid_emotions = ['joy', 'others', 'surprise',
-                  'sadness', 'fear', 'anger', 'disgust']
+    # valid_emotions = ['joy', 'others', 'surprise',
+    #               'sadness', 'fear', 'anger', 'disgust', 'love']
 
-    emotions =  {"joy": 0, "others": 0, "surprise": 0, 
-                "sadness": 0, "fear": 0, "anger": 0, "disgust": 0}
+    # emotions =  {"joy": 0, "others": 0, "surprise": 0, 
+    #             "sadness": 0, "fear": 0, "anger": 0, "disgust": 0, "love": 0}
+
+    valid_emotions = ['anger', 'joy', 'sadness', 'optimism']
+
+    emotions =  {"anger": 0, "joy": 0, "sadness": 0, "optimism": 0}
 
     keywords = {}
 
@@ -30,7 +34,9 @@ class ModelLoader:
             model="siebert/sentiment-roberta-large-english")
         
         self.emotion_model = pipeline(
-            model="finiteautomata/bertweet-base-emotion-analysis")
+            # model="finiteautomata/bertweet-base-emotion-analysis")
+            # model="transformersbook/distilbert-base-uncased-finetuned-emotion")
+            model="cardiffnlp/twitter-roberta-base-emotion")
         
         self.keyword_ext_model = pipeline(
             model="yanekyuk/bert-keyword-extractor")
@@ -56,11 +62,11 @@ class ModelLoader:
     
 
     def get_sentiment_and_emotion(self, total_headlines, headlines_df):
-        with tqdm(total=total_headlines, desc="Analysing Sentiments", unit="headline", dynamic_ncols=True) as pbar:
+        with tqdm(total=total_headlines, desc="Analysing Sentiments", unit="title", dynamic_ncols=True) as pbar:
             for idx in range(total_headlines):
                 row = headlines_df.iloc[idx]
-                headline = row['headline']
-                description = row['description']
+                headline = row['title']
+                # description = row['description']
 
 
                 result = self.sentiment_model(headline)
@@ -71,18 +77,19 @@ class ModelLoader:
                 elif label == 'NEGATIVE':
                     headlines_df.at[idx, 'headline_sentiment'] = -1
 
-                ## analyse description ##               
-                result = self.sentiment_model(description)
-                label = result[0]['label']
+                # ## analyse description ##               
+                # result = self.sentiment_model(description)
+                # label = result[0]['label']
 
-                if label == 'POSITIVE':
-                    headlines_df.at[idx, 'description_sentiment'] = 1
-                elif label == 'NEGATIVE':
-                    headlines_df.at[idx, 'description_sentiment'] = -1
+                # if label == 'POSITIVE':
+                #     headlines_df.at[idx, 'description_sentiment'] = 1
+                # elif label == 'NEGATIVE':
+                #     headlines_df.at[idx, 'description_sentiment'] = -1
                 
 
                 ## analyse emotions ##
                 results = self.emotion_model(headline)
+                print(results)
 
                 for result in results:
                     label = result['label']
@@ -100,12 +107,12 @@ class ModelLoader:
         
         # sum up the sentiment scores for the headlines and descriptions and store in a variable
         headlines_score = headlines_df['headline_sentiment'].sum()
-        description_score = headlines_df['description_sentiment'].sum()
+        # description_score = headlines_df['description_sentiment'].sum()
 
 
         return {
             "headlines_score": int(headlines_score),
-            "description_score": int(description_score),
+            # "description_score": int(description_score),
             "emotions": self.emotions
         }
     

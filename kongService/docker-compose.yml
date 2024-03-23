@@ -1,17 +1,22 @@
-version: '1'
+version: '3.8'
 
 services:
   kong:
-    image: kong:latest
+    # image: kong:latest
+    # platform: linux/amd64
+    build: 
+      context: .
+      dockerfile: Dockerfile
     container_name: kong
+    hostname: kong
     ports:
       - "8000:8000"
       - "8001:8001"
     environment:
       KONG_DATABASE: "off"
       KONG_DECLARATIVE_CONFIG: /etc/kong/kong.yml
-    volumes:
-      - ./kong.yml:/etc/kong/kong.yml
+    # volumes:
+      # - ./kong.yml:/etc/kong/kong.yml
     networks:
       - kong_network
 

@@ -1,0 +1,228 @@
+version: '3.8'
+
+services:
+
+  ######################
+  # Kong API Gateway   #
+  ######################
+
+  kong:
+    image: nmywrld/kongservice-kong:latest
+    container_name: kong
+    hostname: kong
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /etc/kong/kong.yml
+    networks:
+      - kong_network
+
+  # kong-database:
+  #   image: postgres:9.6
+  #   container_name: kong-database
+  #   environment:
+  #     POSTGRES_USER: kong
+  #     POSTGRES_DB: kong
+  #     POSTGRES_PASSWORD: kong
+  #   networks:
+  #     - sentimentservice_sentiment_network
+
+
+  ######################
+  #notification service#
+  ######################
+
+  watchlist:
+    # build: 
+      # context: ./notificationService/watchlist
+      # dockerfile: Dockerfile
+    image: nmywrld/notificationservice-watchlist:latest
+    command: npm start
+    ports:
+      - 3000:3000
+    networks:
+      - notification_service
+      - kong_network
+
+    environment:
+      - DB_URL=watchlist_db:27017
+
+
+  notification_manager:
+    # build: 
+    #   context: ./notificationService/manage_notifications
+      # dockerfile: Dockerfile
+    image: nmywrld/notificationservice-notification_manager:latest
+    command: npm start
+    ports:
+      - 3001:3001
+    networks:
+      - notification_service
+      - queue_network
+
+    environment:
+      - AMQP_SERVER=amqp://rabbitmq:5672
+      - WATCHLIST_URL=http://watchlist:3000/
+      - TELEBOT_URL=http://telebot:3002/
+
+  telebot:
+    # build: 
+    #   context: ./notificationService/telebot_esd
+    #   dockerfile: Dockerfile
+    image: nmywrld/notificationservice-telebot:latest
+    command: npm start
+    ports:
+      - 3002:3002
+    networks:
+      - notification_service
+
+    environment:
+      - AMQP_SERVER=amqp://rabbitmq:5672
+      - BOT_TOKEN=7039505633:AAFoCvJc3XwP8N7bUd1XsjkCP5rH311TrWQ
+      - BOT_URL=https://api.telegram.org/bot
+
+  watchlist_db:
+    platform: linux/amd64
+    image: mongo:latest
+    hostname: watchlist_db
+    ports:
+      - "27018:27017"
+
+    environment:
+      - MONGO_INITDB_DATABASE=sentiments
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+
+    volumes:
+      - watchlist_db:/data/db
+    networks:
+      - notification_service    
+
+
+  ######################
+  # Rabbit             #
+  ######################
+
+
+  rabbitmq:
+    image: nmywrld/rabbitmq-rabbitmq:latest
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    networks:
+      - queue_network
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbitmq_management load_definitions "/etc/rabbitmq/definitions.json"
+
+  ######################
+  # Sentiment   #
+  ######################
+  sentiment_app:
+    # build: 
+    #   context: ./sentimentService/sentiment_express
+    #   dockerfile: Dockerfile
+
+    image: nmywrld/sentimentservice-sentiment_app:latest
+    command: npm start
+    ports:
+      - "5001:5001"
+    networks:
+      - sentiment_network
+      - queue_network
+      - kong_network
+    environment:
+      - SENTIMENT_SERVICE_URL=http://sentiment_service:5002/
+      - DB_URL=sentiment_db:27017
+      - AMQP_SERVER=amqp://rabbitmq:5672
+    depends_on:
+      - sentiment_db
+      - sentiment_service
+
+  sentiment_service:
+    # build: ./sentimentService/sentiment_service
+    image: nmywrld/sentimentservice-sentiment_service:latest
+    command: gunicorn -w 1 --threads 2 -b :5002 --timeout 600 sentimentApp:app
+    hostname: sentiment_service
+    ports:
+      - "5002:5002"
+    networks:
+      - sentiment_network
+
+  sentiment_db:
+    platform: linux/amd64
+    image: mongo:latest
+    hostname: sentiment_db
+    ports:
+      - "27017:27017"
+
+    environment:
+      - MONGO_INITDB_DATABASE=sentiments
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+
+    volumes:
+      - sentiment_db:/data/db
+
+    networks:
+      - sentiment_network
+
+  ######################
+  # User services      #
+  ######################
+
+  user_service:
+    # build: ./userService/User
+    image: nmywrld/userservices-user_service:latest
+    command: gunicorn -w 1 --threads 2 -b :5000 --timeout 600 User:app
+    hostname: user_service
+    ports:
+      - "5000:5000"
+    environment:
+      - SQL_URI=postgresql://postgres:root@user_db:5432
+    networks:
+      - user_network
+      - kong_network
+
+  user_db:
+    # image: postgres:alpine
+    image: nmywrld/userservices-user_db:latest
+    hostname: user_db
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: root
+      POSTGRES_USER: postgres
+      POSTGRES_DB: user_db
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - user_db_data:/var/lib/postgresql/data
+    networks:
+      - user_network
+
+volumes:
+  watchlist_db:
+  rabbitmq_data:
+  sentiment_db:
+  user_db_data:
+
+networks:
+  kong_network:
+    driver: bridge
+    name: kong_network
+  queue_network:
+    driver: bridge
+    name: queue_network
+  notification_service:
+    driver: bridge
+    name: watchlist
+  sentiment_network:
+    driver: bridge
+    name: sentiment_network
+  user_network: 
+    driver: bridge
+    name: user_network

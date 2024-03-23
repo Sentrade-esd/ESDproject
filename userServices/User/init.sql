@@ -12,5 +12,3 @@ CREATE TABLE IF NOT EXISTS "user" (
     Telehandle VARCHAR(255),
     TeleID INTEGER
 );
-
--- You may add more SQL commands here to set up your database schema or initial data

@@ -1,0 +1,29 @@
+beautifulsoup4==4.11.1
+# lxml
+lxml==5.1.0
+jupyterlab==3.3.2
+matplotlib
+pandas
+yfinance==0.2.36
+numpy
+Werkzeug
+Flask
+gunicorn
+
+# beautifulsoup4==4.9.3
+# Flask==2.0.1
+# matplotlib==3.4.2
+# numpy==1.21.0
+# pandas==1.3.0
+# requests==2.25.1
+# yfinance==0.1.63
+# lru_cache==1.0.2
+# json5==0.9.5
+# os-sys==2.1.4
+# datetime==4.3
+# collections-extended==1.0.3
+# functools32==3.2.3.post2
+# logging==0.5.1.2
+# pickle5==0.0.11
+# time==1.2.0
+# typing==3.7.4.3

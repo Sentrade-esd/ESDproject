@@ -201,7 +201,8 @@ def main(targetDate) -> pd.DataFrame:
             LOGGER.info('Fetching report #{}'.format(i))
             LOGGER.info('{} transactions total'.format(len(all_txs)))
         txs = txs_for_report(client, row)
-        all_txs = all_txs.append(txs)
+        # all_txs = all_txs.append(txs)
+        all_txs = pd.concat([all_txs, txs])
     return all_txs
 
 # ============================== Parsing and Cleaning Dataset ===============
@@ -337,14 +338,14 @@ def handle_get(ticker, targetDate):
     # return the JSON string
     return jsonify({'data': json_str}), 200
 
+PORT = os.environ.get('PORT', 5000)
 
 if __name__ == '__main__':
-    host = '127.0.0.1'  
-    port = 5001
+    host = '0.0.0.0'
     log_format = '[%(asctime)s %(levelname)s] %(message)s'
     logging.basicConfig(level=logging.INFO, format=log_format)
-    print(f'Running Flask app on http://{host}:{port}')
-    app.run(host=host, port=port,debug=True)
+    print(f'Running Flask app on http://{host}:{PORT}')
+    app.run(host=host, port=PORT,debug=True)
 
 
 

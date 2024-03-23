@@ -1,8 +1,12 @@
-version: '1'
+version: '3.8'
 
 services:
   rabbitmq:
-    image: 'rabbitmq:3-management'
+    # image: 'rabbitmq:3-management'
+    # platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - '5672:5672'
       - '15672:15672'
@@ -10,15 +14,16 @@ services:
       - queue_network
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
-      - ./definitions.json:/etc/rabbitmq/definitions.json
+      # - ./definitions.json:/etc/rabbitmq/definitions.json
 
     environment:
       - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbitmq_management load_definitions "/etc/rabbitmq/definitions.json"
+
+volumes:
+  rabbitmq_data:
 
 networks:
   queue_network:
     driver: bridge
     name: queue_network
 
-volumes:
-  rabbitmq_data:

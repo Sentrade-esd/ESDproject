@@ -1,7 +1,8 @@
-version: '3'
+version: '3.8'
 
 services:
   sentiment_app:
+    # platform: linux/amd64
     build: 
       context: ./sentiment_express
       dockerfile: Dockerfile
@@ -16,46 +17,95 @@ services:
       - SENTIMENT_SERVICE_URL=http://sentiment_service:5002/
       - DB_URL=sentiment_db:27017
       - AMQP_SERVER=amqp://rabbitmq:5672
+      - SCRAPER_URL=http://scraper:5000
     depends_on:
       - sentiment_db
       - sentiment_service
+    # volumes:
+    #   - sentiment_data:/var/sentiment_app/data
+    # restart: unless-stopped
 
   sentiment_service:
-    build: ./sentiment_service
+    # platform: linux/amd64
+    build: 
+      context: ./sentiment_service
+      dockerfile: Dockerfile
     command: gunicorn -w 1 --threads 2 -b :5002 --timeout 600 sentimentApp:app
     hostname: sentiment_service
     ports:
       - "5002:5002"
     networks:
       - sentiment_network
+    # restart: unless-stopped
+
+
+  scraper:
+    build:
+      context: ./scraper
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    # volumes:
+      # - .:/app
+    command: ["node", "app.js"]
+    environment:
+      - ALPHA_VANTAGE_API_KEY=youralphavantageapikey
+      - PORT=5000
+      - DB_URL=scraper_db:27017
+    # restart: unless-stopped
+    networks:
+      - sentiment_network
+      - scraper_network
+      - kong_network
+  
 
   sentiment_db:
-    image: mongo:latest
+    build:
+      context: .
+      dockerfile: sentimentDBDockerfile
     hostname: sentiment_db
     ports:
       - "27017:27017"
-
     environment:
       - MONGO_INITDB_DATABASE=sentiments
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=root
-
     volumes:
       - sentiment_db:/data/db
-
     networks:
       - sentiment_network
+    restart: unless-stopped
+  
+  scraper_db:
+    build:
+      context: .
+      dockerfile: scraperDBDockerfile
+    hostname: scraper_db
+    ports:
+      - "27018:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=sentiments
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+    volumes:
+      - scraper_db:/data/db
+    networks:
+      - scraper_network
+    restart: unless-stopped
 
 volumes:
   sentiment_db:
+  scraper_db:
+  # sentiment_data:
 
 networks:
   sentiment_network:
-    driver: bridge
-    name: sentiment_network
+    external: true
   queue_network:
     external: true
   kong_network:
+    external: true
+  scraper_network:
     external: true
 
 

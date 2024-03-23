@@ -1,7 +1,7 @@
 _format_version: "1.1"
 services:
   - name: sentiment-service
-    url: http://app:5001/
+    url: http://sentiment_app:5001/
     routes:
       - name: welcome-route
         paths:
@@ -23,8 +23,17 @@ services:
         methods:
           - POST
         strip_path: false
+  - name: scraper-service
+    url: http://scraper:5000
+    routes:
+      - name: scrapeCurrentPrice-route
+        methods:
+        - GET
+        paths:
+        - /scraper/scrapeCurrentPrice/:ticker
+        strip_path: false
 
-  - name: 
+  - name: watchlist-service
     url: http://watchlist:3000/
     routes:
       - name: watchlist-add
@@ -55,8 +64,8 @@ services:
           - GET
         strip_path: false
 
-- name: user-service
-    url: http://user_service:5000/
+  - name: user-service
+    url: http://user_service:6000/
     routes:
       - name: user
         paths:
@@ -73,3 +82,62 @@ services:
           - GET
           - POST
         strip_path: false
+
+
+  - name: comments-service
+    url: http://comments_service:6001/
+    routes:
+      - name: comments
+        paths:
+          - /comments
+        methods:
+          - POST
+        strip_path: false
+
+      - name: get-company
+        paths:
+          - /comments/:company
+        methods:
+          - GET
+        strip_path: false
+
+  - name: transactions-service
+    url: http://transactions:6002/
+    routes:
+      - name: transaction-email-route
+        paths:
+        - /transaction/:email
+        strip_path: false
+
+      - name: transaction-checkBalance-route
+        methods:
+        - GET
+        paths:
+        - /transaction/checkBalance
+        strip_path: false
+
+      - name: followTradeTransaction-route
+        methods:
+        - POST
+        paths:
+        - /followTradeTransaction
+        strip_path: false
+
+  - name: follow-trade-service
+    url: http://follow_trades:4001/
+    routes:
+      - name: root-route
+        methods:
+        - GET
+        paths:
+        - /
+        strip_path: false
+
+      - name: followTrade-buy-route
+        methods:
+        - POST
+        paths:
+        - /followTrade/buy
+        strip_path: false
+
+  

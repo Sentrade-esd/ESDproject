@@ -1,0 +1,10 @@
+# Start from the MongoDB base image
+FROM mongo:latest
+
+# Set environment variables
+# ENV MONGO_INITDB_DATABASE=comments
+# ENV MONGO_INITDB_ROOT_USERNAME=root
+# ENV MONGO_INITDB_ROOT_PASSWORD=root
+
+# Expose the MongoDB port
+EXPOSE 27017

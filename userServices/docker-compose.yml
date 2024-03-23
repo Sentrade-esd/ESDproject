@@ -1,21 +1,29 @@
-version: '1.1'
+version: '3.8'
 
 services:
   user_service:
-    build: ./User
-    command: gunicorn -w 1 --threads 2 -b :5000 --timeout 600 User:app
+    build: 
+      context: ./User
+      dockerfile: Dockerfile
+    command: gunicorn -w 1 --threads 2 -b :6000 --timeout 600 User:app
     hostname: user_service
     ports:
-      - "5000:5000"
+      - "6000:6000"
     environment:
       - SQL_URI=postgresql://postgres:root@user_db:5432
     networks:
       - user_network
       - kong_network
 
+    
+
   user_db:
+    # image: postgres:alpine
+    # platform: linux/amd64
+    build: 
+      context: .
+      dockerfile: userDBDockerfile
     hostname: user_db
-    image: postgres:alpine
     restart: always
     ports:
       - 5432:5432
@@ -25,19 +33,94 @@ services:
       POSTGRES_DB: user_db
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
-      - user_db_data:/var/lib/postgresql/data
-      - ./User/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - user_db:/var/lib/postgresql/data
     networks:
       - user_network
 
+
+  comments_service:
+    build: 
+      context: ./comments
+      dockerfile: Dockerfile  
+    command: npm start
+    ports:
+      - "6001:6001"
+    networks:
+      - comments_netowork
+      - kong_network
+      - queue_network
+    environment:
+      - DB_URL=comments_db:27017
+      - AMQP_SERVER=amqp://rabbitmq:5672
+    
+  comments_db:
+    build: 
+      context: .
+      dockerfile: commentsDBDockerfile
+    hostname: comments_db
+    ports:  
+      - "27020:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=comments
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+    volumes:
+      - comments_db:/data/db
+    networks:
+      - comments_netowork
+    restart: unless-stopped
+
+  transactions:
+    build: 
+      context: ./Transactions
+      dockerfile: Dockerfile
+    command: gunicorn -w 1 --threads 2 -b :6002 --timeout 600 User:app
+    hostname: user_service
+    ports:
+      - "6002:6002"
+    environment:
+      - SQL_URI=postgresql://postgres:root@transactions_db:5432
+      - PORT=6002
+    networks:
+      - transactions_network
+      - kong_network
+
+  transactions_db:
+    build: 
+      context: .
+      dockerfile: transactionsDBDockerfile
+    hostname: transactions_db
+    restart: always
+    ports:
+      - 5433:5432
+    environment:
+      POSTGRES_PASSWORD: root
+      POSTGRES_USER: postgres
+      POSTGRES_DB: transactions_db
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - transactions_db:/var/lib/postgresql/data
+    networks:
+      - transactions_network
+
 volumes:
-  user_db_data:
+  user_db:
+  comments_db:
+  transactions_db:
 
 networks:
   user_network: 
     driver: bridge
     name: user_network
+  comments_netowork:
+    driver: bridge
+    name: comments_network
+  transactions_network:
+    driver: bridge
+    name: transactions_network
   kong_network:
+    external: true
+  queue_network:
     external: true
 
 

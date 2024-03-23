@@ -1,8 +1,9 @@
 // Requiring module
 const express = require('express');
 let puppeteer = require("puppeteer-extra");
-
 require("dotenv").config();
+
+require('./scraperDBclient.js');
 
 
 // Axios module
@@ -15,7 +16,7 @@ require('dotenv').config();
 const xml2js = require('xml2js');
 const jsdom = require('jsdom');
 const {JSDOM} = jsdom;
-
+const scraperDBMethods = require('./scraperDBmethods');
 
 // Creating express object
 const app = express();
@@ -27,19 +28,35 @@ app.get('/', (req, res) => {
 	res.end()
 })
 
+app.get ('/scraper/getNewsFromDB/:ticker', async (req, res) => {
+    const {ticker} = req.params;
+    console.log('ticker: ', ticker);
+
+    let response = await scraperDBMethods.get(ticker);
+    console.log('response', response);
+    res.send(response);
+
+});
+
 // Handling GET query scrape to news artcles about a company using the Google News
-app.get('/scraper/getNews/:query', async (req, res) => { 
-    const {query} = req.params;
-    console.log(query);
+app.get('/scraper/getNews/:query/:ticker', async (req, res) => { 
+    const {query, ticker} = req.params;
+    console.log(query, ticker);
     // run scrapping script
     // return response
     let response = await scrape(query);
+    // call db endpoint to add to db for news
+    console.log('response: ', response);
+    let addToDBResponse = await scraperDBMethods.add(ticker, query, response);
+    // console.log('addToDBresponse', addToDBResponse);
     res.send(response);
 })
+
 async function scrape(query){
     let url = `https://news.google.com/rss/search?q=${query}&hl=en-SG&gl=SG&ceid=SG:en`
     let response = await axios.get(url);
     let content = response.data;
+    // console.log(content);
 
     // Convert xml2js.parseString to return a Promise
     let result = await new Promise((resolve, reject) => {
@@ -50,34 +67,59 @@ async function scrape(query){
     });
 
     let items = result.rss.channel[0].item;
-    for(let i = 0; i < 30; i++) {
+
+    let results = [];
+
+    for(let i = 0; i < 80; i++) {
         let item = items[i];
         let title = item.title[0];
         let pubDate = item.pubDate[0];
         // Change pubDate to sgt
         let date = new Date(pubDate);
         let sgtDate = new Date(date.getTime() + 8*60*60*1000); // SGT => UTC+8
-        pubDate = sgtDate.toISOString();
+        let datetime = sgtDate.toISOString();
 
         
         // Parse the HTML in the description to extract the text
-        let dom = new JSDOM(item.description[0]);
-        let description = dom.window.document.querySelector('a').textContent;
+        // let dom = new JSDOM(item.description[0]);
+        // let description = dom.window.document.querySelector('a').textContent;
 
         let link = item.link[0];
         let obj = {
+            i,
             title,
-            description,
+            // description,
             link,
             pubDate
         }
-        console.log(obj);
+        // console.log(obj);
+        results.push(obj);
     }
 
     // Now you can return items or use it elsewhere in your code
-    return items;
+    // return items;
+    // console.log('results: ', results);
+    return results;
 }
 
+
+async function addToDB(ticker, query, news){
+    let response;
+    try {
+        // const {email, ticker, targetDate, buyAmountPerFiling, maxBuyAmount} = req.body;
+        let body = {
+            ticker: ticker,
+            companyName: query,
+            news: news
+        }
+       response = await scraperDBMethods.add();
+    }
+    catch(error){
+        console.log(error);
+    }
+    return response.data;
+
+}
 
 // Handling GET query scraper to scrape for the stock price using the Alpha Vantage API
 app.get('/scraper/pullPrice/:ticker/:targetDate', async (req, res) => { 
@@ -89,6 +131,7 @@ app.get('/scraper/pullPrice/:ticker/:targetDate', async (req, res) => {
     console.log('response', response);
     res.send(response);
 })
+
 async function stockPrice(query, targetDate){
 
     // replace the "demo" apikey below with your own key from https://www.alphavantage.co/support/#api-key
@@ -197,27 +240,31 @@ app.get('/scraper/scrapeCurrentPrice/:ticker', async (req, res) => {
     console.log('Current Price: ', response);
     res.send(response);
 })
-async function scrapePrice(query) {
-    let browser = await puppeteer.launch({
-        headless: "new",
-      });
 
+async function scrapePrice(query) {
+    let browser = await puppeteer.launch({ headless: 'new' });
     let page = await browser.newPage();
 
     let url = `https://sg.finance.yahoo.com/quote/${query}`;
+    // await page.goto(url);
+    await page.goto(url, {waitUntil: 'networkidle2'});
+    let priceSelector = '#quote-header-info > div.My\\(6px\\).Pos\\(r\\).smartphone_Mt\\(6px\\).W\\(100\\%\\) > div.D\\(ib\\).Va\\(m\\).Maw\\(65\\%\\).Ov\\(h\\) > div.D\\(ib\\).Mend\\(20px\\) > fin-streamer.Fw\\(b\\).Fz\\(36px\\).Mb\\(-4px\\).D\\(ib\\)';
+    let alternatePriceSelector = '#quote-header-info > div.My\\(6px\\).Pos\\(r\\).smartphone_Mt\\(6px\\).W\\(100\\%\\) > div.D\\(ib\\).Va\\(m\\).Maw\\(65\\%\\).Ov\\(h\\) > div > fin-streamer.Fw\\(b\\).Fz\\(36px\\).Mb\\(-4px\\).D\\(ib\\) > span'; // Replace with your alternate selector
 
-    page.goto(url);
+    let data;
+    try {
+        await page.waitForSelector(priceSelector, { timeout: 5000 }); // Wait for 5 seconds
+        data = await page.evaluate((priceSelector) => {
+            return document.querySelector(priceSelector).innerText;
+        }, priceSelector);
+    } catch (error) {
+        await page.waitForSelector(alternatePriceSelector, { timeout: 5000 }); // Wait for 5 seconds
+        data = await page.evaluate((alternatePriceSelector) => {
+            return document.querySelector(alternatePriceSelector).innerText;
+        }, alternatePriceSelector);
+    }
 
-    let priceSelector = '#quote-header-info > div.My\\(6px\\).Pos\\(r\\).smartphone_Mt\\(6px\\).W\\(100\\%\\) > div.D\\(ib\\).Va\\(m\\).Maw\\(65\\%\\).Ov\\(h\\) > div > fin-streamer.Fw\\(b\\).Fz\\(36px\\).Mb\\(-4px\\).D\\(ib\\) > span'
-    // await page.waitForNavigation({ waitUntil: "networkidle0" });
-    await page.waitForSelector(priceSelector);
-
-    let data = await page.evaluate((priceSelector) => {
-
-        return document.querySelector(priceSelector).innerText;
-    }, priceSelector);
-    browser.close();
-    // console.log(data);
+    await browser.close();
     return data;
 }
 

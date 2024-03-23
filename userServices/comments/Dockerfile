@@ -5,14 +5,12 @@ RUN apk add --no-cache nodejs npm
 
 WORKDIR /app
 COPY package*.json ./
-COPY db_client.js ./
 
 # ---- Dependencies ----
 FROM base AS dependencies
 # install node packages
 RUN npm set progress=false && npm config set depth 0
 RUN npm install --only=production 
-RUN npm install selenium-webdriver
 
 # copy production node_modules aside
 RUN cp -R node_modules prod_node_modules
@@ -25,12 +23,6 @@ FROM dependencies AS test
 COPY . .
 RUN  npm run test
 
-# ---- Develop ----
-FROM dependencies AS develop
-RUN npm install -g nodemon
-COPY . .
-CMD ["nodemon", "./app.js"]
-
 # ---- Release ----
 FROM base AS release
 # copy production node_modules
@@ -38,5 +30,5 @@ COPY --from=dependencies /app/prod_node_modules ./node_modules
 # copy app sources
 COPY . .
 # expose port and define CMD
-EXPOSE 5001
-CMD npm run start
+EXPOSE 6001
+CMD ["node", "index.js"]

@@ -1,19 +1,23 @@
+# # app1/Dockerfile
+# FROM node:14
+
+# WORKDIR /usr/src/app
+# COPY package*.json ./
+# RUN npm install
+# COPY . .
+
+# EXPOSE 8080
+# CMD ["npm", "start"]
+
+
 # ---- Base Node ----
 FROM node:alpine AS base
-# install node
-RUN apk add --no-cache nodejs npm
-
-WORKDIR /app
+WORKDIR /usr/src/app
 COPY package*.json ./
-COPY db_client.js ./
 
 # ---- Dependencies ----
 FROM base AS dependencies
-# install node packages
-RUN npm set progress=false && npm config set depth 0
-RUN npm install --only=production 
-RUN npm install selenium-webdriver
-
+RUN npm install
 # copy production node_modules aside
 RUN cp -R node_modules prod_node_modules
 # install ALL node_modules, including 'devDependencies'
@@ -23,20 +27,20 @@ RUN npm install
 # run linters, setup and tests
 FROM dependencies AS test
 COPY . .
-RUN  npm run test
+# Here you can run your tests, for example:
+# RUN  npm run test
 
 # ---- Develop ----
 FROM dependencies AS develop
-RUN npm install -g nodemon
 COPY . .
-CMD ["nodemon", "./app.js"]
+CMD ["node", "app.js"]
 
 # ---- Release ----
 FROM base AS release
 # copy production node_modules
-COPY --from=dependencies /app/prod_node_modules ./node_modules
+COPY --from=dependencies /usr/src/app/prod_node_modules ./node_modules
 # copy app sources
 COPY . .
 # expose port and define CMD
-EXPOSE 5001
-CMD npm run start
+EXPOSE 4001
+CMD ["node", "app.js"]

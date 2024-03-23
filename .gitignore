@@ -5,3 +5,5 @@
 /notificationService/manage_notifications/node_modules
 /notificationService/telebot_esd/node_modules
 /notificationService/watchlist/node_modules
+/userServices/comments/node_modules
+/sentimentService/scraper/node_modules

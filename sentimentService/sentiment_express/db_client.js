@@ -1,4 +1,3 @@
-import { Admin, MongoClient, ServerApiVersion } from "mongodb";
 import  mongoose  from "mongoose";
 
 const DB_service_url = process.env.DB_URL // sentiment_db:27017
