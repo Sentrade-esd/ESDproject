@@ -1,0 +1,5 @@
+# Start from the PostgreSQL Alpine image
+FROM postgres:alpine
+
+# Copy the init.sql file into the docker entrypoint directory
+COPY ./Transactions/init.sql /docker-entrypoint-initdb.d/init.sql

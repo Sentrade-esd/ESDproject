@@ -271,6 +271,40 @@ services:
       - comments_netowork
     restart: unless-stopped
 
+  transactions:
+    build: 
+      context: ./userServices/Transactions
+      dockerfile: Dockerfile
+    command: gunicorn -w 1 --threads 2 -b :6002 --timeout 600 User:app
+    hostname: user_service
+    ports:
+      - "6002:6002"
+    environment:
+      - SQL_URI=postgresql://postgres:root@transactions_db:5432
+      - PORT=6002
+    networks:
+      - transactions_network
+      - kong_network
+      - sentiment_network
+
+  transactions_db:
+    build: 
+      context: ./userServices
+      dockerfile: transactionsDBDockerfile
+    hostname: transactions_db
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: root
+      POSTGRES_USER: postgres
+      POSTGRES_DB: transactions_db
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - transactions_db:/var/lib/postgresql/data
+    networks:
+      - transactions_network
+
 volumes:
   watchlist_db:
   rabbitmq_data:
@@ -278,6 +312,7 @@ volumes:
   scraper_db:
   user_db_data:
   comments_db:
+  transactions_db:
 
 networks:
   kong_network:
@@ -301,3 +336,10 @@ networks:
   comments_netowork:
     driver: bridge
     name: comments_network
+  transactions_network:
+    driver: bridge
+    name: transactions_network  
+
+
+
+
