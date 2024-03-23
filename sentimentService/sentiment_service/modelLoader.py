@@ -89,7 +89,7 @@ class ModelLoader:
 
                 ## analyse emotions ##
                 results = self.emotion_model(headline)
-                print(results)
+                # print(results)
 
                 for result in results:
                     label = result['label']
@@ -127,7 +127,7 @@ class ModelLoader:
         emotion = None
         emotion_result = self.emotion_model(comment)
 
-        print(emotion_result)
+        # print(emotion_result)
 
         emotion_label = emotion_result[0]['label']
         if emotion_label in self.valid_emotions:

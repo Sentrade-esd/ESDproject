@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const DB_service_url = process.env.DB_URL || "mongodb://127.0.0.1:27017/scraperDB";
+const DB_service_url = process.env.DB_URL || "127.0.0.1:27017";
 console.log('mongodb://root:root@' + DB_service_url + '/scraperDB')
 
 mongoose.connect('mongodb://root:root@' + DB_service_url + '/scraperDB', {authSource: "admin"})
