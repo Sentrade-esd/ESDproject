@@ -10,7 +10,7 @@ PORT = os.environ.get('PORT', 5004)
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/esd'
 # app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['SQL_URI'] + '/transaction_data' if 'SQL_URI' in os.environ else 'postgresql://postgres:root@user_db:5432/transaction_data'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['SQL_URI'] + '/transaction_data' if 'SQL_URI' in os.environ else 'mysql+mysqlconnector://root@localhost:3306/esd'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 print(app.config['SQLALCHEMY_DATABASE_URI'])
