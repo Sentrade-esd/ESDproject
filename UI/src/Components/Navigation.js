@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Navbar, Nav, Container, Modal, Button, Form } from "react-bootstrap";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Navigation = () => {
   const [modalShow, setModalShow] = useState(false);
@@ -23,8 +24,8 @@ const handleLogin = (username, password) => {
       if (response.data.code === 200) {
         if (password === response.data.data.Password) {
           console.log(response.data.data);
-          sessionStorage.setItem('username', username);
-          sessionStorage.setItem("id", response.data.data.UserID);
+          localStorage.setItem('username', username); // Note that username is actually the email
+          localStorage.setItem("id", response.data.data.UserID);
           setIsLoggedIn(true);
           setUsername(username); 
           setModalShow(false);
@@ -60,6 +61,15 @@ const handleLogin = (username, password) => {
     });
   };
 
+  const navigate = useNavigate();
+
+  const handleTradeHistoryClick = () => {
+    if (!isLoggedIn) {
+      setModalShow(true); 
+    } else {
+      navigate('/TradeHistory'); 
+    }
+  };
 
   return (
     <Navbar bg="dark" variant="dark">
@@ -68,6 +78,9 @@ const handleLogin = (username, password) => {
         <Nav className="me-auto">
           <Nav.Link href="home">Home</Nav.Link>
           <Nav.Link href="search">Search</Nav.Link>
+          { isLoggedIn && ( // Only show if logged in
+            <Nav.Link onClick={handleTradeHistoryClick}>Trade History</Nav.Link>
+          )}
         </Nav>
         {isLoggedIn ? (
           <React.Fragment>

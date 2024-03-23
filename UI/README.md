@@ -10,6 +10,9 @@ npm install react-wordcloud
 wordcloud: (ignore dependencies)
 npm install --legacy-peer-deps react-wordcloud
 
+Datepicker:
+npm install react-datepicker
+
 
 # Getting Started with Create React App
 

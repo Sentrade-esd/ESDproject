@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from flask_cors import CORS
 
 app = Flask(__name__)
 
@@ -8,6 +9,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+CORS(app)
 
 class Transaction(db.Model):
     __tablename__ = 'transaction'
@@ -58,9 +60,28 @@ def get_all():
     ), 404
 
 
-@app.route("/transaction/<string:email>")
-def find_by_email(Email):
-    transaction = db.session.query(Transaction).filter_by(UserID=Email).first()
+# Get all the trasactions of a user
+# @app.route("/transaction/<string:email>")
+# def find_by_email(Email):
+#     transaction = db.session.query(Transaction).filter_by(UserID=Email).first()
+
+#     if transaction:
+#         return jsonify(
+#             {
+#                 "code": 200,
+#                 "data": transaction.json()
+#             }
+#         )
+#     return jsonify(
+#         {
+#             "code": 404,
+#             "message": "Email not found."
+#         }
+#     ), 404
+
+@app.route("/transaction/<int:UserID>")
+def find_by_id(UserID):
+    transaction = db.session.query(Transaction).filter_by(UserID=UserID).first()
 
     if transaction:
         return jsonify(
@@ -72,9 +93,91 @@ def find_by_email(Email):
     return jsonify(
         {
             "code": 404,
-            "message": "Email not found."
+            "message": "ID not found."
         }
     ), 404
+
+@app.route("/transaction/total/<int:UserID>")
+def find_all_by_id(UserID):
+    transactionUser = db.session.query(Transaction).filter_by(UserID=UserID).all()
+
+    if transactionUser:
+        return jsonify(
+            {
+                "code": 200,
+                "data": {
+                    "Transaction": [transc.json() for transc in transactionUser]
+                }
+            }
+        )
+    return jsonify(
+        {
+            "code": 404,
+            "message": "ID not found."
+        }
+    ), 404
+
+
+@app.route("/transaction/newTrade/", methods=["POST"])
+def add_new_transaction():
+    data = request.get_json()
+
+    
+
+    new_transaction = Transaction(
+        UserID=data["UserID"],
+        Email=data["Email"],
+        DateTimestamp=data["Date"], 
+        BuyAmount=data["Buy_amount"],
+        SellAmount=data["Sell_amount"],  
+        StopLossSentimentThreshold=data["Threshold"],
+        TotalAccountValue=0.0  
+    )
+
+    
+    db.session.add(new_transaction)
+    db.session.commit() 
+
+    return jsonify(
+        {
+            "code": 200,
+            "data": new_transaction.json(),
+            "message": "Transaction Updated."
+        }
+    )
+
+
+@app.route("/transaction/updateTrade/", methods=["POST"])
+def update_transaction():
+    data = request.get_json()
+
+    
+
+    new_transaction = Transaction(
+        UserID=data["UserID"],
+        Email=data["Email"],
+        DateTimestamp=data["Date"], 
+        BuyAmount=data["Buy_amount"],
+        SellAmount=None,  
+        StopLossSentimentThreshold=data["Threshold"],
+        TotalAccountValue=0.0  
+    )
+
+    # Adding the new transaction to the session and committing it to save it in the database.
+    db.session.add(new_transaction)
+    db.session.commit() 
+
+    return jsonify(
+        {
+            "code": 200,
+            "data": new_transaction.json(),
+            "message": "New transaction successfully added."
+        }
+    )
+
+
+
+
 
 @app.route("/transaction/checkBalance", methods=["GET"])
 def checkBalance():
@@ -110,7 +213,7 @@ def follow_trade_transaction():
     print('HAHAHAHAHAHAHA STARTING NOW')
     print(email)
 
-    # if transaction: 
+    # if transaction:  # THIS IS THE ONE I NEED TO UPDATE
     #     transaction.Company = data['data']['Company']
     #     transaction.DateTimestamp = current_timestamp
     #     transaction.BuyAmount = buy_amount
@@ -137,8 +240,34 @@ def follow_trade_transaction():
     print(total_percentage_of_stock)
     sellAmount = float(data['data']['currentPrice']) * (total_percentage_of_stock)
     profit_loss = sellAmount + amount_left - max_buy_amount
-    bought_amount = max_buy_amount - amount_left
+    bought_amount = max_buy_amount - amount_left 
+    # Sell amount, bought amonunt, total account value, company
     # print(sellAmount)
+
+    transaction = db.session.query(Transaction).filter_by(Email=email).order_by(Transaction.DateTimestamp.desc()).first()
+
+    # Update the transaction details in the database
+    if transaction:
+        transaction.Company = data['data']['Company']
+        transaction.BuyAmount = bought_amount
+        transaction.SellAmount = sellAmount
+        transaction.TotalAccountValue = transaction.TotalAccountValue - max_buy_amount + sellAmount  # Assume the total account value gets updated like this
+
+        db.session.commit()
+
+    return jsonify(
+        {
+            "code": 200,
+            "data": {
+                "PnL": "{:.2f}".format(profit_loss),
+                "fractionalSharesBought": "{:.2f}".format(total_percentage_of_stock),
+                "boughtAmount": "{:.2f}".format(bought_amount),
+                "sellAmount": "{:.2f}".format(sellAmount)
+            }
+        }
+    )
+
+
     return {"PnL":"{:.2f}".format(profit_loss), "fractionalSharesBought":"{:.2f}".format(total_percentage_of_stock), "boughtAmount":"{:.2f}".format(bought_amount), "sellAmount":"{:.2f}".format(sellAmount)}
 
 

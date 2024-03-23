@@ -89,14 +89,24 @@ function Search() {
     const selectCompany = (companyName, companySymbol) => {
         console.log(companyName + ' - ' + companySymbol);
 
-        sessionStorage.setItem('companyName', companyName);
-        sessionStorage.setItem('companySymbol', companySymbol);
+        localStorage.setItem('companyName', companyName);
+        localStorage.setItem('companySymbol', companySymbol);
 
         // Navigate to the Trade page using state
         navigate("/trade", {
             state: { companyName, companySymbol },
         });
     };
+
+    const sendScraper = (companySymbol) => {
+    };
+
+    const sendSentiment = (companyName, companySymbol) => {
+    };
+
+    const getComments = (companyName) => {
+    };
+
 
     return (
         <Container>
@@ -123,7 +133,9 @@ function Search() {
                     <Row key={index}>
                         <Col>        
                             <Button 
-                                onClick={() => selectCompany(result.name, result.symbol)} 
+                                onClick={() => selectCompany(result.name, result.symbol)}  // Call scraper pass the ticker ONLY (Price and Newsheadline returning). 
+                                                                                            // For Sentiment, send company name and ticker
+                                                                                            // Call comments, sennd company, get last 5 comments store in local storage. Is fetched as array.
                                 className="companyResultButton">
                                 {result.name} - {result.symbol}
                             </Button>
