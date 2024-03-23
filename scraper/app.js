@@ -28,14 +28,19 @@ app.get('/', (req, res) => {
 })
 
 // Handling GET query scrape to news artcles about a company using the Google News
-app.get('/scraper/getNews/:query', async (req, res) => { 
-    const {query} = req.params;
+app.get('/scraper/getNews/:query/:ticker', async (req, res) => { 
+    const {query, ticker} = req.params;
     console.log(query);
     // run scrapping script
     // return response
     let response = await scrape(query);
-    res.send(response);
+    // call db endpoint to add to db for news
+    // console.log('response', response);
+    let addToDBResponse = await addToDB(ticker, query, response);
+    // console.log('addToDBresponse', addToDBResponse);
+    res.send(addToDBResponse);
 })
+
 async function scrape(query){
     let url = `https://news.google.com/rss/search?q=${query}&hl=en-SG&gl=SG&ceid=SG:en`
     let response = await axios.get(url);
@@ -50,7 +55,10 @@ async function scrape(query){
     });
 
     let items = result.rss.channel[0].item;
-    for(let i = 0; i < 30; i++) {
+
+    let results = [];
+
+    for(let i = 0; i < 80; i++) {
         let item = items[i];
         let title = item.title[0];
         let pubDate = item.pubDate[0];
@@ -61,23 +69,44 @@ async function scrape(query){
 
         
         // Parse the HTML in the description to extract the text
-        let dom = new JSDOM(item.description[0]);
-        let description = dom.window.document.querySelector('a').textContent;
+        // let dom = new JSDOM(item.description[0]);
+        // let description = dom.window.document.querySelector('a').textContent;
 
         let link = item.link[0];
         let obj = {
+            i,
             title,
-            description,
+            // description,
             link,
             pubDate
         }
-        console.log(obj);
+        // console.log(obj);
+        results.push(obj);
     }
 
     // Now you can return items or use it elsewhere in your code
-    return items;
+    // return items;
+    return results;
 }
 
+
+async function addToDB(ticker, query, news){
+    let response;
+    try {
+        // const {email, ticker, targetDate, buyAmountPerFiling, maxBuyAmount} = req.body;
+        let body = {
+            ticker: ticker,
+            companyName: query,
+            news: news
+        }
+       response = await axios.post(`http://localhost:3001/scraperDB/add`, body);
+    }
+    catch(error){
+        console.log(error);
+    }
+    return response.data;
+
+}
 
 // Handling GET query scraper to scrape for the stock price using the Alpha Vantage API
 app.get('/scraper/pullPrice/:ticker/:targetDate', async (req, res) => { 
@@ -89,6 +118,7 @@ app.get('/scraper/pullPrice/:ticker/:targetDate', async (req, res) => {
     console.log('response', response);
     res.send(response);
 })
+
 async function stockPrice(query, targetDate){
 
     // replace the "demo" apikey below with your own key from https://www.alphavantage.co/support/#api-key
