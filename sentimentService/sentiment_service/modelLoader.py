@@ -11,11 +11,15 @@ class ModelLoader:
     # emotion_model = None
     # keyword_model = None
 
-    valid_emotions = ['joy', 'others', 'surprise',
-                  'sadness', 'fear', 'anger', 'disgust', 'love']
+    # valid_emotions = ['joy', 'others', 'surprise',
+    #               'sadness', 'fear', 'anger', 'disgust', 'love']
 
-    emotions =  {"joy": 0, "others": 0, "surprise": 0, 
-                "sadness": 0, "fear": 0, "anger": 0, "disgust": 0, "love": 0}
+    # emotions =  {"joy": 0, "others": 0, "surprise": 0, 
+    #             "sadness": 0, "fear": 0, "anger": 0, "disgust": 0, "love": 0}
+
+    valid_emotions = ['anger', 'joy', 'sadness', 'optimism']
+
+    emotions =  {"anger": 0, "joy": 0, "sadness": 0, "optimism": 0}
 
     keywords = {}
 
@@ -31,7 +35,8 @@ class ModelLoader:
         
         self.emotion_model = pipeline(
             # model="finiteautomata/bertweet-base-emotion-analysis")
-            model="transformersbook/distilbert-base-uncased-finetuned-emotion")
+            # model="transformersbook/distilbert-base-uncased-finetuned-emotion")
+            model="cardiffnlp/twitter-roberta-base-emotion")
         
         self.keyword_ext_model = pipeline(
             model="yanekyuk/bert-keyword-extractor")
@@ -84,6 +89,7 @@ class ModelLoader:
 
                 ## analyse emotions ##
                 results = self.emotion_model(headline)
+                print(results)
 
                 for result in results:
                     label = result['label']

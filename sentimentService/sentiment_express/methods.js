@@ -210,7 +210,8 @@ const sentiment_methods = {
                             datetime: Date.now(),
                             search: search_term,
                             sentiment_score: results.score,
-                            emotion: {"joy":0, "others":0, "surprise":0, "sadness":0, "fear":0, "anger":0, "disgust":0,"love":0}
+                            // emotion: {"joy":0, "others":0, "surprise":0, "sadness":0, "fear":0, "anger":0, "disgust":0,"love":0}
+                            emotion: {"anger": 0, "joy": 0, "sadness": 0, "optimism": 0}
                         });
     
                         newComment.emotion[results.emotion] += 1;
@@ -226,7 +227,8 @@ const sentiment_methods = {
                         datetime: Date.now(),
                         search: search_term,
                         sentiment_score: results.score,
-                        emotion: {"joy":0, "others":0, "surprise":0, "sadness":0, "fear":0, "anger":0, "disgust":0,"love":0}
+                        // emotion: {"joy":0, "others":0, "surprise":0, "sadness":0, "fear":0, "anger":0, "disgust":0,"love":0}
+                        emotion: {"anger": 0, "joy": 0, "sadness": 0, "optimism": 0}
                     });
         
                     newComment.emotion[results.emotion] += 1;
