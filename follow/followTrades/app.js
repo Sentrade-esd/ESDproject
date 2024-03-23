@@ -35,6 +35,7 @@ app.post('/followTrade/buy', async (req, res) => {
     let response;
     try {
         const {userId, ticker, targetDate, buyAmountPerFiling, maxBuyAmount} = req.body;
+        console.log(userId);
         response = await followTrade(userId, ticker, targetDate, buyAmountPerFiling, maxBuyAmount);
     }
     catch(error){
@@ -48,6 +49,7 @@ async function followTrade(userId, ticker, targetDate, buyAmountPerFiling, maxBu
     // Promise request to get user account balance, stock price, senator filings
     let data = {};
     let updateBalanceStatus = await checkBalance(userId, maxBuyAmount);
+    // let updateBalanceStatus = true;
     if (updateBalanceStatus){
         try {
             let [
@@ -80,15 +82,17 @@ async function followTrade(userId, ticker, targetDate, buyAmountPerFiling, maxBu
                 filing.tx_price = stockPrice[filing.tx_date]['4. close'];
             });
 
+            data['ticker'] = ticker;
             // console.log(filings);
             data['filings']= filings;
             // give me the latest key of stock price
-            data['email'] = email;
+            data['userId'] = userId;
             data['currentPrice'] = stockPrice[Object.keys(stockPrice)[0]]['4. close'];
             data['maxBuyAmount'] = maxBuyAmount;
             data['buyAmountPerFiling'] = buyAmountPerFiling;
             const body =  {status: 'success', data};
             console.log(`${TRANSACTION_URL}followTradeTransaction`);
+            console.log(body);
             const response = await axios.post(`${TRANSACTION_URL}followTradeTransaction`, body);
             console.log(response.data);
             boughtAmount = response.data['boughtAmount'];
@@ -115,17 +119,16 @@ async function checkBalance(userId, maxBuyAmount){
     // let accountBalance = 5000;
     // console.log("Amount:", amount);
 
-
     try {
         let data = {};
         data['userId']= userId;
         // give me the latest key of stock price
         data['maxBuyAmount'] = maxBuyAmount;
         console.log(data);
-        const body =  {status: 'success', data};
-        const response = await axios.post(`${TRANSACTION_URL}checkBalance`, body);
+        // const body =  data;
+        const response = await axios.post(`${TRANSACTION_URL}checkBalance`, data);
         // console.log(response.data);
-        return response.data;
+        return response;
     } catch (error) {
         console.error(`HTTP error! status: ${error.response.status}`);
         throw error;

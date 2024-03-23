@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-from flask_cors import CORS
+# from flask_cors import CORS
 import os
 import json
 
@@ -17,7 +17,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 print(app.config['SQLALCHEMY_DATABASE_URI'])
 
 db = SQLAlchemy(app)
-CORS(app)
+# CORS(app)
 
 class Transaction(db.Model):
     # __tablename__ = 'transaction'
@@ -219,6 +219,7 @@ def update_transaction():
 def checkBalance():
     data = request.get_json()
     UserID = data["userId"]
+    print(UserID, type(UserID))
     buy_amt = data["maxBuyAmount"]
     print(type(buy_amt))
 
@@ -250,9 +251,10 @@ def follow_trade_transaction():
     ## ============================ below is for hardcode: ============================
 
     data = request.get_json()
-    email = data['data']['email']
+    print("DATA IS HERE:", data)
+    UserID = data['data']['userId']
     print('HAHAHAHAHAHAHA STARTING NOW')
-    print(email)
+    print(UserID)
 
     # if transaction:  # THIS IS THE ONE I NEED TO UPDATE
     #     transaction.Company = data['data']['Company']
@@ -285,11 +287,13 @@ def follow_trade_transaction():
     # Sell amount, bought amonunt, total account value, company
     # print(sellAmount)
 
-    transaction = db.session.query(Transaction).filter_by(Email=email).order_by(Transaction.DateTimestamp.desc()).first()
+    transaction = db.session.query(Transaction).filter_by(UserID=UserID).order_by(Transaction.DateTimestamp.desc()).first()
 
     # Update the transaction details in the database
     if transaction:
-        transaction.Company = data['data']['Company']
+        # print(data['ticker'])
+        print(data['data']['ticker'])
+        transaction.Company = data['data']['ticker']
         transaction.BuyAmount = bought_amount
         transaction.SellAmount = sellAmount
         transaction.TotalAccountValue = transaction.TotalAccountValue - max_buy_amount + sellAmount  # Assume the total account value gets updated like this
