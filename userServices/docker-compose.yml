@@ -2,7 +2,6 @@ version: '3.8'
 
 services:
   user_service:
-    # platform: linux/amd64
     build: 
       context: ./User
       dockerfile: Dockerfile
@@ -15,6 +14,8 @@ services:
     networks:
       - user_network
       - kong_network
+
+    
 
   user_db:
     # image: postgres:alpine
@@ -32,18 +33,58 @@ services:
       POSTGRES_DB: user_db
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
-      - user_db_data:/var/lib/postgresql/data
+      - user_db:/var/lib/postgresql/data
     networks:
       - user_network
 
+
+  comments_service:
+    build: 
+      context: ./comments
+      dockerfile: Dockerfile  
+    command: npm start
+    ports:
+      - "6001:6001"
+    networks:
+      - comments_netowork
+      - kong_network
+      - queue_network
+    environment:
+      - DB_URL=comments_db:27017
+      - AMQP_SERVER=amqp://rabbitmq:5672
+    
+  comments_db:
+    build: 
+      context: .
+      dockerfile: commentsDBDockerfile
+    hostname: comments_db
+    ports:  
+      - "27020:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=comments
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+    volumes:
+      - comments_db:/data/db
+    networks:
+      - comments_netowork
+    restart: unless-stopped
+
+
 volumes:
-  user_db_data:
+  user_db:
+  comments_db:
 
 networks:
   user_network: 
     driver: bridge
     name: user_network
+  comments_netowork:
+    driver: bridge
+    name: comments_network
   kong_network:
+    external: true
+  queue_network:
     external: true
 
 

@@ -238,12 +238,46 @@ services:
       - user_network
     restart: unless-stopped
 
+  comments_service:
+    build: 
+      context: ./userServices/comments
+      dockerfile: Dockerfile  
+    command: npm start
+    ports:
+      - "6001:6001"
+    networks:
+      - comments_netowork
+      - kong_network
+      - queue_network
+    environment:
+      - MONGO_URI=comments_db:27017
+      - AMQP_SERVER=amqp://rabbitmq:5672
+    restart: unless-stopped
+    
+  comments_db:
+    build: 
+      context: ./userServices
+      dockerfile: commentsDBDockerfile
+    hostname: comments_db
+    ports:  
+      - "27020:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=comments
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+    volumes:
+      - comments_db:/data/db
+    networks:
+      - comments_netowork
+    restart: unless-stopped
+
 volumes:
   watchlist_db:
   rabbitmq_data:
   sentiment_db:
   scraper_db:
   user_db_data:
+  comments_db:
 
 networks:
   kong_network:
@@ -264,3 +298,6 @@ networks:
   user_network: 
     driver: bridge
     name: user_network
+  comments_netowork:
+    driver: bridge
+    name: comments_network

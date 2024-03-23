@@ -3,14 +3,18 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 const amqp = require("amqplib");
 const app = express();
-const PORT = 3003;
+const PORT = 6001;
 app.use(express.json());
+
 const DB_service_url =
   process.env.DB_URL || "mongodb://127.0.0.1:27017/comments";
-console.log("mongodb://" + DB_service_url + "/comments");
+
+  console.log("mongodb://" + DB_service_url + "/comments");
 let connection;
 let channel;
 let amqpServer = process.env.AMQP_SERVER || "amqp://localhost";
+
+
 mongoose
   .connect("mongodb://" + DB_service_url + "/comments", {})
   // mongoose.connect(`${uri}/watchlist`, {})
@@ -21,11 +25,14 @@ mongoose
     console.error("Error connecting to the database:", err);
   });
 
-const commentsByCompanySchema = new Schema({
-  _id: { type: String, alias: "company", unique: true },
-  commentsMade: [String],
-});
-const comments = mongoose.model("comments", commentsByCompanySchema);
+
+
+  const commentsByCompanySchema = new Schema({
+    _id: { type: String, alias: "company", unique: true },
+    commentsMade: [String],
+  });
+  
+  const comments = mongoose.model("comments", commentsByCompanySchema);
 
 // ----------------- AMQP -----------------
 
