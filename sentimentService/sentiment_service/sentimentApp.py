@@ -35,7 +35,7 @@ def convert_json_to_csv():
         # call get_sentiment_and_emotion
         results = model_loader.get_sentiment_and_emotion(len(headlines_df), headlines_df)
 
-        keyword_results = model_loader.get_keywords(" ".join(headlines_df['headline'].tolist())) # + " ".join(headlines_df['description'].tolist())
+        keyword_results = model_loader.get_keywords(" ".join(headlines_df['title'].tolist())) # + " ".join(headlines_df['description'].tolist())
 
         print("analysis complete")
 
@@ -59,7 +59,7 @@ def analyse_keywords():
         headlines_df = pd.DataFrame(json_data)
 
         # call get_sentiment_and_emotion
-        keyword_results = model_loader.get_keywords(" ".join(headlines_df['headline'].tolist())) # + " ".join(headlines_df['description'].tolist())
+        keyword_results = model_loader.get_keywords(" ".join(headlines_df['title'].tolist())) # + " ".join(headlines_df['description'].tolist())
         # print(keyword_results)
         print("analysed keywords")
 

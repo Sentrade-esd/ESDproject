@@ -10,7 +10,6 @@ import './db_client.js';
 import SentimentController from './db_controller.js';
 import { Sentiment, Comment, CronJob } from './db_model.js';
 import sentiment_methods from "./methods.js";
-import axios from 'axios';
 
 const app = express();
 
@@ -111,6 +110,7 @@ cron.schedule("*/1 * * * *", async () => {
     console.log("difference search: " + JSON.stringify(difference_search));
     
     if (difference_search.length > 0) {
+      
       sentiment_methods.produceNotification(difference_search)
     }
   } catch (error) {

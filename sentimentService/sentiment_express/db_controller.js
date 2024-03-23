@@ -82,7 +82,8 @@ SentimentController.get("/sentiment_query", async (req, res) => {
 
     if (sentiments) {
         if ((Date.now() - sentiments.datetime) / 1000 < 1800) {
-            // newsArticles = await sentiment_methods.getNewsFromDB(ticker);
+            let newsFromDB = await sentiment_methods.getNewsFromDB(ticker);
+            newsArticles = newsFromDB.scrapedCompany.news;
             console.log("In DB. Returning data...");
         } else {
             sentiment_flag = true;
@@ -99,7 +100,7 @@ SentimentController.get("/sentiment_query", async (req, res) => {
     if (sentiment_flag) {
         console.log("Not in DB. Getting data...");
         
-        const res = await sentiment_methods.scraper(search_term);
+        const res = await sentiment_methods.scraper(search_term, ticker);
         newsArticles = res[1];
         // console.log(res)
 

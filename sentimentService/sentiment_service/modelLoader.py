@@ -62,10 +62,10 @@ class ModelLoader:
     
 
     def get_sentiment_and_emotion(self, total_headlines, headlines_df):
-        with tqdm(total=total_headlines, desc="Analysing Sentiments", unit="headline", dynamic_ncols=True) as pbar:
+        with tqdm(total=total_headlines, desc="Analysing Sentiments", unit="title", dynamic_ncols=True) as pbar:
             for idx in range(total_headlines):
                 row = headlines_df.iloc[idx]
-                headline = row['headline']
+                headline = row['title']
                 # description = row['description']
 
 

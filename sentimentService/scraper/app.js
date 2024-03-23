@@ -1,8 +1,9 @@
 // Requiring module
 const express = require('express');
 let puppeteer = require("puppeteer-extra");
-
 require("dotenv").config();
+
+require('./scraperDBclient.js');
 
 
 // Axios module
@@ -15,7 +16,7 @@ require('dotenv').config();
 const xml2js = require('xml2js');
 const jsdom = require('jsdom');
 const {JSDOM} = jsdom;
-
+const scraperDBMethods = require('./scraperDBmethods');
 
 // Creating express object
 const app = express();
@@ -27,24 +28,35 @@ app.get('/', (req, res) => {
 	res.end()
 })
 
+app.get ('/scraper/getNewsFromDB/:ticker', async (req, res) => {
+    const {ticker} = req.params;
+    console.log('ticker: ', ticker);
+
+    let response = await scraperDBMethods.get(ticker);
+    console.log('response', response);
+    res.send(response);
+
+});
+
 // Handling GET query scrape to news artcles about a company using the Google News
 app.get('/scraper/getNews/:query/:ticker', async (req, res) => { 
     const {query, ticker} = req.params;
-    console.log(query);
+    console.log(query, ticker);
     // run scrapping script
     // return response
     let response = await scrape(query);
     // call db endpoint to add to db for news
-    // console.log('response', response);
-    let addToDBResponse = await addToDB(ticker, query, response);
+    console.log('response: ', response);
+    let addToDBResponse = await scraperDBMethods.add(ticker, query, response);
     // console.log('addToDBresponse', addToDBResponse);
-    res.send(addToDBResponse);
+    res.send(response);
 })
 
 async function scrape(query){
     let url = `https://news.google.com/rss/search?q=${query}&hl=en-SG&gl=SG&ceid=SG:en`
     let response = await axios.get(url);
     let content = response.data;
+    // console.log(content);
 
     // Convert xml2js.parseString to return a Promise
     let result = await new Promise((resolve, reject) => {
@@ -65,7 +77,7 @@ async function scrape(query){
         // Change pubDate to sgt
         let date = new Date(pubDate);
         let sgtDate = new Date(date.getTime() + 8*60*60*1000); // SGT => UTC+8
-        pubDate = sgtDate.toISOString();
+        let datetime = sgtDate.toISOString();
 
         
         // Parse the HTML in the description to extract the text
@@ -86,6 +98,7 @@ async function scrape(query){
 
     // Now you can return items or use it elsewhere in your code
     // return items;
+    // console.log('results: ', results);
     return results;
 }
 
@@ -99,7 +112,7 @@ async function addToDB(ticker, query, news){
             companyName: query,
             news: news
         }
-       response = await axios.post(`http://localhost:3001/scraperDB/add`, body);
+       response = await scraperDBMethods.add();
     }
     catch(error){
         console.log(error);

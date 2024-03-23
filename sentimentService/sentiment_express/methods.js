@@ -254,9 +254,11 @@ const sentiment_methods = {
         //   }
     },
 
-    scraper: async (search_term) => {
-        const url = `${sentiment_methods.scraper_url}/scraper/getNews/${search_term}`;
+    scraper: async (search_term, ticker) => {
+        const url = `${sentiment_methods.scraper_url}/scraper/getNews/${search_term}/${ticker}`;
+
         const response = await axios.get(url);
+        // console.log(response);
 
         // json parse response.data
         const data = response.data;
@@ -268,18 +270,19 @@ const sentiment_methods = {
 
         for (let i = 0; i < data.length; i++) {
             let newsObject = data[i];
-            let parsed_news = await sentiment_methods.parse_scraper(newsObject);
-            let copy_news = { ...parsed_news };
-            delete parsed_news.link
-
-            headlinesArray.push(parsed_news);
+            delete newsObject.i;
+            // let parsed_news = await sentiment_methods.parse_scraper(newsObject);
+            let copy_news = { ...newsObject };
+            delete newsObject.link
+            
+            headlinesArray.push(newsObject);
             UIArray.push(copy_news);
             // if (i == 50) break;
         }
 
-        console.log(headlinesArray);
-        console.log("====================================");
-        console.log(UIArray);
+        // console.log(headlinesArray);
+        // console.log("====================================");
+        // console.log(UIArray);
 
         return [headlinesArray, UIArray];
         // return [
@@ -331,13 +334,14 @@ const sentiment_methods = {
     },
 
     getNewsFromDB: async (ticker) => {
-        // const url = `${sentiment_methods.scraper_url}/scraper/getNews/${search_term}`;
-        const url = ``
+        const url = `${sentiment_methods.scraper_url}/scraper/getNewsFromDB/${ticker}`;
+
         const response = await axios.get(url);
+        // console.log(response);
 
         // json parse response.data
         const data = response.data;
-        
+
         return data
     },
 

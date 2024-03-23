@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  follow_trades:
+    build: 
+      context: ./followTrades
+      dockerfile: Dockerfile  
+    command: npm start
+    ports:
+      - "4001:4001"
+    networks:
+      - follow_trades_network
+      - kong_network
+      - scraper_network
+      - transactions_network
+    environment:
+      - PORT=4001
+  
+  senator_filings:
+    build: 
+      context: ./senatorFilings
+      dockerfile: Dockerfile  
+    command: gunicorn -w 1 --threads 2 -b :4002 --timeout 600 main:app
+    hostname: senator_filings
+    ports:
+      - "4002:4002"
+    networks:
+      - follow_trades_network
+
+networks:
+  follow_trades_network:
+    driver: bridge
+    name: follow_trades_network
+  kong_network:
+    external: true
+  scraper_network:
+    external: true
+  transactions_network:
+    external: true
