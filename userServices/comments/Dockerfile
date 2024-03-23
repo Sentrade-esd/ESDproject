@@ -23,12 +23,6 @@ FROM dependencies AS test
 COPY . .
 RUN  npm run test
 
-# # ---- Develop ----
-# FROM dependencies AS develop
-# RUN npm install -g nodemon
-# COPY . .
-# CMD ["nodemon", "./app.js"]
-
 # ---- Release ----
 FROM base AS release
 # copy production node_modules
@@ -37,4 +31,4 @@ COPY --from=dependencies /app/prod_node_modules ./node_modules
 COPY . .
 # expose port and define CMD
 EXPOSE 6001
-CMD npm start
+CMD ["node", "index.js"]
