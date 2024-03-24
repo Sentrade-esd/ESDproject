@@ -85,23 +85,25 @@ cron.schedule("*/1 * * * *", async () => {
     all_cron.forEach((cron) => {
       if (combined_sentiments[cron.search]) {
         // if percentage change is +/- 10%
-        if (Math.abs((combined_sentiments[cron.search] - cron.sentiment_score) / Math.abs(cron.sentiment_score)) > 0.1) {
+        let pcntChange = (combined_sentiments[cron.search] - cron.sentiment_score) / Math.abs(cron.sentiment_score);
+        
+        if (Math.abs(pcntChange) > 0.1 || Math.abs(pcntChange) < -0.1) {
           difference_search.push({
             search: cron.search,
-            change: (combined_sentiments[cron.search] - cron.sentiment_score) / Math.abs(cron.sentiment_score),
+            change: pcntChange,
             new_score: combined_sentiments[cron.search]
           });
         }
 
         // anybody with a stop loss of 5-25% (steps of 5), send to a endpoint with the search term and percentage change
-        // if ((combined_sentiments[cron.search] - cron.sentiment_score) / Math.abs(cron.sentiment_score) <= -0.05) {
-        //   let size = Math.abs(Math.floor((combined_sentiments[cron.search] - cron.sentiment_score) / Math.abs(cron.sentiment_score) / 0.05));
+        if ((combined_sentiments[cron.search] - cron.sentiment_score) / Math.abs(cron.sentiment_score) <= -0.05) {
+          let size = Math.abs(Math.floor((combined_sentiments[cron.search] - cron.sentiment_score) / Math.abs(cron.sentiment_score) / 0.05));
 
-        //   axios.post("whatever endpoint this is", {
-        //     search: cron.search,
-        //     size: size*5
-        //   })
-        // }
+          // axios.post("whatever endpoint this is", {
+          //   search: cron.search,
+          //   size: size*5
+          // })
+        }
 
       }
     });
