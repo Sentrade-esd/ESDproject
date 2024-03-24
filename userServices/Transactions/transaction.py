@@ -52,11 +52,11 @@ class Transaction(db.Model):
     TransactionID = db.Column('transactionid', db.Integer, primary_key=True, autoincrement=True)
     UserID = db.Column('userid', db.Integer, nullable=False)
     Email = db.Column('email', db.String(255), nullable=False)
-    Company = db.Column('company', db.String(255), nullable=False)
+    Company = db.Column('company', db.String(255), nullable=True)
     DateTimestamp = db.Column('datetimestamp', db.DateTime, nullable=False)
-    BuyAmount = db.Column('buyamount', db.Float(precision=2), nullable=False)
+    BuyAmount = db.Column('buyamount', db.Float(precision=2), nullable=True)
     SellAmount = db.Column('sellamount', db.Float(precision=2), nullable=True)
-    StopLossSentimentThreshold = db.Column('stoplosssentimentthreshold', db.Float(precision=2), nullable=False)
+    StopLossSentimentThreshold = db.Column('stoplosssentimentthreshold', db.Float(precision=2), nullable=True)
     TotalAccountValue = db.Column('totalaccountvalue', db.Float(precision=2), nullable=False)
 
     def __init__(self, UserID, Email, Company, DateTimestamp, BuyAmount, SellAmount, StopLossSentimentThreshold, TotalAccountValue):
@@ -155,32 +155,56 @@ def find_all_by_id(UserID):
     ), 404
 
 
-@app.route("/transaction/newTrade/", methods=["POST"])
+@app.route("/transaction/newTrade", methods=["POST"])
 def add_new_transaction():
     data = request.get_json()
 
-    
 
-    new_transaction = Transaction(
-        UserID=data["UserID"],
-        Email=data["Email"],
-        DateTimestamp=data["Date"], 
-        BuyAmount=data["Buy_amount"], 
-        StopLossSentimentThreshold=data["Threshold"],
-        TotalAccountValue= get_current_account_value(data["UserID"]) - data["Buy_amount"]
-    )
+    if (data["newUser"]):
+        new_transaction = Transaction(
+            UserID=data["userID"],
+            Email=data["email"],
+            Company=None,
+            DateTimestamp=datetime.now(), 
+            BuyAmount=None,
+            SellAmount=None,
+            StopLossSentimentThreshold=None,
+            TotalAccountValue= 1000
+        )
+        db.session.add(new_transaction)
+        db.session.commit() 
 
-    
-    db.session.add(new_transaction)
-    db.session.commit() 
+        return jsonify(
+            {
+                "code": 200,
+                "data": new_transaction.json(),
+                "message": "New user successfully added."
+            }
+        )
 
-    return jsonify(
-        {
-            "code": 200,
-            "data": new_transaction.json(),
-            "message": "New transaction successfully added."
-        }
-    )
+    else: 
+        new_transaction = Transaction(
+            UserID=data["userID"],
+            Email=data["email"],
+            Company=data["company"],
+            # DateTimestamp=data["date"], 
+            DateTimestamp=datetime.now(),
+            BuyAmount=data["buyAmount"], 
+            StopLossSentimentThreshold=data["threshold"],
+            TotalAccountValue= get_current_account_value(data["userID"]) - data["buyAmount"]
+        )
+
+
+        db.session.add(new_transaction)
+        db.session.commit() 
+
+        return jsonify(
+            {
+                "code": 200,
+                "data": new_transaction.json(),
+                "message": "New transaction successfully added."
+            }
+        )
 
 
 @app.route("/transaction/updateTrade", methods=["POST"])
