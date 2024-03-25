@@ -152,6 +152,7 @@ services:
     restart: unless-stopped
 
   scraper:
+    # platform: linux/x86_64
     build:
       context: ./sentimentService/scraper
       dockerfile: Dockerfile

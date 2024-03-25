@@ -1,6 +1,11 @@
 // Requiring module
 const express = require('express');
-let puppeteer = require("puppeteer-extra");
+// let puppeteer = require("puppeteer-extra");
+let puppeteer = require("puppeteer");
+// const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+const chromium = require('@sparticuz/chromium');
+// puppeteer.use(StealthPlugin());
+
 require("dotenv").config();
 
 require('./scraperDBclient.js');
@@ -242,7 +247,13 @@ app.get('/scraper/scrapeCurrentPrice/:ticker', async (req, res) => {
 })
 
 async function scrapePrice(query) {
-    let browser = await puppeteer.launch({ headless: 'new' });
+    // let browser = await puppeteer.launch({
+    //     args: chromium.args,
+    //     defaultViewport: chromium.defaultViewport,
+    //     executablePath: await chromium.executablePath(),
+    //     headless: chromium.headless,
+    // });
+    let browser = await puppeteer.launch({ headless: 'new', executablePath:'/usr/bin/google-chrome'});
     let page = await browser.newPage();
 
     let url = `https://sg.finance.yahoo.com/quote/${query}`;

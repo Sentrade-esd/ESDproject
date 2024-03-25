@@ -109,8 +109,9 @@ def users():
 #         }
 #     ), 404
 
-@app.route("/user/<string:email>")
-def find_by_email(email):
+@app.route("/user/getUser")
+def find_by_email():
+    email = request.args.get('email')
     user = db.session.query(User).filter_by(Email=email).first()
 
     if user:
