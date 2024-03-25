@@ -211,7 +211,7 @@ services:
     build: 
       context: ./userServices/User
       dockerfile: Dockerfile
-    command: gunicorn -w 1 --threads 2 -b :5000 --timeout 600 User:app
+    command: gunicorn -w 1 --threads 2 -b :6000 --timeout 600 User:app
     hostname: user_service
     ports:
       - "6000:6000"

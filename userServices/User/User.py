@@ -10,6 +10,7 @@ CORS(app, resources={r'/*': {'origins': '*'}})   ###### consider changing to acc
 
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/esd'
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['SQL_URI'] + '/user_data' if 'SQL_URI' in os.environ else 'mysql+mysqlconnector://root@localhost:3306/esd'
+print(app.config['SQLALCHEMY_DATABASE_URI'])
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 print(app.config['SQLALCHEMY_DATABASE_URI'])
