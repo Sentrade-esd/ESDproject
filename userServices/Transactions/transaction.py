@@ -116,9 +116,11 @@ def get_all():
 #         }
 #     ), 404
 
+# Get the latest transaction for a user
 @app.route("/transaction/<int:UserID>")
 def find_by_id(UserID):
-    transaction = db.session.query(Transaction).filter_by(UserID=UserID).first()
+    # transaction = db.session.query(Transaction).filter_by(UserID=UserID).first()
+    transaction = db.session.query(Transaction).filter_by(UserID=UserID).order_by(Transaction.DateTimestamp.desc()).first()
 
     if transaction:
         return jsonify(
@@ -212,22 +214,44 @@ def add_new_transaction():
     UserID = data["UserID"]
     Company = data["Company"]
 
-    if (check_if_bought(UserID, Company)):
-        update_transaction = Transaction(
-                UserID=data["UserID"],
-                Email=data["Email"],
-                Company=data["Company"],
-                # DateTimestamp=data["date"], 
-                DateTimestamp=datetime.now(),
-                # BuyAmount=data["buyAmount"], 
-                SellAmount=data["sellAmount"],
-                # StopLossSentimentThreshold=data["Threshold"],
-                TotalAccountValue= get_current_account_value(data["UserID"]) - data["sellAmount"]
-            )
+    transaction = Transaction.query.filter_by(UserID=UserID, Company=Company).first()
 
 
-        db.session.add(update_transaction)
+    if (transaction):
+        transaction.Company = data["Company"]
+        transaction.DateTimestamp = datetime.now()
+        transaction.SellAmount = data["sellAmount"]
+        transaction.TotalAccountValue = get_current_account_value(data["UserID"]) + data["sellAmount"]
+
+    # if (check_if_bought(UserID, Company)):
+        # update_transaction = Transaction(
+        #         UserID=data["UserID"],
+        #         Email=data["Email"],
+        #         Company=data["Company"],
+        #         # DateTimestamp=data["date"], 
+        #         DateTimestamp=datetime.now(),
+        #         # BuyAmount=data["buyAmount"], 
+        #         SellAmount=data["sellAmount"],
+        #         # StopLossSentimentThreshold=data["Threshold"],
+        #         TotalAccountValue= get_current_account_value(data["UserID"]) - data["sellAmount"]
+        #     )
+        
+        
+
+
+        # db.session.add(update_transaction)
         db.session.commit() 
+
+        return jsonify(
+        {
+            "code": 200,
+            "data": transaction.json(),
+            "message": "Transaction Updated."
+        }
+    )        
+
+
+
     else:
             return jsonify(
         {
@@ -237,13 +261,6 @@ def add_new_transaction():
     )  
 
 
-    return jsonify(
-        {
-            "code": 200,
-            "data": update_transaction.json(),
-            "message": "Transaction Updated."
-        }
-    )        
 
 
 # Check if that user is trying to sell stock he doesn't have

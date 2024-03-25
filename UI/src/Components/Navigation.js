@@ -48,18 +48,37 @@ const handleLogin = (username, password) => {
   };
 
   const handleSignup = (Email, Password, TelegramHandle) => {
-    axios.post('http://127.0.0.1:5000/user', {
+    axios.post("http://127.0.0.1:5000/user", {
       Email: Email,
       Password: Password,
-      telegram_handle: TelegramHandle
-    }).then(response => {
-      setIsLoggedIn(true);
-      setUsername(Email); 
+      telegram_handle: TelegramHandle,
+    })
+    .then((response) => {
+      if (response.data.code === 200) {
+        axios.get(`http://localhost:5000/user/${Email}`).then((response) => {
+          if (response.data.code === 200) {
+            localStorage.setItem("username", Email); 
+            localStorage.setItem("id", response.data.data.UserID);
+            setIsLoggedIn(true);
+            setUsername(Email); 
+          } else {
+            console.error("Fetch data after signup failed");
+          }
+        });
+      } else {
+        console.error("Signup failed");
+      }
       setModalShow(false);
-    }).catch(error => {
-      console.error('There was an error!', error);
+    })
+    .catch((error) => {
+      console.error("There was an error while signing up!", error);
     });
   };
+
+  const handleNewUser = (Email) => {
+
+  };
+
 
   const navigate = useNavigate();
 

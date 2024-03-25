@@ -75,22 +75,55 @@ function Trade() {
 
     };
 
-    const handleFollowTrade = () => {
+    const handleFollowTrade = async() => {
         // Should be calling FollowTrades here
         // Store this email, ticker, targetDate, buyAmountPerFiling, maxBuyAmount and send
 
     };
 
-    const handleBuyStock = () => {
+    const handleBuyStock = async () => {
         // Should be calling Transaction here
         // Store company name, id, email, buy amount
+        let url = "http://localhost:6002/transaction/newTrade";
+        
+        let data = {
+            UserID: localStorage.getItem("id"),
+            Email: localStorage.getItem("username"),
+            Company: localStorage.getItem("companyName"),
+            buyAmount: tradeAmount,
+            Threshold: threshold
+        }
 
+        try {
+            let response = await axios.post(url, data);
+            console.log(response.data);
+            alert('Transaction successful');
+        } catch (error) {
+            console.error(error);
+            alert('Unable to process the transaction');
+        }
     };
 
-    const handleSellStock = () => {
+    const handleSellStock = async () => {
         // Should be calling FollowTrades here
         // Store this email, ticker, targetDate, buyAmountPerFiling, maxBuyAmount and send
+        let url = "http://localhost:6002/transaction/newTrade";
+        
+        let data = {
+            UserID: localStorage.getItem("id"),
+            Email: localStorage.getItem("username"),
+            Company: localStorage.getItem("companyName"),
+            buyAmount: tradeAmount
+        }
 
+        try {
+            let response = await axios.post(url, data);
+            console.log(response.data);
+            alert('Transaction successful');
+        } catch (error) {
+            console.error(error);
+            alert('Unable to process the transaction');
+        }
     };
 
     const [tradeAmount, setTradeAmount] = useState(0);
