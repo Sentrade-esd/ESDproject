@@ -160,8 +160,8 @@ def setup_new_user():
     data = request.get_json()
 
     new_transaction = Transaction(
-            UserID=data["UserID"],
-            Email=data["Email"],
+            UserID=data["userID"],
+            Email=data["email"],
             Company=None,
             DateTimestamp=datetime.now(), 
             BuyAmount=None,
