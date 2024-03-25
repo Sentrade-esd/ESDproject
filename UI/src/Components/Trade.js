@@ -95,6 +95,7 @@ function Trade() {
 
     const [tradeAmount, setTradeAmount] = useState(0);
     const [maxBuy, setMaxBuy] = useState(0);
+    const [threshold, setStopLoss] = useState(0);
 
     const MyWordCloud = React.memo(({ words, options }) => 
     <div style={{width: '600px', height: '400px'}}>
@@ -148,6 +149,17 @@ const endDate = new Date(); // Current date
                             value={maxBuy}
                             onChange={(e) => setMaxBuy(e.target.value)}
                             />
+
+                            <Form.Control
+                                    type="number"
+                                    id="stopLoss"
+                                    name="stopLoss"
+                                    min="0"
+                                    max="100"
+                                    step="5"
+                                    aria-label="Stop Loss Input"
+                                    onChange={(e) => setStopLoss(e.target.value)}
+                                />
                         </Form.Group>
 
                         <Button variant="primary" onClick={handleFollowTrade} className="mt-3">Follow Trade</Button>

@@ -154,75 +154,21 @@ def find_all_by_id(UserID):
         }
     ), 404
 
-
-@app.route("/transaction/newTrade", methods=["POST"])
-def add_new_transaction():
+# When a user sign up, this will be called to setup the inital account value
+@app.route("/transaction/setup", methods=["POST"])
+def setup_new_user():
     data = request.get_json()
 
-
-    if (data["newUser"]):
-        new_transaction = Transaction(
-            UserID=data["userID"],
-            Email=data["email"],
+    new_transaction = Transaction(
+            UserID=data["UserID"],
+            Email=data["Email"],
             Company=None,
             DateTimestamp=datetime.now(), 
             BuyAmount=None,
             SellAmount=None,
             StopLossSentimentThreshold=None,
-            TotalAccountValue= 1000
+            TotalAccountValue=1000
         )
-        db.session.add(new_transaction)
-        db.session.commit() 
-
-        return jsonify(
-            {
-                "code": 200,
-                "data": new_transaction.json(),
-                "message": "New user successfully added."
-            }
-        )
-
-    else: 
-        new_transaction = Transaction(
-            UserID=data["userID"],
-            Email=data["email"],
-            Company=data["company"],
-            # DateTimestamp=data["date"], 
-            DateTimestamp=datetime.now(),
-            BuyAmount=data["buyAmount"], 
-            StopLossSentimentThreshold=data["threshold"],
-            TotalAccountValue= get_current_account_value(data["userID"]) - data["buyAmount"]
-        )
-
-
-        db.session.add(new_transaction)
-        db.session.commit() 
-
-        return jsonify(
-            {
-                "code": 200,
-                "data": new_transaction.json(),
-                "message": "New transaction successfully added."
-            }
-        )
-
-
-@app.route("/transaction/updateTrade", methods=["POST"])
-def update_transaction():
-    data = request.get_json()
-    
-
-    new_transaction = Transaction(
-        UserID=data["UserID"],
-        Email=data["Email"],
-        DateTimestamp=data["Date"], 
-        BuyAmount=data["Buy_amount"],
-        SellAmount=data["Sell_amount"],  
-        StopLossSentimentThreshold=data["Threshold"],
-        TotalAccountValue = get_current_account_value(data["UserID"]) + data["Sell_amount"]
-    )
-
-    # Adding the new transaction to the session and committing it to save it in the database.
     db.session.add(new_transaction)
     db.session.commit() 
 
@@ -230,9 +176,113 @@ def update_transaction():
         {
             "code": 200,
             "data": new_transaction.json(),
-            "message": "Transaction Updated."
+            "message": "New user successfully added."
         }
     )
+
+
+@app.route("/transaction/updateTrade", methods=["POST"])
+def add_new_transaction():
+    data = request.get_json()
+
+    # if (data["newUser"]):
+    #     new_transaction = Transaction(
+    #         UserID=data["UserID"],
+    #         Email=data["Email"],
+    #         Company=None,
+    #         DateTimestamp=datetime.now(), 
+    #         BuyAmount=None,
+    #         SellAmount=None,
+    #         StopLossSentimentThreshold=None,
+    #         TotalAccountValue=1000
+    #     )
+    #     db.session.add(new_transaction)
+    #     db.session.commit() 
+
+    #     return jsonify(
+    #         {
+    #             "code": 200,
+    #             "data": new_transaction.json(),
+    #             "message": "New user successfully added."
+    #         }
+    #     )
+
+    # else: 
+
+    UserID = data["UserID"]
+    Company = data["Company"]
+
+    if (check_if_bought(UserID, Company)):
+        update_transaction = Transaction(
+                UserID=data["UserID"],
+                Email=data["Email"],
+                Company=data["Company"],
+                # DateTimestamp=data["date"], 
+                DateTimestamp=datetime.now(),
+                # BuyAmount=data["buyAmount"], 
+                SellAmount=data["sellAmount"],
+                # StopLossSentimentThreshold=data["Threshold"],
+                TotalAccountValue= get_current_account_value(data["UserID"]) - data["sellAmount"]
+            )
+
+
+        db.session.add(update_transaction)
+        db.session.commit() 
+    else:
+            return jsonify(
+        {
+            "code": 400,
+            "message": "Bad Request: Transaction doesn't exist.",
+        }
+    )  
+
+
+    return jsonify(
+        {
+            "code": 200,
+            "data": update_transaction.json(),
+            "message": "Transaction Updated."
+        }
+    )        
+
+
+# Check if that user is trying to sell stock he doesn't have
+def check_if_bought(UserID, Company):
+    transaction = Transaction.query.filter_by(UserID=UserID, Company=Company).first()
+    return transaction is not None
+
+
+
+
+
+@app.route("/transaction/newTrade", methods=["POST"])
+def update_transaction():
+    data = request.get_json()
+    
+
+    new_transaction = Transaction(
+        UserID=data["UserID"],
+        Email=data["Email"],
+        Company=data["Company"],
+        DateTimestamp=datetime.now(), 
+        # DateTimestamp=data["Date"], 
+        BuyAmount=data["buyAmount"],
+        SellAmount=None,  
+        StopLossSentimentThreshold=data["Threshold"],
+        TotalAccountValue = get_current_account_value(data["UserID"]) - data["buyAmount"]
+    )
+
+    # Adding the new transaction to the session and committing it to save it in the database.
+    db.session.add(new_transaction)
+    db.session.commit() 
+
+    return jsonify(
+            {
+                "code": 200,
+                "data": new_transaction.json(),
+                "message": "New transaction successfully added."
+            }
+        )
 
 
 
@@ -242,7 +292,7 @@ def update_transaction():
 @app.route("/checkBalance", methods=["POST"])
 def checkBalance():
     data = request.get_json()
-    UserID = data["userId"]
+    UserID = data["UserID"]
     print(UserID, type(UserID))
     buy_amt = data["maxBuyAmount"]
     print(type(buy_amt))
@@ -276,7 +326,7 @@ def follow_trade_transaction():
 
     data = request.get_json()
     print("DATA IS HERE:", data)
-    UserID = data['data']['userId']
+    UserID = data['data']['UserID']
     print('HAHAHAHAHAHAHA STARTING NOW')
     print(UserID)
 
@@ -311,6 +361,7 @@ def follow_trade_transaction():
     # Sell amount, bought amonunt, total account value, company
     # print(sellAmount)
 
+    # Need to get company name sent here so I can do matching
     transaction = db.session.query(Transaction).filter_by(UserID=UserID).order_by(Transaction.DateTimestamp.desc()).first()
 
     # Update the transaction details in the database
@@ -348,6 +399,37 @@ def follow_trade_transaction():
             }
         }
     ), {"PnL":"{:.2f}".format(profit_loss), "fractionalSharesBought":"{:.2f}".format(total_percentage_of_stock), "boughtAmount":"{:.2f}".format(bought_amount), "sellAmount":"{:.2f}".format(sellAmount)}
+
+# @app.route("/transaction/trigger", methods=['POST'])
+# def automated_selling():
+
+#     body = request.get_json()
+
+#     company = body["search"]
+#     threshold = body["size"]
+    
+#     transactions = db.session.query(Transaction).filter_by(Transaction.StopLossSentimentThreshold >= threshold, Transaction.Comapny==company).order_by(Transaction.DateTimestamp.desc()).all()
+
+#     # Get sell price
+
+
+#     transaction_list = []
+#     for transaction in transactions:
+#         transaction_dict = {
+#             'TransactionID': transaction.TransactionID,
+#             'UserID': transaction.UserID,
+#             'Email': transaction.Email,
+#             'Company': transaction.Company,
+#             'DateTimestamp': transaction.DateTimestamp,
+#             'BuyAmount': transaction.BuyAmount,
+#             'SellAmount': transaction.SellAmount,
+#             'StopLossSentimentThreshold': transaction.StopLossSentimentThreshold,
+#             'TotalAccountValue': transaction.TotalAccountValue
+#         }
+#         transaction_list.append(transaction_dict)
+
+#     return jsonify(transaction_list)
+
 
 
 
