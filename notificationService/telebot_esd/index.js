@@ -1,9 +1,10 @@
 const { Telegraf } = require("telegraf");
-const bot = new Telegraf(process.env.BOT_TOKEN || "7039505633:AAFoCvJc3XwP8N7bUd1XsjkCP5rH311TrWQ");
+const bot = new Telegraf(
+  process.env.BOT_TOKEN || "7039505633:AAFoCvJc3XwP8N7bUd1XsjkCP5rH311TrWQ"
+);
 const express = require("express");
 const http = require("http");
 const app = express();
-
 
 app.use(express.json());
 
@@ -36,7 +37,8 @@ app.post("/teleBot/send_message", (req, res) => {
   }
 
   telegramIds.forEach((id) => {
-    bot.telegram.sendMessage(id, message);
+    const numericId = Number(id);
+    bot.telegram.sendMessage(numericId, message);
   });
 
   res.status(200).json({ status: "Messages sent" });
