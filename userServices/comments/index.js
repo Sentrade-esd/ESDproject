@@ -111,7 +111,7 @@ app.get("/comments/:company", async (req, res) => {
   const company = req.params.company;
 
   try {
-    const companyComments = await comments.findOne({ _id: company });
+    const companyComments = await comments.findOne({ company: company });
 
     if (!companyComments) {
       return res.status(404).send({ message: "Company not found" });

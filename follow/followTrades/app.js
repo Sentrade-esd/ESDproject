@@ -34,9 +34,9 @@ app.get('/', (req, res) => {
 app.post('/followTrade/buy', async (req, res) => {
     let response;
     try {
-        const {userId, ticker, targetDate, buyAmountPerFiling, maxBuyAmount} = req.body;
+        const {userId, ticker, targetDate, buyAmountPerFiling, maxBuyAmount, company} = req.body;
         console.log(userId);
-        response = await followTrade(userId, ticker, targetDate, buyAmountPerFiling, maxBuyAmount);
+        response = await followTrade(userId, ticker, targetDate, buyAmountPerFiling, maxBuyAmount,company);
     }
     catch(error){
         console.log(error);
@@ -45,7 +45,7 @@ app.post('/followTrade/buy', async (req, res) => {
     
 });
 
-async function followTrade(userId, ticker, targetDate, buyAmountPerFiling, maxBuyAmount){
+async function followTrade(userId, ticker, targetDate, buyAmountPerFiling, maxBuyAmount, company){
     // Promise request to get user account balance, stock price, senator filings
     let data = {};
     let updateBalanceStatus = await checkBalance(userId, maxBuyAmount);
@@ -100,7 +100,7 @@ async function followTrade(userId, ticker, targetDate, buyAmountPerFiling, maxBu
             PnL = response.data['PnL'];
             sellAmount = response.data['sellAmount'];
 
-            return {status: 'success', data, boughtAmount: boughtAmount, fractionalSharesBought: fractionalSharesBought, PnL: PnL, sellAmount: sellAmount};
+            return {status: 'success', data, boughtAmount: boughtAmount, fractionalSharesBought: fractionalSharesBought, PnL: PnL, sellAmount: sellAmount, company: company};
         } catch (error){
             console.log(error);
             return {status: 'error', data};

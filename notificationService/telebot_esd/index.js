@@ -30,15 +30,15 @@ bot.launch();
 //   console.log("Server listening on port 3001");
 // });
 app.post("/teleBot/send_message", (req, res) => {
-  const { telegramIds, message } = req.body;
+  const { telegramIds, teleMessage } = req.body;
 
-  if (!Array.isArray(telegramIds) || typeof message !== "string") {
+  if (!Array.isArray(telegramIds) || typeof teleMessage !== "string") {
     return res.status(400).json({ error: "Invalid request body" });
   }
 
   telegramIds.forEach((id) => {
     const numericId = Number(id);
-    bot.telegram.sendMessage(numericId, message);
+    bot.telegram.sendMessage(numericId, teleMessage);
   });
 
   res.status(200).json({ status: "Messages sent" });
