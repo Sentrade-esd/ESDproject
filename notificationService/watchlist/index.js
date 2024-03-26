@@ -35,7 +35,7 @@ const WatchlistedCompanies = mongoose.model(
   watchlistedCompaniesSchema
 );
 const companyWatchlistersSchema = new Schema({
-  company: { type: String, alias: "company", unique: true },
+  company: { type: String, unique: true },
   watchlisters: [String],
 });
 
@@ -46,9 +46,8 @@ const CompanyWatchlisters = mongoose.model(
 
 // create watchlist database and watchlisted companies collection
 
-// WatchlistedCompanies.createCollection(); 
+// WatchlistedCompanies.createCollection();
 // CompanyWatchlisters.createCollection();
-
 
 app.post("/watchlist/add", async (req, res) => {
   const { userID, teleID, watchlistedCompany } = req.body;
