@@ -1,4 +1,4 @@
- # Stage 1 - the build process
+# Stage 1 - the build process
 FROM node:14 as build-deps
 WORKDIR /usr/src/app
 COPY package*.json ./
