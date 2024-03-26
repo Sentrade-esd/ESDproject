@@ -193,12 +193,17 @@ const sentiment_methods = {
                         exisiting_comments.sentiment_score += results.score;
                         exisiting_comments.emotion[results.emotion] += 1;
         
-                        let updateComment = await Comment.replaceOne({_id: exisiting_comments.id}, {
-                            datetime: exisiting_comments.datetime,
-                            search: exisiting_comments.search,
-                            sentiment_score: exisiting_comments.sentiment_score,
-                            emotion: exisiting_comments.emotion
-                        });
+                        let updateComment = await Comment.updateOne(
+                            { _id: exisiting_comments.id },
+                            {
+                              $set: {
+                                datetime: exisiting_comments.datetime,
+                                search: exisiting_comments.search,
+                                sentiment_score: exisiting_comments.sentiment_score,
+                                emotion: exisiting_comments.emotion
+                              }
+                            }
+                        );
         
                         console.log("saving existing comment");
                         // return res.json({ result: exisiting_comments });

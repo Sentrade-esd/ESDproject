@@ -54,29 +54,65 @@ async function start_amqp() {
   // await channel.assertQueue(queue, { durable: true });
 
   channel.consume(queue, async (message) => {
-    const content = JSON.parse(message.content.toString());
-    const company = content.search;
-    const change = content.change;
 
-    try {
-      const response = await axios.get(
-        `${watchlist_url}watchlist/company/${company}`
-      );
-      console.log(response.data);
+    // for each message, parse the message and send to telegram)
+    const parsedMessage = JSON.parse(message.content.toString());
 
-      // Send message to Telegram bot
-      const telegramIds = response.data; // Replace this with the actual array of Telegram IDs
-      const teleMessage = `The company ${company} has a change of ${change}.`; // Replace this with the actual message
+    for (let i = 0; i < parsedMessage.length; i++){
+      const content = parsedMessage[i];
+      console.log(content);
+      const company = content.search;
+      const change = content.change;
 
-      await axios.post(`${telebut_url}teleBot/send_message`, {
-        telegramIds,
-        teleMessage,
-      });
-      channel.ack(message);
+      console.log(`Received message for company ${company} with change ${change}`);
 
-    } catch (error) {
-      console.error(`Error getting watchlist for company ${company}:`, error);
+      try {
+        const response = await axios.get(
+          `${watchlist_url}watchlist/company/${company}`
+        );
+        console.log(response.data);
+
+        // Send message to Telegram bot
+        const telegramIds = response.data; // Replace this with the actual array of Telegram IDs
+        const teleMessage = `The company ${company} has a change of ${change}.`; // Replace this with the actual message
+
+        await axios.post(`${telebut_url}teleBot/send_message`, {
+          telegramIds,
+          teleMessage,
+        });
+        channel.ack(message);
+
+      } catch (error) {
+        console.error(`Error getting watchlist for company ${company}:`, error);
+      }
+
     }
+
+    // console.log(content);
+    // const company = content.search;
+    // const change = content.change;
+
+    // console.log(`Received message for company ${company} with change ${change}`);
+
+    // try {
+    //   const response = await axios.get(
+    //     `${watchlist_url}watchlist/company/${company}`
+    //   );
+    //   console.log(response.data);
+
+    //   // Send message to Telegram bot
+    //   const telegramIds = response.data; // Replace this with the actual array of Telegram IDs
+    //   const teleMessage = `The company ${company} has a change of ${change}.`; // Replace this with the actual message
+
+    //   await axios.post(`${telebut_url}teleBot/send_message`, {
+    //     telegramIds,
+    //     teleMessage,
+    //   });
+    //   channel.ack(message);
+
+    // } catch (error) {
+    //   console.error(`Error getting watchlist for company ${company}:`, error);
+    // }
 
   });
 
