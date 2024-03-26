@@ -152,6 +152,7 @@ services:
     restart: unless-stopped
 
   scraper:
+    # platform: linux/x86_64
     build:
       context: ./sentimentService/scraper
       dockerfile: Dockerfile
@@ -252,7 +253,7 @@ services:
       - kong_network
       - queue_network
     environment:
-      - MONGO_URI=comments_db:27017
+      - DB_URL=comments_db:27017
       - AMQP_SERVER=amqp://rabbitmq:5672
     restart: unless-stopped
     

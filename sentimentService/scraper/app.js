@@ -1,6 +1,9 @@
 // Requiring module
 const express = require('express');
-let puppeteer = require("puppeteer-extra");
+// let puppeteer = require("puppeteer-extra");
+let puppeteer = require("puppeteer");
+
+
 require("dotenv").config();
 
 require('./scraperDBclient.js');
@@ -17,6 +20,10 @@ const xml2js = require('xml2js');
 const jsdom = require('jsdom');
 const {JSDOM} = jsdom;
 const scraperDBMethods = require('./scraperDBmethods');
+
+
+// const chromiumPath = process.env.CHROMIUM_PATH;
+
 
 // Creating express object
 const app = express();
@@ -242,7 +249,17 @@ app.get('/scraper/scrapeCurrentPrice/:ticker', async (req, res) => {
 })
 
 async function scrapePrice(query) {
-    let browser = await puppeteer.launch({ headless: 'new' });
+    // let browser = await puppeteer.launch({
+    //     args: chromium.args,
+    //     defaultViewport: chromium.defaultViewport,
+    //     executablePath: await chromium.executablePath(),
+    //     headless: chromium.headless,
+    // });
+    let browser = await puppeteer.launch({ 
+        headless: 'new', 
+        executablePath:'/usr/bin/chromium',
+        args: ['--no-sandbox']
+    });
     let page = await browser.newPage();
 
     let url = `https://sg.finance.yahoo.com/quote/${query}`;

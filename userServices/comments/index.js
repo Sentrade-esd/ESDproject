@@ -16,7 +16,7 @@ let amqpServer = process.env.AMQP_SERVER || "amqp://localhost";
 
 
 mongoose
-  .connect("mongodb://" + DB_service_url + "/comments", {})
+  .connect("mongodb://root:root@" + DB_service_url + "/comments", {authSource:"admin"})
   // mongoose.connect(`${uri}/watchlist`, {})
   .then(() => {
     console.log("Connected to the database!");
@@ -28,7 +28,10 @@ mongoose
 
 
   const commentsByCompanySchema = new Schema({
-    _id: { type: String, alias: "company", unique: true },
+    // _id: { type: String, alias: "company", unique: true },
+    // commentsMade: [String],
+
+    company: { type: String, unique: true },
     commentsMade: [String],
   });
   
@@ -37,26 +40,32 @@ mongoose
 // ----------------- AMQP -----------------
 
 const startAmqp = async () => {
-  try {
-    connection = await amqp.connect(amqpServer);
-    channel = await connection.createChannel();
+  return new Promise((resolve, reject) => {
+    const start = async () => {
+      try {
+        connection = await amqp.connect(amqpServer);
+        channel = await connection.createChannel();
 
-    connection.on("error", (err) => {
-      if (err.message !== "Connection closing") {
-        console.error("[AMQP] conn error", err.message);
+        connection.on("error", (err) => {
+          if (err.message !== "Connection closing") {
+            console.error("[AMQP] conn error", err.message);
+          }
+        });
+
+        connection.on("close", () => {
+          console.error("[AMQP] reconnecting");
+          return setTimeout(start, 10000);
+        });
+
+        console.log("[AMQP] connected");
+        resolve();
+      } catch (err) {
+        console.error("[AMQP] could not connect", err.message);
+        return setTimeout(start, 10000);
       }
-    });
-
-    connection.on("close", () => {
-      console.error("[AMQP] reconnecting");
-      return setTimeout(startAmqp, 10000);
-    });
-
-    console.log("[AMQP] connected");
-  } catch (err) {
-    console.error("[AMQP] could not connect", err.message);
-    return setTimeout(startAmqp, 10000);
-  }
+    };
+    start();
+  });
 };
 
 const sendToQueue = async (exchange, routingKey, msg) => {
@@ -81,7 +90,7 @@ app.post("/comments", async (req, res) => {
     const msg = { company, comment };
     await sendToQueue("comments_exchange", "comment", msg);
     const companyComments = await comments.findOneAndUpdate(
-      { _id: company },
+      { company: company },
       { $push: { commentsMade: comment } },
       { new: true, upsert: true }
     );
@@ -114,7 +123,12 @@ app.get("/comments/:company", async (req, res) => {
     res.status(500).send({ message: "Error getting comments" });
   }
 });
-startAmqp().catch(console.error);
+
+(async () => {
+  await startAmqp();
+})();
+
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
