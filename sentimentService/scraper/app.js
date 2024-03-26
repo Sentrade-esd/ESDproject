@@ -2,9 +2,7 @@
 const express = require('express');
 // let puppeteer = require("puppeteer-extra");
 let puppeteer = require("puppeteer");
-// const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-const chromium = require('@sparticuz/chromium');
-// puppeteer.use(StealthPlugin());
+
 
 require("dotenv").config();
 
@@ -22,6 +20,10 @@ const xml2js = require('xml2js');
 const jsdom = require('jsdom');
 const {JSDOM} = jsdom;
 const scraperDBMethods = require('./scraperDBmethods');
+
+
+// const chromiumPath = process.env.CHROMIUM_PATH;
+
 
 // Creating express object
 const app = express();
@@ -253,7 +255,11 @@ async function scrapePrice(query) {
     //     executablePath: await chromium.executablePath(),
     //     headless: chromium.headless,
     // });
-    let browser = await puppeteer.launch({ headless: 'new', executablePath:'/usr/bin/google-chrome'});
+    let browser = await puppeteer.launch({ 
+        headless: 'new', 
+        executablePath:'/usr/bin/chromium',
+        args: ['--no-sandbox']
+    });
     let page = await browser.newPage();
 
     let url = `https://sg.finance.yahoo.com/quote/${query}`;
