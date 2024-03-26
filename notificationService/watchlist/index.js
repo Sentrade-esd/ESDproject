@@ -11,10 +11,10 @@ const { Schema } = mongoose;
 
 const DB_service_url =
   process.env.DB_URL || "mongodb://127.0.0.1:27017/watchlist";
-console.log("mongodb://" + DB_service_url + "/watchlist");
+console.log("mongodb://root:root@" + DB_service_url + "/watchlist");
 
 mongoose
-  .connect("mongodb://" + DB_service_url + "/watchlist", {})
+  .connect("mongodb://root:root@" + DB_service_url + "/watchlist", {authSource:"admin"})
   // mongoose.connect(`${uri}/watchlist`, {})
   .then(() => {
     console.log("Connected to the database!");
