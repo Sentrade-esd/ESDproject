@@ -46,10 +46,8 @@ const CompanyWatchlisters = mongoose.model(
 
 // create watchlist database and watchlisted companies collection
 
-WatchlistedCompanies.createCollection(); 
-CompanyWatchlisters.createCollection();
-
-
+// WatchlistedCompanies.createCollection(); 
+// CompanyWatchlisters.createCollection();
 
 
 app.post("/watchlist/add", async (req, res) => {
