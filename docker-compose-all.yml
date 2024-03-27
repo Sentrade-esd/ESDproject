@@ -341,8 +341,26 @@ services:
       - "4002:4002"
     networks:
       - follow_trades_network
-
   
+  
+  ##########################
+  ####         UI     ######
+  ##########################
+
+  app:
+    build:
+      context: ./UI
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    volumes:
+      - .:/usr/src/app
+    command: ["nginx", "-g", "daemon off;"]
+    networks:
+      - kong_network
+    environment:
+      - KONG_URL=http://kong:8000/
+
 
 volumes:
   watchlist_db:

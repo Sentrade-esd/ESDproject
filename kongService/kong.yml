@@ -171,4 +171,14 @@ services:
         - /followTrade/buy
         strip_path: false
 
+  - name: telebot-service
+    url: http://telebot:3002/
+    routes: 
+      - name: register-user
+        methods:
+          - POST
+        paths:
+          - /register       #### temporary
+        strip_path: false
+
   
