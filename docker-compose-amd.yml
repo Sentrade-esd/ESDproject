@@ -1,0 +1,363 @@
+version: '3.8'
+
+services:
+
+  ##########################
+  ###### Kong Service ######
+  ##########################
+
+  kong:
+    image: chernise/esdproject-kong:latest
+    hostname: kong
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+    networks:
+      - kong_network
+    restart: unless-stopped
+
+  ##########################
+  # Notification Service ###
+  ##########################
+
+  watchlist:
+    image: chernise/esdproject-watchlist:latest
+    command: npm start
+    ports:
+      - 3000:3000
+    networks:
+      - watchlist_network
+      - kong_network
+    environment:
+      - DB_URL=watchlist_db:27017
+    restart: unless-stopped
+  
+  notification_manager:
+    image: chernise/esdproject-notification_manager:latest
+    command: npm start
+    ports:
+      - 3001:3001
+    networks:
+      - notification_service
+      - watchlist_network
+      - queue_network
+    environment:
+      - AMQP_SERVER=amqp://rabbitmq:5672
+      - WATCHLIST_URL=http://watchlist:3000/
+      - TELEBOT_URL=http://telebot:3002/
+    restart: unless-stopped
+
+  telebot:
+    image: chernise/esdproject-telebot:latest
+    command: npm start
+    ports:
+      - 3002:3002
+    networks:
+      - notification_service
+    environment:
+      - AMQP_SERVER=amqp://rabbitmq:5672
+      - BOT_TOKEN=7039505633:AAFoCvJc3XwP8N7bUd1XsjkCP5rH311TrWQ
+      - BOT_URL=https://api.telegram.org/bot
+    # restart: unless-stopped
+
+  watchlist_db:
+    image: chernise/esdproject-watchlist_db:latest
+    hostname: watchlist_db
+    ports:
+      - "27019:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=watchlist
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+    volumes:
+      - watchlist_db:/data/db
+    networks:
+      - watchlist_network
+    restart: unless-stopped
+
+
+  ##########################
+  ###### rabbit MQ    ######
+  ##########################
+
+  rabbitmq:
+    image: chernise/esdproject-rabbitmq:latest
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    networks:
+      - queue_network
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      # - ./definitions.json:/etc/rabbitmq/definitions.json
+    environment:
+      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbitmq_management load_definitions "/etc/rabbitmq/definitions.json"
+    restart: unless-stopped
+  
+
+  ##########################
+  #### sentiment Service ###
+  ##########################
+
+
+  sentiment_app:
+    image: chernise/esdproject-sentiment_app:latest
+    command: npm start
+    ports:
+      - "5001:5001"
+    networks:
+      - sentiment_network
+      - queue_network
+      - kong_network
+    environment:
+      - SENTIMENT_SERVICE_URL=http://sentiment_service:5002/
+      - DB_URL=sentiment_db:27017
+      - AMQP_SERVER=amqp://rabbitmq:5672
+      - SCRAPER_URL=http://scraper:5000
+    depends_on:
+      - sentiment_db
+      - sentiment_service
+      # - rabbitmq
+    restart: unless-stopped
+
+  sentiment_service:
+    image: chernise/esdproject-sentiment_service:latest
+    command: gunicorn -w 1 --threads 2 -b :5002 --timeout 600 sentimentApp:app
+    hostname: sentiment_service
+    ports:
+      - "5002:5002"
+    networks:
+      - sentiment_network
+    restart: unless-stopped
+
+  scraper:
+    image: chernise/esdproject-scraper:latest
+    ports:
+      - "5000:5000"
+    command: ["node", "app.js"]
+    environment:
+      - ALPHA_VANTAGE_API_KEY=youralphavantageapikey
+      - PORT=5000
+      - DB_URL=scraper_db:27017
+    restart: unless-stopped
+    networks:
+      - sentiment_network
+      - scraper_network
+      - kong_network
+
+  sentiment_db:
+    image: chernise/esdproject-sentiment_db:latest
+    hostname: sentiment_db
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=sentiments
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+    volumes:
+      - sentiment_db:/data/db
+    networks:
+      - sentiment_network
+    restart: unless-stopped
+
+  scraper_db:
+    image: chernise/esdproject-scraper_db:latest
+    hostname: scraper_db
+    ports:
+      - "27018:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=scraper
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+    volumes:
+      - scraper_db:/data/db
+    networks:
+      - scraper_network
+    restart: unless-stopped
+
+
+  ##########################
+  #### USER Service   ######
+  ##########################
+
+  user_service:
+    image: chernise/esdproject-user_service:latest
+    command: gunicorn -w 1 --threads 2 -b :6000 --timeout 600 User:app
+    hostname: user_service
+    ports:
+      - "6000:6000"
+    environment:
+      - SQL_URI=postgresql://postgres:root@user_db:5432
+    networks:
+      - user_network
+      - kong_network
+    restart: unless-stopped
+
+  user_db:
+    image: chernise/esdproject-user_db:latest
+    hostname: user_db
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: root
+      POSTGRES_USER: postgres
+      POSTGRES_DB: user_db
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - user_db_data:/var/lib/postgresql/data
+    networks:
+      - user_network
+    restart: unless-stopped
+
+  comments_service:
+    image: chernise/esdproject-comments_service:latest
+    command: npm start
+    ports:
+      - "6001:6001"
+    networks:
+      - comments_network
+      - kong_network
+      - queue_network
+    environment:
+      - DB_URL=comments_db:27017
+      - AMQP_SERVER=amqp://rabbitmq:5672
+    restart: unless-stopped
+    
+  comments_db:
+    image: chernise/esdproject-sentiment_db:latest
+    hostname: comments_db
+    ports:  
+      - "27020:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=comments
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+    volumes:
+      - comments_db:/data/db
+    networks:
+      - comments_network
+    restart: unless-stopped
+
+  transactions:
+    image: chernise/esdproject-transactions:latest
+    command: gunicorn -w 1 --threads 2 -b :6002 --timeout 600 transaction:app
+    hostname: user_service
+    ports:
+      - "6002:6002"
+    environment:
+      - SQL_URI=postgresql://postgres:root@transactions_db:5432
+      - PORT=6002
+    networks:
+      - transactions_network
+      - kong_network
+      - sentiment_network
+      - follow_trades_network
+
+  transactions_db:
+    image: chernise/esdproject-transactions_db:latest
+    hostname: transactions_db
+    restart: always
+    ports:
+      - 5433:5432
+    environment:
+      POSTGRES_PASSWORD: root
+      POSTGRES_USER: postgres
+      POSTGRES_DB: transactions_db
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - transactions_db:/var/lib/postgresql/data
+    networks:
+      - transactions_network
+
+  ##########################
+  #### folow trades   ######
+  ##########################
+
+  follow_trades:
+    image: chernise/esdproject-follow_trades:latest
+    command: npm start
+    ports:
+      - "4001:4001"
+    networks:
+      - follow_trades_network
+      - kong_network
+      - scraper_network
+      - transactions_network
+    environment:
+      - PORT=4001
+      - TRANSACTION_URL=http://transactions:6002/
+      - SCRAPER_URL=http://scraper:5000/
+      - SENATOR_URL=http://senator_filings:4002/
+  
+  senator_filings:
+    image: chernise/esdproject-senator_filings:latest
+    command: gunicorn -w 1 --threads 2 -b :4002 --timeout 600 main:app
+    hostname: senator_filings
+    ports:
+      - "4002:4002"
+    networks:
+      - follow_trades_network
+
+  ##########################
+  ####         UI     ######
+  ##########################
+
+  app:
+    image: chernise/esdproject-app:latest
+    ports:
+      - "80:80"
+    volumes:
+      - .:/usr/src/app
+    command: ["nginx", "-g", "daemon off;"]
+    networks:
+      - kong_network
+    environment:
+      - KONG_URL=http://kong:8000/
+
+
+  
+
+volumes:
+  watchlist_db:
+  rabbitmq_data:
+  sentiment_db:
+  scraper_db:
+  user_db_data:
+  comments_db:
+  transactions_db:
+
+networks:
+  kong_network:
+    driver: bridge
+    name: kong_network
+  queue_network:
+    driver: bridge
+    name: queue_network
+  watchlist_network:
+    driver: bridge
+    name: watchlist_network
+  notification_service:
+    driver: bridge
+    name: watchlist
+  sentiment_network:
+    driver: bridge
+    name: sentiment_network
+  scraper_network:  
+    driver: bridge
+    name: scraper_network
+  user_network: 
+    driver: bridge
+    name: user_network
+  comments_network:
+    driver: bridge
+    name: comments_network
+  transactions_network:
+    driver: bridge
+    name: transactions_network  
+  follow_trades_network:
+    driver: bridge
+    name: follow_trades_network
+
+
+
+
