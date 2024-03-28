@@ -19,7 +19,11 @@ bot.start((ctx) => {
   // });
   const userId = ctx.from.id;
 
-  ctx.reply("Welcome to the bot!");
+  ctx.reply(
+    'Welcome to SenTrade. You will receive your notifications here. Please <a href="http://yourwebsite.com">click here</a> to go back to the website',
+    { parse_mode: "HTML" }
+  );
+
   // ... rest of your code
 });
 bot.command("send_Drago", (ctx) => {
