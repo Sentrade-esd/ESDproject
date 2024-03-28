@@ -323,7 +323,7 @@ def follow_trade_transaction():
 
     data = request.get_json()
     print("DATA IS HERE:", data)
-    UserID = data['data']['UserID']
+    UserID = data['data']['userId']
     print('HAHAHAHAHAHAHA STARTING NOW')
     print(UserID)
 
@@ -358,24 +358,43 @@ def follow_trade_transaction():
     # Sell amount, bought amonunt, total account value, company
     # print(sellAmount)
 
-    # Need to get company name sent here so I can do matching
-    transaction = db.session.query(Transaction).filter_by(UserID=UserID).order_by(Transaction.DateTimestamp.desc()).first()
+
+
+    # transaction = db.session.query(Transaction).filter_by(UserID=UserID).order_by(Transaction.DateTimestamp.desc()).first()
+    
+    company=data["data"]["company"]
+    email = data["data"]["email"]
+    
+    last_transaction = db.session.query(Transaction).filter_by(UserID=UserID).order_by(Transaction.DateTimestamp.desc()).first()
+
+    # If there was a last transaction, use its 'TotalAccountValue'
+    if last_transaction is not None:
+        total_account_value = last_transaction.TotalAccountValue + profit_loss
+    else:
+        # handle case where there is no last transaction
+        total_account_value = 1000 + profit_loss  # Add 1000 since setup also gives 1000
+
+    transaction = Transaction(UserID=UserID, Email=email, Company=company, BuyAmount=bought_amount, DateTimestamp=datetime.now(),
+                        SellAmount=sellAmount, StopLossSentimentThreshold=0, StocksHeld=0, TotalAccountValue=total_account_value)
+
 
     # Need to send both company name and ticker
     ticker = data["data"]["ticker"]
-    company = data["company"]
 
     # Update the transaction details in the database
-    if transaction:
-        # print(data['ticker'])
-        print(data['data']['ticker'])
-        transaction.Company = company
-        transaction.BuyAmount = bought_amount
-        transaction.SellAmount = sellAmount
-        transaction.StocksHeld = total_percentage_of_stock
-        transaction.TotalAccountValue = transaction.TotalAccountValue - max_buy_amount + sellAmount  # Assume the total account value gets updated like this
+    # if transaction:
+    #     # print(data['ticker'])
+    #     print(data['data']['ticker'])
+    #     transaction.Company = company
+    #     transaction.BuyAmount = bought_amount
+    #     transaction.SellAmount = sellAmount
+    #     transaction.StocksHeld = total_percentage_of_stock
+    #     transaction.TotalAccountValue = transaction.TotalAccountValue - max_buy_amount + sellAmount  # Assume the total account value gets updated like this
 
-        db.session.commit()
+        # db.session.commit()
+    
+    db.session.add(transaction)
+    db.session.commit()
 
     # return jsonify(
     #     {

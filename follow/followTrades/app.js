@@ -34,9 +34,9 @@ app.get('/', (req, res) => {
 app.post('/followTrade/buy', async (req, res) => {
     let response;
     try {
-        const {userId, ticker, targetDate, buyAmountPerFiling, maxBuyAmount, company} = req.body;
+        const {userId, email, ticker, targetDate, buyAmountPerFiling, maxBuyAmount, company} = req.body;
         console.log(userId);
-        response = await followTrade(userId, ticker, targetDate, buyAmountPerFiling, maxBuyAmount,company);
+        response = await followTrade(userId, email, ticker, targetDate, buyAmountPerFiling, maxBuyAmount,company);
     }
     catch(error){
         console.log(error);
@@ -45,7 +45,7 @@ app.post('/followTrade/buy', async (req, res) => {
     
 });
 
-async function followTrade(userId, ticker, targetDate, buyAmountPerFiling, maxBuyAmount, company){
+async function followTrade(userId, email, ticker, targetDate, buyAmountPerFiling, maxBuyAmount, company){
     // Promise request to get user account balance, stock price, senator filings
     let data = {};
     let updateBalanceStatus = await checkBalance(userId, maxBuyAmount);
@@ -90,6 +90,13 @@ async function followTrade(userId, ticker, targetDate, buyAmountPerFiling, maxBu
             data['currentPrice'] = stockPrice[Object.keys(stockPrice)[0]]['4. close'];
             data['maxBuyAmount'] = maxBuyAmount;
             data['buyAmountPerFiling'] = buyAmountPerFiling;
+
+            // TESTING CODE HERE
+            data["company"] = company
+            data["email"] = email
+            // TESTING CODE ENDS
+
+
             const body =  {status: 'success', data};
             console.log(`${TRANSACTION_URL}followTradeTransaction`);
             console.log(body);
@@ -101,7 +108,8 @@ async function followTrade(userId, ticker, targetDate, buyAmountPerFiling, maxBu
             PnL = response.data['PnL'];
             sellAmount = response.data['sellAmount'];
 
-            return {status: 'success', data, boughtAmount: boughtAmount, fractionalSharesBought: fractionalSharesBought, PnL: PnL, sellAmount: sellAmount, company: company};
+            // return {status: 'success', data, boughtAmount: boughtAmount, fractionalSharesBought: fractionalSharesBought, PnL: PnL, sellAmount: sellAmount, company: company};
+            return {status: 'success', data, boughtAmount: boughtAmount, fractionalSharesBought: fractionalSharesBought, PnL: PnL, sellAmount: sellAmount};
         } catch (error){
             console.log(error);
             return {status: 'error', data};
