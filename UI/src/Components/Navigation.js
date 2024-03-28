@@ -61,6 +61,7 @@ const handleLogin = (username, password) => {
             localStorage.setItem("id", response.data.data.UserID);
             setIsLoggedIn(true);
             setUsername(Email); 
+            handleNewUser();
           } else {
             console.error("Fetch data after signup failed");
           }
@@ -75,8 +76,11 @@ const handleLogin = (username, password) => {
     });
   };
 
-  const handleNewUser = (Email) => {
-
+  const handleNewUser = () => {
+    axios.post("http://127.0.0.1:5000/transaction/setup", {
+      userId: localStorage.getItem("id"),
+      email: localStorage.getItem("username")
+    })
   };
 
 
