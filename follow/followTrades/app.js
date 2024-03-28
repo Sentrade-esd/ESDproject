@@ -187,7 +187,7 @@ async function getSenatorFilings(ticker, targetDate){
         // console.log(response.data);
         return response.data;
     } catch (error) {
-        console.error(`HTTP error! status: ${error.response.status}`);
+        console.error(`HTTP error! status: ${error.response}`);
         throw error;
     }
 }

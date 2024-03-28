@@ -81,7 +81,7 @@ async function scrape(query){
 
     for(let i = 0; i < 80; i++) {
         let item = items[i];
-        let title = item.title[0];
+        let title = item.title[0].split(" - ")[0];
         let pubDate = item.pubDate[0];
         // Change pubDate to sgt
         let date = new Date(pubDate);
@@ -93,16 +93,20 @@ async function scrape(query){
         // let dom = new JSDOM(item.description[0]);
         // let description = dom.window.document.querySelector('a').textContent;
 
-        let link = item.link[0];
-        let obj = {
-            i,
-            title,
-            // description,
-            link,
-            pubDate
+        // include obj in results only if the result is less than a week old
+        if (date > new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000)){
+            let link = item.link[0];
+            let obj = {
+                i,
+                title,
+                // description,
+                link,
+                datetime
+            }
+            // console.log(obj);
+            results.push(obj);
         }
-        // console.log(obj);
-        results.push(obj);
+
     }
 
     // Now you can return items or use it elsewhere in your code

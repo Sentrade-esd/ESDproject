@@ -17,11 +17,12 @@ class ModelLoader:
     # emotions =  {"joy": 0, "others": 0, "surprise": 0, 
     #             "sadness": 0, "fear": 0, "anger": 0, "disgust": 0, "love": 0}
 
-    valid_emotions = ['anger', 'joy', 'sadness', 'optimism']
+    # valid_emotions = ['anger', 'joy', 'sadness', 'optimism']
 
-    emotions =  {"anger": 0, "joy": 0, "sadness": 0, "optimism": 0}
+    # emotions =  {"anger": 0, "joy": 0, "sadness": 0, "optimism": 0}
+    # emotions = {}
 
-    keywords = {}
+    # keywords = {}
 
 
     def __new__(cls, *args, **kwargs):
@@ -31,12 +32,16 @@ class ModelLoader:
 
     def __init__(self):
         self.sentiment_model = pipeline(
-            model="siebert/sentiment-roberta-large-english")
+            # model="siebert/sentiment-roberta-large-english")
+            model="lxyuan/distilbert-base-multilingual-cased-sentiments-student")
         
         self.emotion_model = pipeline(
             # model="finiteautomata/bertweet-base-emotion-analysis")
             # model="transformersbook/distilbert-base-uncased-finetuned-emotion")
             model="cardiffnlp/twitter-roberta-base-emotion")
+
+        self.comments_emotion_model = pipeline(
+            model="SamLowe/roberta-base-go_emotions")
         
         self.keyword_ext_model = pipeline(
             model="yanekyuk/bert-keyword-extractor")
@@ -46,6 +51,7 @@ class ModelLoader:
         
     
     def extract_keywords(self, batch_headlines):
+        keywords = {}
         batch_results = self.keyword_ext_model(batch_headlines)
 
         for result in batch_results:
@@ -53,15 +59,16 @@ class ModelLoader:
 
             # Filter words with less than 2 letters, exclude hashtags, and exclude "chin"
             if keyword and len(keyword) >= 3 and not keyword.startswith('#') and keyword.lower() != 'chin':
-                if keyword in self.keywords.keys():
-                    self.keywords[keyword] += 1
+                if keyword in keywords.keys():
+                    keywords[keyword] += 1
                 else:
-                    self.keywords[keyword] = 1
+                    keywords[keyword] = 1
 
-        return self.keywords
+        return keywords
     
 
     def get_sentiment_and_emotion(self, total_headlines, headlines_df):
+        emotions = {}
         with tqdm(total=total_headlines, desc="Analysing Sentiments", unit="title", dynamic_ncols=True) as pbar:
             for idx in range(total_headlines):
                 row = headlines_df.iloc[idx]
@@ -70,7 +77,7 @@ class ModelLoader:
 
 
                 result = self.sentiment_model(headline)
-                label = result[0]['label']
+                label = result[0]['label'].upper()
 
                 if label == 'POSITIVE':
                     headlines_df.at[idx, 'headline_sentiment'] = 1
@@ -89,18 +96,33 @@ class ModelLoader:
 
                 ## analyse emotions ##
                 results = self.emotion_model(headline)
-                # print(results)
+                # results = self.comments_emotion_model(headline)
 
                 for result in results:
                     label = result['label']
-                    if label in self.valid_emotions:
 
-                        if label not in self.emotions:
-                            self.emotions[label] = 0
+                    if label not in emotions:
+                        emotions[label] = 0
 
-                        self.emotions[label] += 1
+                    emotions[label] += 1
 
-                        headlines_df.at[idx, "emotion"] = label
+                    headlines_df.at[idx, "emotion"] = label
+
+
+
+                # results = self.emotion_model(headline)
+                # print(results)
+
+                # for result in results:
+                #     label = result['label']
+                #     if label in self.valid_emotions:
+
+                #         if label not in self.emotions:
+                #             self.emotions[label] = 0
+
+                #         self.emotions[label] += 1
+
+                #         headlines_df.at[idx, "emotion"] = label
 
 
                 pbar.update(1)
@@ -113,7 +135,7 @@ class ModelLoader:
         return {
             "headlines_score": int(headlines_score),
             # "description_score": int(description_score),
-            "emotions": self.emotions
+            "emotions": emotions
         }
     
 
@@ -121,17 +143,22 @@ class ModelLoader:
         return self.extract_keywords(batch_headlines)
     
     def get_comment(self, comment):
+
+        emotions = {}
+
         sentiment_result = self.sentiment_model(comment)
-        sentiment_label = sentiment_result[0]['label']
+        sentiment_label = sentiment_result[0]['label'].upper()
 
         emotion = None
-        emotion_result = self.emotion_model(comment)
+        emotion_result = self.comments_emotion_model(comment)
 
         # print(emotion_result)
 
-        emotion_label = emotion_result[0]['label']
-        if emotion_label in self.valid_emotions:
-            emotion = emotion_label
+        emotion = emotion_result[0]['label']
+
+        # emotion_label = emotion_result[0]['label']
+        # if emotion_label in self.valid_emotions:
+            # emotion = emotion_label
 
 
         return {

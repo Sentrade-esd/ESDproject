@@ -8,6 +8,7 @@ from flask import request, jsonify
 
 app = Flask(__name__)
 model_loader = ModelLoader()
+print("Model loaded")
 
 
 @app.route('/')

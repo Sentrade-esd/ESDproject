@@ -435,7 +435,7 @@ def automated_selling():
     sellAmount = body["currentPrice"]
     
     # Checking where stoploss is met, is for that company, and that the transaction is open
-    transactions = db.session.query(Transaction).filter(Transaction.StopLossSentimentThreshold >= threshold, Transaction.Comapny==company, Transaction.SellAmount.is_(None)).all()
+    transactions = db.session.query(Transaction).filter(Transaction.StopLossSentimentThreshold >= threshold, Transaction.Company==company, Transaction.SellAmount.is_(None)).all()
 
     # Get company ticker
     # key = "YJ3Q75JEFR08G0VB"

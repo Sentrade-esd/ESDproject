@@ -56,24 +56,35 @@ const sentiment_methods = {
     //     }, delay);
     // },
 
+    combine_emotions : async (a, b) => {
+        let result = {...a};
+
+        for (let key in b) {
+            if (result.hasOwnProperty(key)) {
+                result[key] += b[key];
+            } else {
+                result[key] = b[key];
+            }
+        }
+
+        return result;
+    },
+
     upsert_data: async (collection, filter, replacement) => {
         // console.log('Attempting to upsert data');
-        collection.findOneAndReplace(
-            filter,
-            replacement,
-            { upsert: true },
-            function(err, doc) {
-                if (err) {
-                    console.error(err);
-                    console.log("Retrying in 5 seconds...");
-                    setTimeout(function() {
-                        sentiment_methods.upsert_data(collection, filter, replacement);
-                    }, 5000);
-                } else {
-                    console.log('Document replaced or inserted: ', doc);
-                }
-            }
-        )
+        try {
+            const doc = await collection.findOneAndReplace(
+                filter, 
+                replacement, 
+                { new: true, upsert: true }
+            );
+            // console.log('Document replaced or inserted: ', doc);
+            return doc;
+        } catch (err) {
+            console.error(err);
+            console.log("Retrying in 5 seconds...");
+            setTimeout(() => sentiment_methods.upsert_data(collection, filter, replacement), 5000);
+        }
     },
     
     start_amqp: () => {
@@ -210,8 +221,12 @@ const sentiment_methods = {
                         
                         console.log("comment exists");
     
-                        // override existing values with .replaceOnce method
                         exisiting_comments.sentiment_score += results.score;
+
+                        if (exisiting_comments.emotion[results.emotion] == undefined) {
+                            exisiting_comments.emotion[results.emotion] = 0;
+                        }
+
                         exisiting_comments.emotion[results.emotion] += 1;
         
                         // let updateComment = await Comment.replaceOne({_id: exisiting_comments.id}, {
@@ -231,6 +246,8 @@ const sentiment_methods = {
                             sentiment_score: exisiting_comments.sentiment_score,
                             emotion: exisiting_comments.emotion
                         };
+
+                        console.log (replacement)
     
                         sentiment_methods.upsert_data(Comment, filter, replacement);
                         // return res.json({ result: exisiting_comments });
@@ -258,10 +275,14 @@ const sentiment_methods = {
                             datetime: Date.now(),
                             search: search_term,
                             sentiment_score: results.score,
-                            emotion: {"anger": 0, "joy": 0, "sadness": 0, "optimism": 0}
+                            emotion: {}
                         };
 
                         replacement.sentiment_score += results.score;
+                        if (replacement.emotion[results.emotion] == undefined) {
+                            replacement.emotion[results.emotion] = 0;
+                        }
+
                         replacement.emotion[results.emotion] += 1;
 
                         sentiment_methods.upsert_data(Comment, filter, replacement);
@@ -290,10 +311,14 @@ const sentiment_methods = {
                         datetime: Date.now(),
                         search: search_term,
                         sentiment_score: results.score,
-                        emotion: {"anger": 0, "joy": 0, "sadness": 0, "optimism": 0}
+                        emotion: {}
                     };
 
                     replacement.sentiment_score += results.score;
+                    if (replacement.emotion[results.emotion] == undefined) {
+                        replacement.emotion[results.emotion] = 0;
+                    }
+
                     replacement.emotion[results.emotion] += 1;
 
                     sentiment_methods.upsert_data(Comment, filter, replacement);
@@ -410,13 +435,16 @@ const sentiment_methods = {
 
         const response = await axios.get(url, { params: { company } });
 
-        return response.data;
+        // console.log(response);
+
+        return response;
 
     },
 
     triggerStoploss: async (search, size, currentPrice) => {
         const url = `${sentiment_methods.transactions_url}/transaction/trigger`;
 
+        console.log("triggering stop loss: " + url);
         axios.post(url, { search, size, currentPrice });
 
     },
