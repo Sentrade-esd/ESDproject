@@ -7,9 +7,7 @@ services:
   ##########################
 
   kong:
-    build: 
-      context: ./kongService
-      dockerfile: Dockerfile
+    image: chernise/esdproject-kong:latest
     hostname: kong
     ports:
       - "8000:8000"
@@ -23,9 +21,7 @@ services:
   ##########################
 
   watchlist:
-    build: 
-      context: ./notificationService/watchlist
-      dockerfile: Dockerfile
+    image: chernise/esdproject-watchlist:latest
     command: npm start
     ports:
       - 3000:3000
@@ -37,9 +33,7 @@ services:
     restart: unless-stopped
   
   notification_manager:
-    build: 
-      context: ./notificationService/manage_notifications
-      dockerfile: Dockerfile
+    image: chernise/esdproject-notification_manager:latest
     command: npm start
     ports:
       - 3001:3001
@@ -54,9 +48,7 @@ services:
     restart: unless-stopped
 
   telebot:
-    build: 
-      context: ./notificationService/telebot_esd
-      dockerfile: Dockerfile
+    image: chernise/esdproject-telebot:latest
     command: npm start
     ports:
       - 3002:3002
@@ -69,9 +61,7 @@ services:
     # restart: unless-stopped
 
   watchlist_db:
-    build:
-      context: ./notificationService
-      dockerfile: watchlistDBDockerfile
+    image: chernise/esdproject-watchlist_db:latest
     hostname: watchlist_db
     ports:
       - "27019:27017"
@@ -91,9 +81,7 @@ services:
   ##########################
 
   rabbitmq:
-    build:
-      context: ./rabbitMQ
-      dockerfile: Dockerfile
+    image: chernise/esdproject-rabbitmq:latest
     ports:
       - '5672:5672'
       - '15672:15672'
@@ -113,9 +101,7 @@ services:
 
 
   sentiment_app:
-    build: 
-      context: ./sentimentService/sentiment_express
-      dockerfile: Dockerfile
+    image: chernise/esdproject-sentiment_app:latest
     command: npm start
     ports:
       - "5001:5001"
@@ -135,9 +121,7 @@ services:
     restart: unless-stopped
 
   sentiment_service:
-    build: 
-      context: ./sentimentService/sentiment_service
-      dockerfile: Dockerfile
+    image: chernise/esdproject-sentiment_service:latest
     command: gunicorn -w 1 --threads 2 -b :5002 --timeout 600 sentimentApp:app
     hostname: sentiment_service
     ports:
@@ -147,15 +131,12 @@ services:
     restart: unless-stopped
 
   scraper:
-    # platform: linux/x86_64
-    build:
-      context: ./sentimentService/scraper
-      dockerfile: Dockerfile
+    image: chernise/esdproject-scraper:latest
     ports:
       - "5000:5000"
     command: ["node", "app.js"]
     environment:
-      - ALPHA_VANTAGE_API_KEY=key
+      - ALPHA_VANTAGE_API_KEY=youralphavantageapikey
       - PORT=5000
       - DB_URL=scraper_db:27017
     restart: unless-stopped
@@ -165,9 +146,7 @@ services:
       - kong_network
 
   sentiment_db:
-    build:
-      context: ./sentimentService
-      dockerfile: sentimentDBDockerfile
+    image: chernise/esdproject-sentiment_db:latest
     hostname: sentiment_db
     ports:
       - "27017:27017"
@@ -182,9 +161,7 @@ services:
     restart: unless-stopped
 
   scraper_db:
-    build:
-      context: ./sentimentService
-      dockerfile: scraperDBDockerfile
+    image: chernise/esdproject-scraper_db:latest
     hostname: scraper_db
     ports:
       - "27018:27017"
@@ -204,9 +181,7 @@ services:
   ##########################
 
   user_service:
-    build: 
-      context: ./userServices/User
-      dockerfile: Dockerfile
+    image: chernise/esdproject-user_service:latest
     command: gunicorn -w 1 --threads 2 -b :6000 --timeout 600 User:app
     hostname: user_service
     ports:
@@ -219,9 +194,7 @@ services:
     restart: unless-stopped
 
   user_db:
-    build: 
-      context: ./userServices
-      dockerfile: userDBDockerfile
+    image: chernise/esdproject-user_db:latest
     hostname: user_db
     ports:
       - 5432:5432
@@ -237,9 +210,7 @@ services:
     restart: unless-stopped
 
   comments_service:
-    build: 
-      context: ./userServices/comments
-      dockerfile: Dockerfile  
+    image: chernise/esdproject-comments_service:latest
     command: npm start
     ports:
       - "6001:6001"
@@ -253,9 +224,7 @@ services:
     restart: unless-stopped
     
   comments_db:
-    build: 
-      context: ./userServices
-      dockerfile: commentsDBDockerfile
+    image: chernise/esdproject-sentiment_db:latest
     hostname: comments_db
     ports:  
       - "27020:27017"
@@ -270,9 +239,7 @@ services:
     restart: unless-stopped
 
   transactions:
-    build: 
-      context: ./userServices/Transactions
-      dockerfile: Dockerfile
+    image: chernise/esdproject-transactions:latest
     command: gunicorn -w 1 --threads 2 -b :6002 --timeout 600 transaction:app
     hostname: user_service
     ports:
@@ -287,9 +254,7 @@ services:
       - follow_trades_network
 
   transactions_db:
-    build: 
-      context: ./userServices
-      dockerfile: transactionsDBDockerfile
+    image: chernise/esdproject-transactions_db:latest
     hostname: transactions_db
     restart: always
     ports:
@@ -309,9 +274,7 @@ services:
   ##########################
 
   follow_trades:
-    build: 
-      context: ./follow/followTrades
-      dockerfile: Dockerfile  
+    image: chernise/esdproject-follow_trades:latest
     command: npm start
     ports:
       - "4001:4001"
@@ -327,25 +290,20 @@ services:
       - SENATOR_URL=http://senator_filings:4002/
   
   senator_filings:
-    build: 
-      context: ./follow/senatorFilings
-      dockerfile: Dockerfile  
+    image: chernise/esdproject-senator_filings:latest
     command: gunicorn -w 1 --threads 2 -b :4002 --timeout 600 main:app
     hostname: senator_filings
     ports:
       - "4002:4002"
     networks:
       - follow_trades_network
-  
-  
+
   ##########################
   ####         UI     ######
   ##########################
 
   app:
-    build:
-      context: ./UI
-      dockerfile: Dockerfile
+    image: chernise/esdproject-app:latest
     ports:
       - "80:80"
     volumes:
@@ -356,6 +314,8 @@ services:
     environment:
       - KONG_URL=http://kong:8000/
 
+
+  
 
 volumes:
   watchlist_db:

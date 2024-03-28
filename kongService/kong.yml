@@ -31,7 +31,7 @@ services:
         methods:
           - GET
         paths:
-          - /scraper/scrapeCurrentPrice/:ticker
+          - /scraper/scrapeCurrentPrice
         strip_path: false
 
   - name: watchlist-service
@@ -53,14 +53,14 @@ services:
 
       - name: watchlist-getuser
         paths:
-          - /watchlist/user/:id
+          - /watchlist/user
         methods:
           - GET
         strip_path: false
 
       - name: watchlist-getcompany
         paths:
-          - /watchlist/company/:company
+          - /watchlist/company
         methods:
           - GET
         strip_path: false
@@ -78,10 +78,9 @@ services:
 
       - name: get-user
         paths:
-          - /user/(.*)
+          - /user/getUser
         methods:
           - GET
-          - POST
         strip_path: false
 
 
@@ -97,7 +96,7 @@ services:
 
       - name: get-company
         paths:
-          - /comments/:company
+          - /comments/
         methods:
           - GET
         strip_path: false
@@ -114,14 +113,14 @@ services:
 
       - name: transaction-by-id-route
         paths:
-        - /transaction/:UserID
+        - /transaction
         methods:
         - GET
         strip_path: false
 
       - name: transaction-total-by-id-route
         paths:
-        - /transaction/total/:UserID
+        - /transaction/total
         methods:
         - GET
         strip_path: false
@@ -169,6 +168,16 @@ services:
         - POST
         paths:
         - /followTrade/buy
+        strip_path: false
+
+  - name: telebot-service
+    url: http://telebot:3002/
+    routes: 
+      - name: register-user
+        methods:
+          - POST
+        paths:
+          - /register       #### temporary
         strip_path: false
 
   
