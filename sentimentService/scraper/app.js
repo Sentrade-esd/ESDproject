@@ -238,8 +238,15 @@ async function stockPrice(query, targetDate){
 }
 
 // Handling to get the currentPrice from yahoo finance
-app.get('/scraper/scrapeCurrentPrice/:ticker', async (req, res) => { 
-    const {ticker} = req.params;
+app.get('/scraper/scrapeCurrentPrice', async (req, res) => { 
+    // const {ticker} = req.params;
+    let ticker = req.query.ticker
+    let company = req.query.company
+
+    if (!ticker){
+        ticker = convertCompanyToTicker(company)
+    }
+
     console.log("Ticker: ", ticker);
     // run scrapping script
     // return response
@@ -247,6 +254,21 @@ app.get('/scraper/scrapeCurrentPrice/:ticker', async (req, res) => {
     console.log('Current Price: ', response);
     res.send(response);
 })
+
+async function convertCompanyToTicker(company){
+
+    // Get company ticker
+    key = "YJ3Q75JEFR08G0VB"
+    // let company = company
+    let url = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${company}&apikey=${key}`
+
+    const response = await axios.get(url);
+    ticker = response.data.bestMatches[0]["1. symbol"];
+
+    return ticker
+
+}
+
 
 async function scrapePrice(query) {
     // let browser = await puppeteer.launch({
