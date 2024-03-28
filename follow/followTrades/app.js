@@ -94,6 +94,7 @@ async function followTrade(userId, ticker, targetDate, buyAmountPerFiling, maxBu
             console.log(`${TRANSACTION_URL}followTradeTransaction`);
             console.log(body);
             const response = await axios.post(`${TRANSACTION_URL}followTradeTransaction`, body);
+            
             console.log(response.data);
             boughtAmount = response.data['boughtAmount'];
             fractionalSharesBought = response.data['fractionalSharesBought'];

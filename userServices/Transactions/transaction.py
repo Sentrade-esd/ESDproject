@@ -251,8 +251,7 @@ def check_if_bought(UserID, Company):
 @app.route("/transaction/newTrade", methods=["POST"])
 def update_transaction():
     data = request.get_json()
-    ticker = data["ticker"]
-    # cur_price = get_current_price(ticker)
+    ticker = data["Ticker"]
     cur_price = data["currentPrice"]
     stocks_bought = data["buyAmount"] / cur_price
 
@@ -290,7 +289,7 @@ def update_transaction():
 @app.route("/checkBalance", methods=["POST"])
 def checkBalance():
     data = request.get_json()
-    UserID = data["UserID"]
+    UserID = data["userId"]
     print(UserID, type(UserID))
     buy_amt = data["maxBuyAmount"]
     print(type(buy_amt))
@@ -452,11 +451,11 @@ def automated_selling():
     return jsonify(transaction_list)
 
 
-def get_current_price(ticker):
-    url = f"http://localhost:3000/scraper/scrapeCurrentPrice/{ticker}"
-    price = requests.get(url).text
-    price_float = float(price)
-    return price_float
+# def get_current_price(ticker):
+#     url = f"http://localhost:3000/scraper/scrapeCurrentPrice/{ticker}"
+#     price = requests.get(url).text
+#     price_float = float(price)
+#     return price_float
 
 
 

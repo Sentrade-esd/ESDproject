@@ -241,7 +241,7 @@ async function stockPrice(query, targetDate){
 app.get('/scraper/scrapeCurrentPrice', async (req, res) => { 
     // const {ticker} = req.params;
     let ticker = req.query.ticker
-    let company = req.query.company
+    let company = req.query.company || null
 
     if (!ticker){
         ticker = convertCompanyToTicker(company)
