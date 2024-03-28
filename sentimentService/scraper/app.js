@@ -31,7 +31,7 @@ const app = express();
 // Handling GET request
 app.get('/', (req, res) => { 
 	res.send('A Google News Scraper '
-		+ '/scrape/:query to have a suprise') 
+		+ '/scrape/:query/:ticker to have a suprise') 
 	res.end()
 })
 
@@ -49,12 +49,14 @@ app.get ('/scraper/getNewsFromDB/:ticker', async (req, res) => {
 app.get('/scraper/getNews/:query/:ticker', async (req, res) => { 
     const {query, ticker} = req.params;
     console.log(query, ticker);
+    
     // run scrapping script
-    // return response
     let response = await scrape(query);
+
     // call db endpoint to add to db for news
     console.log('response: ', response);
     let addToDBResponse = await scraperDBMethods.add(ticker, query, response);
+
     // console.log('addToDBresponse', addToDBResponse);
     res.send(response);
 })
@@ -240,19 +242,26 @@ async function stockPrice(query, targetDate){
 // Handling to get the currentPrice from yahoo finance
 app.get('/scraper/scrapeCurrentPrice', async (req, res) => { 
     // const {ticker} = req.params;
-    let ticker = req.query.ticker
+    let ticker = req.query.ticker || null
     let company = req.query.company || null
 
-    if (!ticker){
-        ticker = convertCompanyToTicker(company)
+    if (!ticker && company){
+        console.log("getting ticker");
+        ticker = await convertCompanyToTicker(company)
     }
 
     console.log("Ticker: ", ticker);
-    // run scrapping script
-    // return response
-    let response = await scrapePrice(ticker);
-    console.log('Current Price: ', response);
-    res.send(response);
+
+    try {
+        let response = await scrapePrice(ticker);
+        console.log('Current Price: ', response);
+        res.send(response);
+    } catch (error) {
+        console.error(error);
+        // return 500 with error message
+        res.status(500).send("Error: " + error);
+    }
+
 })
 
 async function convertCompanyToTicker(company){

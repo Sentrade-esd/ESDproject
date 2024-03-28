@@ -114,6 +114,7 @@ services:
       - DB_URL=sentiment_db:27017
       - AMQP_SERVER=amqp://rabbitmq:5672
       - SCRAPER_URL=http://scraper:5000
+      - TRANSACTION_URL=http://transactions:6002
     depends_on:
       - sentiment_db
       - sentiment_service

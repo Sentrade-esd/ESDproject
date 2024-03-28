@@ -427,7 +427,7 @@ def follow_trade_transaction():
 
 @app.route("/transaction/trigger", methods=['POST'])
 def automated_selling():
-
+    print ("Automated Selling")
     body = request.get_json()
 
     company = body["search"]
@@ -438,17 +438,17 @@ def automated_selling():
     transactions = db.session.query(Transaction).filter(Transaction.StopLossSentimentThreshold >= threshold, Transaction.Comapny==company, Transaction.SellAmount.is_(None)).all()
 
     # Get company ticker
-    key = "YJ3Q75JEFR08G0VB"
+    # key = "YJ3Q75JEFR08G0VB"
     
-    url = f'https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords={company}&apikey={key}'
-    r = requests.get(url)
-    data = r.json()
-    ticker = data['bestMatches'][0]["1. symbol"]
-    # print(data['bestMatches'][0]["1. symbol"])
+    # url = f'https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords={company}&apikey={key}'
+    # r = requests.get(url)
+    # data = r.json()
+    # ticker = data['bestMatches'][0]["1. symbol"]
+    # # print(data['bestMatches'][0]["1. symbol"])
     
     
-    # Get sell price
-    # sellAmount = get_current_price(ticker)
+    # # Get sell price
+    # # sellAmount = get_current_price(ticker)
 
     
 
