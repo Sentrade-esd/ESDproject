@@ -7,16 +7,11 @@ services:
   ##########################
 
   kong:
-    image: chernise/esdproject-kong:latest
+    image: nmywrld/esdproject-kong:latest
     hostname: kong
     ports:
       - "8000:8000"
       - "8001:8001"
-    environment:
-      KONG_DATABASE: "off"
-      KONG_DECLARATIVE_CONFIG: /etc/kong/kong.yml
-    volumes:
-      - ./kongService/kong.yml:/etc/kong/kong.yml
     networks:
       - kong_network
     restart: unless-stopped
@@ -26,7 +21,7 @@ services:
   ##########################
 
   watchlist:
-    image: chernise/esdproject-watchlist:latest
+    image: nmywrld/esdproject-watchlist:latest
     command: npm start
     ports:
       - 3000:3000
@@ -38,7 +33,7 @@ services:
     restart: unless-stopped
   
   notification_manager:
-    image: chernise/esdproject-notification_manager:latest
+    image: nmywrld/esdproject-notification_manager:latest
     command: npm start
     ports:
       - 3001:3001
@@ -53,7 +48,7 @@ services:
     restart: unless-stopped
 
   telebot:
-    image: chernise/esdproject-telebot:latest
+    image: nmywrld/esdproject-telebot:latest
     command: npm start
     ports:
       - 3002:3002
@@ -66,7 +61,7 @@ services:
     # restart: unless-stopped
 
   watchlist_db:
-    image: chernise/esdproject-watchlist_db:latest
+    image: nmywrld/esdproject-watchlist_db:latest
     hostname: watchlist_db
     ports:
       - "27019:27017"
@@ -86,7 +81,7 @@ services:
   ##########################
 
   rabbitmq:
-    image: chernise/esdproject-rabbitmq:latest
+    image: nmywrld/esdproject-rabbitmq:latest
     ports:
       - '5672:5672'
       - '15672:15672'
@@ -106,7 +101,7 @@ services:
 
 
   sentiment_app:
-    image: chernise/esdproject-sentiment_app:latest
+    image: nmywrld/esdproject-sentiment_app:latest
     command: npm start
     ports:
       - "5001:5001"
@@ -126,7 +121,7 @@ services:
     restart: unless-stopped
 
   sentiment_service:
-    image: chernise/esdproject-sentiment_service:latest
+    image: nmywrld/esdproject-sentiment_service:latest
     command: gunicorn -w 1 --threads 2 -b :5002 --timeout 600 sentimentApp:app
     hostname: sentiment_service
     ports:
@@ -136,7 +131,7 @@ services:
     restart: unless-stopped
 
   scraper:
-    image: chernise/esdproject-scraper:latest
+    image: nmywrld/esdproject-scraper:latest
     ports:
       - "5000:5000"
     command: ["node", "app.js"]
@@ -151,7 +146,7 @@ services:
       - kong_network
 
   sentiment_db:
-    image: chernise/esdproject-sentiment_db:latest
+    image: nmywrld/esdproject-sentiment_db:latest
     hostname: sentiment_db
     ports:
       - "27017:27017"
@@ -166,7 +161,7 @@ services:
     restart: unless-stopped
 
   scraper_db:
-    image: chernise/esdproject-scraper_db:latest
+    image: nmywrld/esdproject-scraper_db:latest
     hostname: scraper_db
     ports:
       - "27018:27017"
@@ -186,7 +181,7 @@ services:
   ##########################
 
   user_service:
-    image: chernise/esdproject-user_service:latest
+    image: nmywrld/esdproject-user_service:latest
     command: gunicorn -w 1 --threads 2 -b :6000 --timeout 600 User:app
     hostname: user_service
     ports:
@@ -199,7 +194,7 @@ services:
     restart: unless-stopped
 
   user_db:
-    image: chernise/esdproject-user_db:latest
+    image: nmywrld/esdproject-user_db:latest
     hostname: user_db
     ports:
       - 5432:5432
@@ -215,7 +210,7 @@ services:
     restart: unless-stopped
 
   comments_service:
-    image: chernise/esdproject-comments_service:latest
+    image: nmywrld/esdproject-comments_service:latest
     command: npm start
     ports:
       - "6001:6001"
@@ -229,7 +224,7 @@ services:
     restart: unless-stopped
     
   comments_db:
-    image: chernise/esdproject-sentiment_db:latest
+    image: nmywrld/esdproject-sentiment_db:latest
     hostname: comments_db
     ports:  
       - "27020:27017"
@@ -244,7 +239,7 @@ services:
     restart: unless-stopped
 
   transactions:
-    image: chernise/esdproject-transactions:latest
+    image: nmywrld/esdproject-transactions:latest
     command: gunicorn -w 1 --threads 2 -b :6002 --timeout 600 transaction:app
     hostname: user_service
     ports:
@@ -259,7 +254,7 @@ services:
       - follow_trades_network
 
   transactions_db:
-    image: chernise/esdproject-transactions_db:latest
+    image: nmywrld/esdproject-transactions_db:latest
     hostname: transactions_db
     restart: always
     ports:
@@ -279,7 +274,7 @@ services:
   ##########################
 
   follow_trades:
-    image: chernise/esdproject-follow_trades:latest
+    image: nmywrld/esdproject-follow_trades:latest
     command: npm start
     ports:
       - "4001:4001"
@@ -295,7 +290,7 @@ services:
       - SENATOR_URL=http://senator_filings:4002/
   
   senator_filings:
-    image: chernise/esdproject-senator_filings:latest
+    image: nmywrld/esdproject-senator_filings:latest
     command: gunicorn -w 1 --threads 2 -b :4002 --timeout 600 main:app
     hostname: senator_filings
     ports:
@@ -307,7 +302,17 @@ services:
   ####         UI     ######
   ##########################
 
-  # MISSING UI
+  app:
+    image: nmywrld/esdproject-app:latest
+    ports:
+      - "80:80"
+    volumes:
+      - .:/usr/src/app
+    command: ["nginx", "-g", "daemon off;"]
+    networks:
+      - kong_network
+    environment:
+      - KONG_URL=http://kong:8000/
 
   
 
