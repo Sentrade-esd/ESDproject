@@ -194,8 +194,10 @@ def add_new_transaction():
     UserID = data["UserID"]
     Company = data["Company"]
     Ticker = data["Ticker"]
-    sellAmount = get_current_price(Ticker)
+    # sellAmount = get_current_price(Ticker)
+    sellAmount = data["currentPrice"]
     TransactionID = data["TransactionID"]
+    
 
     transaction = Transaction.query.filter_by(UserID=UserID, Company=Company, TransactionID=TransactionID).first()
 
@@ -250,8 +252,10 @@ def check_if_bought(UserID, Company):
 def update_transaction():
     data = request.get_json()
     ticker = data["ticker"]
-    cur_price = get_current_price(ticker)
+    # cur_price = get_current_price(ticker)
+    cur_price = data["currentPrice"]
     stocks_bought = data["buyAmount"] / cur_price
+
 
     new_transaction = Transaction(
         UserID=data["UserID"],
@@ -410,6 +414,7 @@ def automated_selling():
 
     company = body["search"]
     threshold = body["size"]
+    sellAmount = body["currentPrice"]
     
     # Checking where stoploss is met, is for that company, and that the transaction is open
     transactions = db.session.query(Transaction).filter(Transaction.StopLossSentimentThreshold >= threshold, Transaction.Comapny==company, Transaction.SellAmount.is_(None)).all()
@@ -425,7 +430,7 @@ def automated_selling():
     
     
     # Get sell price
-    sellAmount = get_current_price(ticker)
+    # sellAmount = get_current_price(ticker)
 
     
 
