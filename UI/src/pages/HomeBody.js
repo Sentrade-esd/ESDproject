@@ -9,9 +9,12 @@ import "Assets/css/nucleo-icons.css";
 import "Assets/css/blk-design-system-pro-react.css";
 import NavBar from "Components/NavBar";
 import { useState, useEffect } from "react";
+import Navigation from "Components/Navigation";
 
 function HomeBody() {
   return (
+    <>
+    <Navigation></Navigation>
     <Container fluid>
       <Row>
         <Col xs={12} md={6}>
@@ -49,6 +52,7 @@ function HomeBody() {
         </Col>
       </Row>
     </Container>
+    </>
   );
 }
 export default HomeBody;

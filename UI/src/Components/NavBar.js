@@ -188,8 +188,7 @@ const NavBar = ({ transparent}) => {
         <Nav className="nav navbar-right" navbar>
         {!isLoggedIn ? (<NavItem>
             <NavLink
-            href="#pablo"
-            onClick={handleLogin}
+            onClick={() => setModalShow(true)}
             >
             Login
             </NavLink>
