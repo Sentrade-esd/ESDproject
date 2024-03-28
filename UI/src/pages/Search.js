@@ -5,7 +5,7 @@ import Col from "react-bootstrap/Col";
 import { Button } from 'react-bootstrap'
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
-import NavBar from 'components/NavBar';
+import NavBar from 'Components/NavBar';
 
 
 function Search() {

@@ -2,12 +2,12 @@ import React from 'react';
 // import Container from 'react-bootstrap/Container';
 // import Row from 'react-bootstrap/Row';
 // import Col from 'react-bootstrap/Col';
-// import money from '../assets/money.jpg';
-// import coolguy from '../assets/coolguy.jpg';
+// import money from '../Assets/money.jpg';
+// import coolguy from '../Assets/coolguy.jpg';
 // import '../styles/HomeBody.css';
-import "assets/css/nucleo-icons.css";
-import "assets/css/blk-design-system-pro-react.css";
-import NavBar from 'components/NavBar';
+import "Assets/css/nucleo-icons.css";
+import "Assets/css/blk-design-system-pro-react.css";
+import NavBar from 'Components/NavBar';
 import {useState, useEffect} from 'react';
 
 import {
@@ -206,7 +206,7 @@ function Home(){
                 playsInline="playsinline"
               >
                 <source
-                  src={require("../assets/video/Mt_Baker.mp4")}
+                  src={require("../Assets/video/Mt_Baker.mp4")}
                   type="video/mp4"
                 />
               </video>

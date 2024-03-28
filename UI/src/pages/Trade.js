@@ -4,7 +4,7 @@ import jsonData from '../test.json';
 // import WordCloud from 'react-wordcloud';
 import { useLocation } from 'react-router-dom';
 import { Form, Button } from 'react-bootstrap';
-import WordCloud from '../components/wordCloud.js';
+import WordCloud from '../Components/wordCloud.js';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
