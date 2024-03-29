@@ -95,7 +95,7 @@ app.post("/comments", async (req, res) => {
       { new: true, upsert: true }
     );
 
-    if (companyComments.commentsMade.length > 5) {
+    if (companyComments.commentsMade.length > 20) {
       companyComments.commentsMade.shift();
       await companyComments.save();
     }

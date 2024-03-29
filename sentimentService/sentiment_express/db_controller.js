@@ -8,13 +8,6 @@ const SentimentController = express.Router();
 
 
 try {
-    // findOneAndUpdate(
-    //     { _id: userID },
-    //     {
-    //       teleId: teleID,
-    //       $addToSet: { watchlistedCompanies: watchlistedCompany },
-    //     },
-    //     { new: true, upsert: true }
 
     // insert test document
     let newSentiment = {
@@ -32,11 +25,6 @@ try {
         newSentiment, 
         { new: true, upsert: true }, 
     );
-
-    // console.log("dropping comment");
-    // // drop collection
-    // Comment.collection.drop();
-    // Comment.createCollection();
 
     // insert test document
     let newComment = {
@@ -114,17 +102,30 @@ SentimentController.get("/sentiment_query", async (req, res) => {
         
             console.log("Inserting...");
         
-            const newSentiment = new Sentiment({
+            // const newSentiment = new Sentiment({
+            //     datetime: Date.now(),
+            //     search: search_term,
+            //     sentiment_score: results.results.headlines_score, // + results.results.description_score
+            //     emotion: results.results.emotions,
+            //     keyword: results.keyword_results
+            // });
+            // sentiments = newSentiment;
+        
+            // // await newSentiment.save();
+            // sentiment_methods.save_data(newSentiment);
+
+            const filter = { search: search_term };
+            const replacement = {
                 datetime: Date.now(),
                 search: search_term,
                 sentiment_score: results.results.headlines_score, // + results.results.description_score
                 emotion: results.results.emotions,
                 keyword: results.keyword_results
-            });
-            sentiments = newSentiment;
-        
-            // await newSentiment.save();
-            sentiment_methods.save_data(newSentiment);
+            };
+
+            sentiments = replacement
+
+            sentiment_methods.upsert_data(Sentiment, filter, replacement);
 
             // if (newSentiment) {
                 // set the result to the sentiments variable
@@ -163,6 +164,9 @@ SentimentController.get("/sentiment_query", async (req, res) => {
     
     if (sentiments && comments && !comments_flag) {
         console.log("combining sentiment and comments");
+
+        let comb_emotion = await sentiment_methods.combine_emotions(sentiments.emotion, comments.emotion);
+
         combined_sentiment = {
             search: search_term,
             sentiment_score: sentiments.sentiment_score + comments.sentiment_score,
@@ -176,12 +180,7 @@ SentimentController.get("/sentiment_query", async (req, res) => {
             //     "disgust": sentiments.emotion.disgust + comments.emotion.disgust,
             //     "love": sentiments.emotion.love + comments.emotion.love
             // },
-            emotion: {
-                "joy": sentiments.emotion.joy + comments.emotion.joy,
-                "anger": sentiments.emotion.anger + comments.emotion.anger,
-                "sadness": sentiments.emotion.sadness + comments.emotion.sadness,
-                "optimism": sentiments.emotion.optimism + comments.emotion.optimism
-            },
+            emotion: comb_emotion,
             keyword: sentiments.keyword
         }
         return res.json({sentiments: combined_sentiment, newsArticles: newsArticles});
@@ -197,86 +196,125 @@ SentimentController.get("/sentiment_query", async (req, res) => {
 
 });
 
-SentimentController.post("/sentiment_comment", async (req, res) => {
-    const comment = req.body.comment;
-    const search_term = req.body.search_term;
+// SentimentController.post("/sentiment_comment", async (req, res) => {
+//     const comment = req.body.comment;
+//     const search_term = req.body.search_term;
 
 
-    try {
-        const results = await sentiment_methods.analyse_comment(comment);
+//     try {
+//         const results = await sentiment_methods.analyse_comment(comment);
 
 
-        try {
-            // chekc if DB has a record
-            let exisiting_comments = await Comment.findOne({search: search_term});
+//         try {
+//             // chekc if DB has a record
+//             let exisiting_comments = await Comment.findOne({search: search_term});
 
-            if (exisiting_comments) {
+//             if (exisiting_comments) {
 
-                if ((Date.now() - exisiting_comments.datetime) / 1000 < 86400){
+//                 if ((Date.now() - exisiting_comments.datetime) / 1000 < 86400){
                     
-                    console.log("comment exists");
+//                     console.log("comment exists");
     
-                    // override existing values with .replaceOnce method
-                    exisiting_comments.sentiment_score += results.score;
-                    exisiting_comments.emotion[results.emotion] += 1;
+//                     exisiting_comments.sentiment_score += results.score;
+//                     exisiting_comments.emotion[results.emotion] += 1;
     
-                    let updateComment = await Comment.replaceOne({_id: exisiting_comments.id}, {
-                        datetime: exisiting_comments.datetime,
-                        search: exisiting_comments.search,
-                        sentiment_score: exisiting_comments.sentiment_score,
-                        emotion: exisiting_comments.emotion
-                    });
+//                     // let updateComment = await Comment.replaceOne({_id: exisiting_comments.id}, {
+//                     //     datetime: exisiting_comments.datetime,
+//                     //     search: exisiting_comments.search,
+//                     //     sentiment_score: exisiting_comments.sentiment_score,
+//                     //     emotion: exisiting_comments.emotion
+//                     // });
     
-                    console.log("saving existing comment");
-                    return res.json({ result: exisiting_comments });
-                } else {
-                    console.log("comment in db expired");
-                    await Comment.deleteOne({search: search_term});
+//                     // console.log("saving existing comment");
 
-                    let newComment = new Comment({
-                        datetime: Date.now(),
-                        search: search_term,
-                        sentiment_score: results.score,
-                        // emotion: {"joy":0, "others":0, "surprise":0, "sadness":0, "fear":0, "anger":0, "disgust":0, "love":0}
-                        emotion: {"anger": 0, "joy": 0, "sadness": 0, "optimism": 0}
-                    });
+//                     // upsert
+//                     const filter = { search: search_term };
+//                     const replacement = {
+//                         datetime: exisiting_comments.datetime,
+//                         search: exisiting_comments.search,
+//                         sentiment_score: exisiting_comments.sentiment_score,
+//                         emotion: exisiting_comments.emotion
+//                     };
 
-                    newComment.emotion[results.emotion] += 1;
+//                     sentiment_methods.upsert_data(Comment, filter, replacement);
 
-                    console.log("saving new comment");
-                    // await newComment.save();
-                    sentiment_methods.save_data(newComment);
+//                     return res.json({ result: replacement });
+//                 } else {
+//                     console.log("comment in db expired");
+//                     await Comment.deleteOne({search: search_term});
 
-                    return res.json({ result: newComment });
-                }
-            } else {
-                // if no record exists, create a new one
-                let newComment = new Comment({
-                    datetime: Date.now(),
-                    search: search_term,
-                    sentiment_score: results.score,
-                    // emotion: {"joy":0, "others":0, "surprise":0, "sadness":0, "fear":0, "anger":0, "disgust":0, "love":0}
-                    emotion: {"anger": 0, "joy": 0, "sadness": 0, "optimism": 0},
-                });
+//                     // let newComment = new Comment({
+//                     //     datetime: Date.now(),
+//                     //     search: search_term,
+//                     //     sentiment_score: results.score,
+//                     //     // emotion: {"joy":0, "others":0, "surprise":0, "sadness":0, "fear":0, "anger":0, "disgust":0, "love":0}
+//                     //     emotion: {"anger": 0, "joy": 0, "sadness": 0, "optimism": 0}
+//                     // });
+
+//                     // newComment.emotion[results.emotion] += 1;
+
+//                     // console.log("saving new comment");
+//                     // // await newComment.save();
+//                     // sentiment_methods.save_data(newComment);
+
+//                     // upsert 
+//                     const filter = { search: search_term };
+//                     const replacement = {
+//                         datetime: Date.now(),
+//                         search: search_term,
+//                         sentiment_score: results.score,
+//                         emotion: {"anger": 0, "joy": 0, "sadness": 0, "optimism": 0}
+//                     };
+
+//                     replacement.sentiment_score += results.score;
+//                     replacement.emotion[results.emotion] += 1;
+
+//                     sentiment_methods.upsert_data(Comment, filter, replacement);
+
+//                     return res.json({ result: replacement });
+//                 }
+//             } else {
+//                 // if no record exists, create a new one
+//                 // let newComment = new Comment({
+//                 //     datetime: Date.now(),
+//                 //     search: search_term,
+//                 //     sentiment_score: results.score,
+//                 //     // emotion: {"joy":0, "others":0, "surprise":0, "sadness":0, "fear":0, "anger":0, "disgust":0, "love":0}
+//                 //     emotion: {"anger": 0, "joy": 0, "sadness": 0, "optimism": 0},
+//                 // });
     
-                newComment.emotion[results.emotion] += 1;
+//                 // newComment.emotion[results.emotion] += 1;
     
-                console.log("saving new comment");
-                // await newComment.save();
-                sentiment_methods.save_data(newComment);
+//                 // console.log("saving new comment");
+//                 // // await newComment.save();
+//                 // sentiment_methods.save_data(newComment);
+
+//                 // upsert
+//                 const filter = { search: search_term };
+//                 const replacement = {
+//                     datetime: Date.now(),
+//                     search: search_term,
+//                     sentiment_score: results.score,
+//                     emotion: {"anger": 0, "joy": 0, "sadness": 0, "optimism": 0}
+//                 };
+
+//                 replacement.sentiment_score += results.score;
+//                 replacement.emotion[results.emotion] += 1;
+
+//                 sentiment_methods.upsert_data(Comment, filter, replacement);
     
-                return res.json({ result: newComment });
-            }
+//                 return res.json({ result: replacement });
+//             }
 
-        } catch (error) {
-            return res.status(500).json({ error: "Internal Server Error" });
-        }
+//         } catch (error) {
+//             return res.status(500).json({ error: "Internal Server Error" });
+//         }
 
-    } catch (error) {
+//     } catch (error) {
         
-    }
+//     }
 
-});
+// });
 
 
 export default SentimentController;

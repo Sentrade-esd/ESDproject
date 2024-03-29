@@ -4,6 +4,7 @@ from datetime import datetime
 # from flask_cors import CORS
 import os
 import json
+import requests
 
 app = Flask(__name__)
 PORT = os.environ.get('PORT', 5004)
@@ -57,9 +58,10 @@ class Transaction(db.Model):
     BuyAmount = db.Column('buyamount', db.Float(precision=2), nullable=True)
     SellAmount = db.Column('sellamount', db.Float(precision=2), nullable=True)
     StopLossSentimentThreshold = db.Column('stoplosssentimentthreshold', db.Float(precision=2), nullable=True)
+    StocksHeld = db.Column('stocksheld', db.Float(precision=2), nullable=True)
     TotalAccountValue = db.Column('totalaccountvalue', db.Float(precision=2), nullable=False)
 
-    def __init__(self, UserID, Email, Company, DateTimestamp, BuyAmount, SellAmount, StopLossSentimentThreshold, TotalAccountValue):
+    def __init__(self, UserID, Email, Company, DateTimestamp, BuyAmount, SellAmount, StopLossSentimentThreshold, StocksHeld, TotalAccountValue):
         self.UserID = UserID
         self.Email = Email
         self.Company = Company
@@ -67,13 +69,14 @@ class Transaction(db.Model):
         self.BuyAmount = BuyAmount
         self.SellAmount = SellAmount
         self.StopLossSentimentThreshold = StopLossSentimentThreshold
+        self.StocksHeld = StocksHeld
         self.TotalAccountValue = TotalAccountValue
 
     def json(self):
         return {"TransactionID": self.TransactionID, "UserID": self.UserID, 
                 "Email": self.Email, "Company": self.Company, "DateTimestamp": self.DateTimestamp,
                 "BuyAmount": self.BuyAmount, "SellAmount": self.SellAmount,
-                "StopLossSentimentThreshold": self.StopLossSentimentThreshold,
+                "StopLossSentimentThreshold": self.StopLossSentimentThreshold, "StocksHeld": self.StocksHeld,
                 "TotalAccountValue": self.TotalAccountValue}
 
 @app.route("/transaction")
@@ -169,6 +172,7 @@ def setup_new_user():
             BuyAmount=None,
             SellAmount=None,
             StopLossSentimentThreshold=None,
+            StocksHeld=None,
             TotalAccountValue=1000
         )
     db.session.add(new_transaction)
@@ -185,70 +189,42 @@ def setup_new_user():
 
 @app.route("/transaction/updateTrade", methods=["POST"])
 def add_new_transaction():
-    data = request.get_json()
-
-    # if (data["newUser"]):
-    #     new_transaction = Transaction(
-    #         UserID=data["UserID"],
-    #         Email=data["Email"],
-    #         Company=None,
-    #         DateTimestamp=datetime.now(), 
-    #         BuyAmount=None,
-    #         SellAmount=None,
-    #         StopLossSentimentThreshold=None,
-    #         TotalAccountValue=1000
-    #     )
-    #     db.session.add(new_transaction)
-    #     db.session.commit() 
-
-    #     return jsonify(
-    #         {
-    #             "code": 200,
-    #             "data": new_transaction.json(),
-    #             "message": "New user successfully added."
-    #         }
-    #     )
-
-    # else: 
+    data = request.get_json() 
 
     UserID = data["UserID"]
     Company = data["Company"]
+    Ticker = data["Ticker"]
+    # sellAmount = get_current_price(Ticker)
+    sellAmount = data["currentPrice"]
+    TransactionID = data["TransactionID"]
+    
 
-    transaction = Transaction.query.filter_by(UserID=UserID, Company=Company).first()
-
+    transaction = Transaction.query.filter_by(UserID=UserID, Company=Company, TransactionID=TransactionID).first()
 
     if (transaction):
-        transaction.Company = data["Company"]
-        transaction.DateTimestamp = datetime.now()
-        transaction.SellAmount = data["sellAmount"]
-        transaction.TotalAccountValue = get_current_account_value(data["UserID"]) + data["sellAmount"]
+        if (transaction.StocksHeld):
+            transaction.Company = data["Company"]
+            transaction.DateTimestamp = datetime.now()
+            transaction.SellAmount = sellAmount * Transaction.StocksHeld
+            transaction.StocksHeld = 0
+            transaction.TotalAccountValue = get_current_account_value(data["UserID"]) + Transaction.SellAmount
 
-    # if (check_if_bought(UserID, Company)):
-        # update_transaction = Transaction(
-        #         UserID=data["UserID"],
-        #         Email=data["Email"],
-        #         Company=data["Company"],
-        #         # DateTimestamp=data["date"], 
-        #         DateTimestamp=datetime.now(),
-        #         # BuyAmount=data["buyAmount"], 
-        #         SellAmount=data["sellAmount"],
-        #         # StopLossSentimentThreshold=data["Threshold"],
-        #         TotalAccountValue= get_current_account_value(data["UserID"]) - data["sellAmount"]
-        #     )
-        
-        
+            db.session.commit() 
 
-
-        # db.session.add(update_transaction)
-        db.session.commit() 
-
-        return jsonify(
-        {
-            "code": 200,
-            "data": transaction.json(),
-            "message": "Transaction Updated."
-        }
-    )        
+            return jsonify(
+            {
+                "code": 200,
+                "data": transaction.json(),
+                "message": "Transaction Updated."
+            }
+        )
+        else:
+            return jsonify(
+            {
+                "code": 400,
+                "message": "Trying to sell more stocks than held.",
+            }
+        )          
 
 
 
@@ -275,7 +251,10 @@ def check_if_bought(UserID, Company):
 @app.route("/transaction/newTrade", methods=["POST"])
 def update_transaction():
     data = request.get_json()
-    
+    ticker = data["Ticker"]
+    cur_price = data["currentPrice"]
+    stocks_bought = data["buyAmount"] / cur_price
+
 
     new_transaction = Transaction(
         UserID=data["UserID"],
@@ -286,6 +265,7 @@ def update_transaction():
         BuyAmount=data["buyAmount"],
         SellAmount=None,  
         StopLossSentimentThreshold=data["Threshold"],
+        StocksHeld = stocks_bought,
         TotalAccountValue = get_current_account_value(data["UserID"]) - data["buyAmount"]
     )
 
@@ -309,7 +289,7 @@ def update_transaction():
 @app.route("/checkBalance", methods=["POST"])
 def checkBalance():
     data = request.get_json()
-    UserID = data["UserID"]
+    UserID = data["userId"]
     print(UserID, type(UserID))
     buy_amt = data["maxBuyAmount"]
     print(type(buy_amt))
@@ -343,7 +323,7 @@ def follow_trade_transaction():
 
     data = request.get_json()
     print("DATA IS HERE:", data)
-    UserID = data['data']['UserID']
+    UserID = data['data']['userId']
     print('HAHAHAHAHAHAHA STARTING NOW')
     print(UserID)
 
@@ -378,19 +358,43 @@ def follow_trade_transaction():
     # Sell amount, bought amonunt, total account value, company
     # print(sellAmount)
 
-    # Need to get company name sent here so I can do matching
-    transaction = db.session.query(Transaction).filter_by(UserID=UserID).order_by(Transaction.DateTimestamp.desc()).first()
+
+
+    # transaction = db.session.query(Transaction).filter_by(UserID=UserID).order_by(Transaction.DateTimestamp.desc()).first()
+    
+    company=data["data"]["company"]
+    email = data["data"]["email"]
+    
+    last_transaction = db.session.query(Transaction).filter_by(UserID=UserID).order_by(Transaction.DateTimestamp.desc()).first()
+
+    # If there was a last transaction, use its 'TotalAccountValue'
+    if last_transaction is not None:
+        total_account_value = last_transaction.TotalAccountValue + profit_loss
+    else:
+        # handle case where there is no last transaction
+        total_account_value = 1000 + profit_loss  # Add 1000 since setup also gives 1000
+
+    transaction = Transaction(UserID=UserID, Email=email, Company=company, BuyAmount=bought_amount, DateTimestamp=datetime.now(),
+                        SellAmount=sellAmount, StopLossSentimentThreshold=0, StocksHeld=0, TotalAccountValue=total_account_value)
+
+
+    # Need to send both company name and ticker
+    ticker = data["data"]["ticker"]
 
     # Update the transaction details in the database
-    if transaction:
-        # print(data['ticker'])
-        print(data['data']['ticker'])
-        transaction.Company = data['data']['ticker']
-        transaction.BuyAmount = bought_amount
-        transaction.SellAmount = sellAmount
-        transaction.TotalAccountValue = transaction.TotalAccountValue - max_buy_amount + sellAmount  # Assume the total account value gets updated like this
+    # if transaction:
+    #     # print(data['ticker'])
+    #     print(data['data']['ticker'])
+    #     transaction.Company = company
+    #     transaction.BuyAmount = bought_amount
+    #     transaction.SellAmount = sellAmount
+    #     transaction.StocksHeld = total_percentage_of_stock
+    #     transaction.TotalAccountValue = transaction.TotalAccountValue - max_buy_amount + sellAmount  # Assume the total account value gets updated like this
 
-        db.session.commit()
+        # db.session.commit()
+    
+    db.session.add(transaction)
+    db.session.commit()
 
     # return jsonify(
     #     {
@@ -417,37 +421,60 @@ def follow_trade_transaction():
         }
     ), {"PnL":"{:.2f}".format(profit_loss), "fractionalSharesBought":"{:.2f}".format(total_percentage_of_stock), "boughtAmount":"{:.2f}".format(bought_amount), "sellAmount":"{:.2f}".format(sellAmount)}
 
-# @app.route("/transaction/trigger", methods=['POST'])
-# def automated_selling():
+# def check_open_transactions(Company, Size):
+#     transaction = db.session.query(Transaction).filter_by(Transaction.Company==Company, Transaction.StopLossSentimentThreshold >=Size).all()
+#     return transaction
 
-#     body = request.get_json()
+@app.route("/transaction/trigger", methods=['POST'])
+def automated_selling():
+    print ("Automated Selling")
+    body = request.get_json()
 
-#     company = body["search"]
-#     threshold = body["size"]
+    company = body["search"]
+    threshold = body["size"]
+    sellAmount = body["currentPrice"]
     
-#     transactions = db.session.query(Transaction).filter_by(Transaction.StopLossSentimentThreshold >= threshold, Transaction.Comapny==company).order_by(Transaction.DateTimestamp.desc()).all()
+    # Checking where stoploss is met, is for that company, and that the transaction is open
+    transactions = db.session.query(Transaction).filter(Transaction.StopLossSentimentThreshold >= threshold, Transaction.Company==company, Transaction.SellAmount.is_(None)).all()
 
-#     # Get sell price
+    # Get company ticker
+    # key = "YJ3Q75JEFR08G0VB"
+    
+    # url = f'https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords={company}&apikey={key}'
+    # r = requests.get(url)
+    # data = r.json()
+    # ticker = data['bestMatches'][0]["1. symbol"]
+    # # print(data['bestMatches'][0]["1. symbol"])
+    
+    
+    # # Get sell price
+    # # sellAmount = get_current_price(ticker)
+
+    
+
+    transaction_list = []
+    for transaction in transactions:
+        transaction_dict = {
+            'TransactionID': transaction.TransactionID,
+            'UserID': transaction.UserID,
+            'Email': transaction.Email,
+            'Company': transaction.Company,
+            'DateTimestamp': transaction.DateTimestamp,
+            'BuyAmount': transaction.BuyAmount,
+            'SellAmount': sellAmount,
+            'StopLossSentimentThreshold': transaction.StopLossSentimentThreshold,
+            'TotalAccountValue': transaction.TotalAccountValue + sellAmount
+        }
+        transaction_list.append(transaction_dict)
+
+    return jsonify(transaction_list)
 
 
-#     transaction_list = []
-#     for transaction in transactions:
-#         transaction_dict = {
-#             'TransactionID': transaction.TransactionID,
-#             'UserID': transaction.UserID,
-#             'Email': transaction.Email,
-#             'Company': transaction.Company,
-#             'DateTimestamp': transaction.DateTimestamp,
-#             'BuyAmount': transaction.BuyAmount,
-#             'SellAmount': transaction.SellAmount,
-#             'StopLossSentimentThreshold': transaction.StopLossSentimentThreshold,
-#             'TotalAccountValue': transaction.TotalAccountValue
-#         }
-#         transaction_list.append(transaction_dict)
-
-#     return jsonify(transaction_list)
-
-
+# def get_current_price(ticker):
+#     url = f"http://localhost:3000/scraper/scrapeCurrentPrice/{ticker}"
+#     price = requests.get(url).text
+#     price_float = float(price)
+#     return price_float
 
 
 

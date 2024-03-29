@@ -48,7 +48,7 @@ app.get('/', (req, res) => {
 app.use('/sentimentAPI', SentimentController);
 
 
-// cron job for every 20 sec
+// cron job for every 1 min
 cron.schedule("*/1 * * * *", async () => {
   console.log('Running a task every 1 min');
   let combined_sentiments = {};
@@ -80,13 +80,15 @@ cron.schedule("*/1 * * * *", async () => {
   
     // compare combined_sentiments with all_cron
     // if difference is more than 10%, return search term
-    // let difference_flag = false;
+    
     let difference_search = [];
+
     all_cron.forEach((cron) => {
+
       if (combined_sentiments[cron.search]) {
-        // if percentage change is +/- 10%
         let pcntChange = (combined_sentiments[cron.search] - cron.sentiment_score) / Math.abs(cron.sentiment_score);
         
+        // if percentage change is +/- 10%
         if (Math.abs(pcntChange) > 0.1 || Math.abs(pcntChange) < -0.1) {
           difference_search.push({
             search: cron.search,
@@ -95,14 +97,23 @@ cron.schedule("*/1 * * * *", async () => {
           });
         }
 
-        // anybody with a stop loss of 5-25% (steps of 5), send to a endpoint with the search term and percentage change
-        if ((combined_sentiments[cron.search] - cron.sentiment_score) / Math.abs(cron.sentiment_score) <= -0.05) {
-          let size = Math.abs(Math.floor((combined_sentiments[cron.search] - cron.sentiment_score) / Math.abs(cron.sentiment_score) / 0.05));
+        // anybody with a stop loss of 5-25% (steps of 5), send to a endpoint with the search term and percentage change and current price
+        if (pcntChange <= -0.05) {
 
-          // axios.post("whatever endpoint this is", {
-          //   search: cron.search,
-          //   size: size*5
-          // })
+          sentiment_methods.getCurrentPrice(cron.search)
+            .then((res) => {
+              console.log("current price from scraper: " + res.data);
+
+              let size = Math.abs(Math.floor(pcntChange / 0.05));
+              sentiment_methods.triggerStoploss(cron.search, size*5, res.data);
+            })
+            .catch((error) => {
+              console.log("error getting current price");
+              console.log(error);
+            });
+
+
+          // trigger triggerStoploss() without waiting for a response (fire and forget)
         }
 
       }
@@ -112,9 +123,9 @@ cron.schedule("*/1 * * * *", async () => {
     console.log("difference search: " + JSON.stringify(difference_search));
     
     if (difference_search.length > 0) {
-      
       sentiment_methods.produceNotification(difference_search)
     }
+
   } catch (error) {
     console.log("cron job failed");
     console.log(error);
@@ -133,12 +144,24 @@ cron.schedule("*/1 * * * *", async () => {
     if (Object.keys(combined_sentiments).length > 0) {
       // for each item in senitments, create a new cron item
       for (let search of Object.keys(combined_sentiments)) {
-        // console.log("search: " + search);
-        let newCron = new CronJob({
+        // // console.log("search: " + search);
+        // let newCron = new CronJob({
+        //   search: search,
+        //   sentiment_score: combined_sentiments[search],
+        // });
+        // sentiment_methods.save_data(newCron);
+
+        // upsert
+        let filter =  { search: search };
+
+        let newCron = {
           search: search,
           sentiment_score: combined_sentiments[search],
-        });
-        sentiment_methods.save_data(newCron);
+        };
+
+        sentiment_methods.upsert_data(CronJob, filter, newCron);
+
+
       }
     }
 
@@ -150,12 +173,6 @@ cron.schedule("*/1 * * * *", async () => {
 
   
 });
-
-// cron job for every 15 mins
-// cron.schedule("*/15 * * * *", async () => {
-//   console.log('Running a task every 15 minutes');
-// });
-
 
 // start queue connection
 (async () => {

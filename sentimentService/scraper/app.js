@@ -31,7 +31,7 @@ const app = express();
 // Handling GET request
 app.get('/', (req, res) => { 
 	res.send('A Google News Scraper '
-		+ '/scrape/:query to have a suprise') 
+		+ '/scrape/:query/:ticker to have a suprise') 
 	res.end()
 })
 
@@ -49,12 +49,14 @@ app.get ('/scraper/getNewsFromDB/:ticker', async (req, res) => {
 app.get('/scraper/getNews/:query/:ticker', async (req, res) => { 
     const {query, ticker} = req.params;
     console.log(query, ticker);
+    
     // run scrapping script
-    // return response
     let response = await scrape(query);
+
     // call db endpoint to add to db for news
     console.log('response: ', response);
     let addToDBResponse = await scraperDBMethods.add(ticker, query, response);
+
     // console.log('addToDBresponse', addToDBResponse);
     res.send(response);
 })
@@ -79,7 +81,7 @@ async function scrape(query){
 
     for(let i = 0; i < 80; i++) {
         let item = items[i];
-        let title = item.title[0];
+        let title = item.title[0].split(" - ")[0];
         let pubDate = item.pubDate[0];
         // Change pubDate to sgt
         let date = new Date(pubDate);
@@ -91,16 +93,20 @@ async function scrape(query){
         // let dom = new JSDOM(item.description[0]);
         // let description = dom.window.document.querySelector('a').textContent;
 
-        let link = item.link[0];
-        let obj = {
-            i,
-            title,
-            // description,
-            link,
-            pubDate
+        // include obj in results only if the result is less than a week old
+        if (date > new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000)){
+            let link = item.link[0];
+            let obj = {
+                i,
+                title,
+                // description,
+                link,
+                datetime
+            }
+            // console.log(obj);
+            results.push(obj);
         }
-        // console.log(obj);
-        results.push(obj);
+
     }
 
     // Now you can return items or use it elsewhere in your code
@@ -238,15 +244,44 @@ async function stockPrice(query, targetDate){
 }
 
 // Handling to get the currentPrice from yahoo finance
-app.get('/scraper/scrapeCurrentPrice/:ticker', async (req, res) => { 
-    const {ticker} = req.params;
+app.get('/scraper/scrapeCurrentPrice', async (req, res) => { 
+    // const {ticker} = req.params;
+    let ticker = req.query.ticker || null
+    let company = req.query.company || null
+
+    if (!ticker && company){
+        console.log("getting ticker");
+        ticker = await convertCompanyToTicker(company)
+    }
+
     console.log("Ticker: ", ticker);
-    // run scrapping script
-    // return response
-    let response = await scrapePrice(ticker);
-    console.log('Current Price: ', response);
-    res.send(response);
+
+    try {
+        let response = await scrapePrice(ticker);
+        console.log('Current Price: ', response);
+        res.send(response);
+    } catch (error) {
+        console.error(error);
+        // return 500 with error message
+        res.status(500).send("Error: " + error);
+    }
+
 })
+
+async function convertCompanyToTicker(company){
+
+    // Get company ticker
+    key = "YJ3Q75JEFR08G0VB"
+    // let company = company
+    let url = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${company}&apikey=${key}`
+
+    const response = await axios.get(url);
+    ticker = response.data.bestMatches[0]["1. symbol"];
+
+    return ticker
+
+}
+
 
 async function scrapePrice(query) {
     // let browser = await puppeteer.launch({
