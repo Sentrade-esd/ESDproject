@@ -465,7 +465,14 @@ def automated_selling():
             'StopLossSentimentThreshold': transaction.StopLossSentimentThreshold,
             'TotalAccountValue': transaction.TotalAccountValue + sellAmount
         }
-        transaction_list.append(transaction_dict)
+        transaction.SellAmount = sellAmount
+        transaction.TotalAccountValue = transaction.TotalAccountValue + sellAmount
+        db.session.merge(transaction)
+
+    db.session.commit()  # commit the changes to the database
+
+
+    transaction_list.append(transaction_dict)
 
     return jsonify(transaction_list)
 
