@@ -34,8 +34,8 @@ const NavBar = ({ transparent}) => {
     const [isLogin, setIsLogin] = useState(true);
 
     useEffect(() => {
-        const savedUsername = localStorage.getItem("username");
-        // const savedUsername = 'hello';
+        // const savedUsername = localStorage.getItem("username");
+        const savedUsername = 'hello';
         if (savedUsername) {
           setIsLoggedIn(true);
           setUsername(savedUsername);

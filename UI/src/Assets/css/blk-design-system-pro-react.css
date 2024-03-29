@@ -16469,6 +16469,7 @@ p.description {
   margin-bottom: 25px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.8);
+  /* color: rgba(0, 0, 0, 0); */
 }
 .title.title-up {
   text-transform: uppercase;
