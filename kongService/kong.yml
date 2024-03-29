@@ -111,13 +111,6 @@ services:
         - GET
         strip_path: false
 
-      - name: transaction-by-id-route
-        paths:
-        - /transaction
-        methods:
-        - GET
-        strip_path: false
-
       - name: transaction-total-by-id-route
         paths:
         - /transaction/total
@@ -146,9 +139,9 @@ services:
         - GET
         strip_path: false
 
-      - name: followTradeTransaction-route
+      - name: transaction-setup-route
         paths:
-        - /followTradeTransaction
+        - /transaction/setup
         methods:
         - POST
         strip_path: false

@@ -14,6 +14,7 @@ const sentiment_methods = {
     sentiment_service_url: process.env.SENTIMENT_SERVICE_URL,
     amqpServer: process.env.AMQP_SERVER,
     scraper_url: process.env.SCRAPER_URL,
+    transactions_url: process.env.TRANSACTIONS_URL,
 
     connection: null,
     channel: null,
@@ -32,27 +33,58 @@ const sentiment_methods = {
     //     });
     // },
 
-    save_data: async (data, retries = 5, delay = 15000) => {
-        console.log('Attempting to save data');
-        try {
-            await data.save();
-            console.log('Data saved successfully');
-            return;
-        } catch (error) {
-            console.error('Initial save failed', error);
+    // save_data: async (data, retries = 5, delay = 15000) => {
+    //     // console.log('Attempting to save data');
+    //     try {
+    //         await data.save();
+    //         // console.log('Data saved successfully');
+    //         return;
+    //     } catch (error) {
+    //         console.error('Initial save failed', error);
+    //     }
+
+    //     // If the initial save fails, start the interval
+    //     const intervalId = setInterval(async () => {
+    //         // console.log('Attempting to save data');
+    //         try {
+    //             await data.save();
+    //             // console.log('Data saved successfully');
+    //             clearInterval(intervalId); // If save is successful, clear the interval
+    //         } catch (error) {
+    //             console.error(`Save failed, retrying in ${delay}ms`, error);
+    //         }
+    //     }, delay);
+    // },
+
+    combine_emotions : async (a, b) => {
+        let result = {...a};
+
+        for (let key in b) {
+            if (result.hasOwnProperty(key)) {
+                result[key] += b[key];
+            } else {
+                result[key] = b[key];
+            }
         }
 
-        // If the initial save fails, start the interval
-        const intervalId = setInterval(async () => {
-            console.log('Attempting to save data');
-            try {
-                await data.save();
-                console.log('Data saved successfully');
-                clearInterval(intervalId); // If save is successful, clear the interval
-            } catch (error) {
-                console.error(`Save failed, retrying in ${delay}ms`, error);
-            }
-        }, delay);
+        return result;
+    },
+
+    upsert_data: async (collection, filter, replacement) => {
+        // console.log('Attempting to upsert data');
+        try {
+            const doc = await collection.findOneAndReplace(
+                filter, 
+                replacement, 
+                { new: true, upsert: true }
+            );
+            // console.log('Document replaced or inserted: ', doc);
+            return doc;
+        } catch (err) {
+            console.error(err);
+            console.log("Retrying in 5 seconds...");
+            setTimeout(() => sentiment_methods.upsert_data(collection, filter, replacement), 5000);
+        }
     },
     
     start_amqp: () => {
@@ -188,60 +220,108 @@ const sentiment_methods = {
                     if ((Date.now() - exisiting_comments.datetime) / 1000 < 86400){
                         
                         console.log("comment exists");
-        
-                        // override existing values with .replaceOnce method
+    
                         exisiting_comments.sentiment_score += results.score;
+
+                        if (exisiting_comments.emotion[results.emotion] == undefined) {
+                            exisiting_comments.emotion[results.emotion] = 0;
+                        }
+
                         exisiting_comments.emotion[results.emotion] += 1;
         
-                        let updateComment = await Comment.updateOne(
-                            { _id: exisiting_comments.id },
-                            {
-                              $set: {
-                                datetime: exisiting_comments.datetime,
-                                search: exisiting_comments.search,
-                                sentiment_score: exisiting_comments.sentiment_score,
-                                emotion: exisiting_comments.emotion
-                              }
-                            }
-                        );
+                        // let updateComment = await Comment.replaceOne({_id: exisiting_comments.id}, {
+                        //     datetime: exisiting_comments.datetime,
+                        //     search: exisiting_comments.search,
+                        //     sentiment_score: exisiting_comments.sentiment_score,
+                        //     emotion: exisiting_comments.emotion
+                        // });
         
-                        console.log("saving existing comment");
+                        // console.log("saving existing comment");
+    
+                        // upsert
+                        const filter = { search: search_term };
+                        const replacement = {
+                            datetime: exisiting_comments.datetime,
+                            search: exisiting_comments.search,
+                            sentiment_score: exisiting_comments.sentiment_score,
+                            emotion: exisiting_comments.emotion
+                        };
+
+                        console.log (replacement)
+    
+                        sentiment_methods.upsert_data(Comment, filter, replacement);
                         // return res.json({ result: exisiting_comments });
                     } else {
                         console.log("comment in db expired");
                         await Comment.deleteOne({search: search_term});
-    
-                        let newComment = new Comment({
+
+                        // let newComment = new Comment({
+                        //     datetime: Date.now(),
+                        //     search: search_term,
+                        //     sentiment_score: results.score,
+                        //     // emotion: {"joy":0, "others":0, "surprise":0, "sadness":0, "fear":0, "anger":0, "disgust":0, "love":0}
+                        //     emotion: {"anger": 0, "joy": 0, "sadness": 0, "optimism": 0}
+                        // });
+
+                        // newComment.emotion[results.emotion] += 1;
+
+                        // console.log("saving new comment");
+                        // // await newComment.save();
+                        // sentiment_methods.save_data(newComment);
+
+                        // upsert 
+                        const filter = { search: search_term };
+                        const replacement = {
                             datetime: Date.now(),
                             search: search_term,
                             sentiment_score: results.score,
-                            // emotion: {"joy":0, "others":0, "surprise":0, "sadness":0, "fear":0, "anger":0, "disgust":0,"love":0}
-                            emotion: {"anger": 0, "joy": 0, "sadness": 0, "optimism": 0}
-                        });
-    
-                        newComment.emotion[results.emotion] += 1;
-    
-                        console.log("saving new comment");
-                        await newComment.save();
+                            emotion: {}
+                        };
+
+                        replacement.sentiment_score += results.score;
+                        if (replacement.emotion[results.emotion] == undefined) {
+                            replacement.emotion[results.emotion] = 0;
+                        }
+
+                        replacement.emotion[results.emotion] += 1;
+
+                        sentiment_methods.upsert_data(Comment, filter, replacement);
     
                         // return res.json({ result: newComment });
                     }
                 } else {
                     // if no record exists, create a new one
-                    let newComment = new Comment({
+                    // let newComment = new Comment({
+                    //     datetime: Date.now(),
+                    //     search: search_term,
+                    //     sentiment_score: results.score,
+                    //     // emotion: {"joy":0, "others":0, "surprise":0, "sadness":0, "fear":0, "anger":0, "disgust":0, "love":0}
+                    //     emotion: {"anger": 0, "joy": 0, "sadness": 0, "optimism": 0},
+                    // });
+        
+                    // newComment.emotion[results.emotion] += 1;
+        
+                    // console.log("saving new comment");
+                    // // await newComment.save();
+                    // sentiment_methods.save_data(newComment);
+
+                    // upsert
+                    const filter = { search: search_term };
+                    const replacement = {
                         datetime: Date.now(),
                         search: search_term,
                         sentiment_score: results.score,
-                        // emotion: {"joy":0, "others":0, "surprise":0, "sadness":0, "fear":0, "anger":0, "disgust":0,"love":0}
-                        emotion: {"anger": 0, "joy": 0, "sadness": 0, "optimism": 0}
-                    });
-        
-                    newComment.emotion[results.emotion] += 1;
-        
-                    console.log("saving new comment");
-                    await newComment.save();
-        
-                    // return res.json({ result: newComment });
+                        emotion: {}
+                    };
+
+                    replacement.sentiment_score += results.score;
+                    if (replacement.emotion[results.emotion] == undefined) {
+                        replacement.emotion[results.emotion] = 0;
+                    }
+
+                    replacement.emotion[results.emotion] += 1;
+
+                    sentiment_methods.upsert_data(Comment, filter, replacement);
                 }
     
             } catch (error) {
@@ -348,6 +428,25 @@ const sentiment_methods = {
         const data = response.data;
 
         return data
+    },
+
+    getCurrentPrice: async (company) => {
+        const url = `${sentiment_methods.scraper_url}/scraper/scrapeCurrentPrice`;
+
+        const response = await axios.get(url, { params: { company } });
+
+        // console.log(response);
+
+        return response;
+
+    },
+
+    triggerStoploss: async (search, size, currentPrice) => {
+        const url = `${sentiment_methods.transactions_url}/transaction/trigger`;
+
+        console.log("triggering stop loss: " + url);
+        axios.post(url, { search, size, currentPrice });
+
     },
 
 };
