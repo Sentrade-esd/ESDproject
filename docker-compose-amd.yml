@@ -307,6 +307,7 @@ services:
     image: chernise/esdproject-app:latest
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - .:/usr/src/app
     command: ["nginx", "-g", "daemon off;"]
