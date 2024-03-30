@@ -57,7 +57,7 @@ async function followTrade(userId, email, ticker, targetDate, buyAmountPerFiling
                 senatorFilings
                 ] = await Promise.all([
                 getStockPrice(ticker, targetDate),
-                getSenatorFilings(ticker, targetDate),
+                getSenatorFiling(ticker, targetDate),
             ]);
 
             console.log("Account Balance:" , updateBalanceStatus);
