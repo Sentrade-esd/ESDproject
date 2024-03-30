@@ -6,10 +6,16 @@ import { useLocation } from 'react-router-dom';
 import { Form, 
     // Button 
 } from 'react-bootstrap';
-import WordCloud from '../Components/wordCloud.js';
+import WordCloud from 'Components/WordCloud'
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 // import Select from "react";
+import Slick from "react-slick";
+
+
+// import React from "react";
+// import ProgressBar from "@ramonak/react-progress-bar";
+
 
 import {
     Button,
@@ -28,8 +34,106 @@ import {
     Carousel,
     CarouselItem,
     CarouselIndicators,
+    
 
   } from "reactstrap";
+import CommentsAndNewsTabs from 'Components/CommentsAndNewsTabs';
+
+    // custom previous button for the slick component
+const PrevButton = (props) => {
+  return (
+    <Button
+      className="btn-round btn-icon btn-simple slick-prev slick-arrow"
+      color="primary"
+      aria-label="Previous"
+      type="button"
+      onClick={props.onClick}
+    >
+      <i className="tim-icons icon-minimal-left" />
+    </Button>
+  );
+};
+// custom next button for the slick component
+const NextButton = (props) => {
+  return (
+    <Button
+      className="btn-round btn-icon btn-simple slick-next slick-arrow"
+      color="primary"
+      aria-label="Next"
+      type="button"
+    >
+      <i className="tim-icons icon-minimal-right" onClick={props.onClick} />
+    </Button>
+  );
+};
+
+  let slickSettings = {
+    dots: false,
+    infinite: true,
+    centerMode: true,
+    slidesToShow: 4,
+    slidesToScroll: 1,
+    prevArrow: <PrevButton />,
+    nextArrow: <NextButton />,
+    className: "center slider",
+    slide: "section",
+    responsive: [
+      {
+        breakpoint: 1024,
+        settings: {
+          slidesToShow: 3,
+          slidesToScroll: 1,
+          infinite: true,
+        },
+      },
+      {
+        breakpoint: 600,
+        settings: {
+          slidesToShow: 2,
+          slidesToScroll: 1,
+        },
+      },
+      {
+        breakpoint: 480,
+        settings: {
+          slidesToShow: 1,
+          slidesToScroll: 1,
+        },
+      },
+    ],
+  };
+
+  const news = [ 
+    {
+      title: "Nvidia Just Bought 5 Artificial Intelligence (AI) Stocks. These 2 Stand Out the Most. - Yahoo Finance" , 
+      link : "https://news.google.com/rss/articles/CBMiTWh0dHBzOi8vZmluYW5jZS55YWhvby5jb20vbmV3cy9udmlkaWEtanVzdC1ib3VnaHQtNS1hcnRpZmljaWFsLTA5MjgwMDM5My5odG1s0gEA?oc=5",
+      pubDate: "2024-03-21T17:28:00.000+00:00"
+    }, 
+    {
+      title: "Nvidia Just Bought 5 Artificial Intelligence (AI) Stocks. These 2 Stand Out the Most. - Yahoo Finance" , 
+      link : "https://news.google.com/rss/articles/CBMiTWh0dHBzOi8vZmluYW5jZS55YWhvby5jb20vbmV3cy9udmlkaWEtanVzdC1ib3VnaHQtNS1hcnRpZmljaWFsLTA5MjgwMDM5My5odG1s0gEA?oc=5",
+      pubDate: "2024-03-21T17:28:00.000+00:00"
+    }, 
+    {
+      title: "Nvidia Just Bought 5 Artificial Intelligence (AI) Stocks. These 2 Stand Out the Most. - Yahoo Finance" , 
+      link : "https://news.google.com/rss/articles/CBMiTWh0dHBzOi8vZmluYW5jZS55YWhvby5jb20vbmV3cy9udmlkaWEtanVzdC1ib3VnaHQtNS1hcnRpZmljaWFsLTA5MjgwMDM5My5odG1s0gEA?oc=5",
+      pubDate: "2024-03-21T17:28:00.000+00:00"
+    }, 
+  ]
+
+  const comments = [ 
+    {
+      commentTxt: "Apple sucks ass. THey dont produce good products. Samsung is going to take over. "
+    }, 
+    {
+      commentTxt: "Apple Number 1"
+    }, 
+    {
+      commentTxt: "Apple's car is the number 1 thing next time. No cap"
+    }, 
+  ]
+
+
 
   const items = [
     {
@@ -76,15 +180,17 @@ function Trade() {
     const [animating, setAnimating] = React.useState(false);
     const [quantity, setQuantity] = React.useState(1);
     const wrapper = React.useRef(null);
-    // React.useEffect(() => {
-    //   document.documentElement.scrollTop = 0;
-    //   document.scrollingElement.scrollTop = 0;
-    //   wrapper.current.scrollTop = 0;
-    //   document.body.classList.add("product-page");
-    //   return function cleanup() {
-    //     document.body.classList.remove("product-page");
-    //   };
-    // }, []);
+    React.useEffect(() => {
+      document.documentElement.scrollTop = 0;
+      document.scrollingElement.scrollTop = 0;
+      wrapper.current.scrollTop = 0;
+      document.body.classList.add("product-page");
+      return function cleanup() {
+        document.body.classList.remove("product-page");
+      };
+    }, []);
+
+
     const onExiting = () => {
       setAnimating(true);
     };
@@ -245,18 +351,336 @@ function Trade() {
     const [maxBuy, setMaxBuy] = useState(0);
     const [threshold, setStopLoss] = useState(0);
 
-    const MyWordCloud = React.memo(({ words, options }) => 
-    <div style={{width: '600px', height: '400px'}}>
-        <WordCloud words={words} options={options} />
-    </div>
-);
+    // const MyWordCloud = React.memo(({ words, options }) => 
+    // <div style={{width: '600px', height: '400px'}}>
+    //     <WordCloud words={words} options={options} />
+    // </div>
 
-const [startDate, setStartDate] = useState(new Date());
-const endDate = new Date(); // Current date
+  const [startDate, setStartDate] = useState(new Date());
+  const endDate = new Date(); // Current date
+
+  const sentimentColor = sentiment_score < 0 ? 'red' : 'green';
+
+  // Normalize sentiment_score from range [-50, 50] to [0, 100]
+  const normalizedScore = Math.abs((sentiment_score / 50) * 100);
+
+  const progressBarStyles = {
+      width: `${normalizedScore}%`,
+      backgroundColor: sentimentColor,
+      height: '20px',
+      position: 'absolute',
+      top: 0,
+      [sentiment_score < 0 ? 'right' : 'left']: '50%',
+  };
+  const scoreStyles = {
+      position: 'absolute',
+      top: '-40px',
+      [sentiment_score < 0 ? 'left' : 'right']: `${Math.abs(50 - normalizedScore)}%`,
+      transform: `translateX(${sentiment_score < 0 ? '-100%' : '0%'})`,
+      color: `${sentimentColor} !important`,
+      fontSize: '20px !important',
+      zIndex: 999,
+
+  };
+
+  const words = [
+    { text: 'Hello', size: 40 },
+    { text: 'World', size: 30 },
+    { text: 'React', size: 35 },
+    { text: 'Fun', size: 60 },
+    { text: 'HaHA', size: 70 },
+    { text: 'LOL', size: 30 },
+    { text: 'USELESS', size: 15 },
+    { text: 'Lousy', size: 35 },
+    { text: 'Trash', size: 60 },
+    { text: 'Bull', size: 70 },
+    { text: 'Bear', size: 30 },
+    { text: 'Noob', size: 15 },
+    // Add more words as needed
+  ];
+
+  const keyWords = [
+    { text: 'Hello', size: 40 },
+    { text: 'World', size: 30 },
+    { text: 'React', size: 35 },
+    { text: 'Fun', size: 60 },
+    { text: 'HaHA', size: 70 },
+    { text: 'LOL', size: 30 },
+    { text: 'USELESS', size: 15 },
+    { text: 'Lousy', size: 35 },
+    { text: 'Trash', size: 60 },
+    { text: 'Bull', size: 70 },
+    { text: 'Bear', size: 30 },
+    { text: 'Noob', size: 15 },
+    // Add more words as needed
+  ];
+
 
     return (
-        <>
-        <div>
+      <>
+      <div className="wrapper" ref={wrapper} style={{backgroundColor: "#1D304f"}}>
+        {/* <div className="page-header page-header-small">
+        <img
+            alt="..."
+            className="path shape"
+            src={require("Assets/img/shape-s.png")}
+          />
+          <Container>
+            <h1 className="h1-seo">Our products</h1>
+            <h3>This is the best way to find your favorite stuff</h3>
+          </Container>
+        </div> */}
+        {/* <Col className="ml-auto mr-auto" md="8"> */}
+          <div className="testimonials-4">
+            <Container fluid>
+              {/* <Row>
+                <Col className="ml-auto mr-auto text-center" md="6">
+                  <h2 className="title">Join our world</h2>
+                </Col>
+              </Row> */}
+              <Row>
+                <Col className="positioned" lg="4" md="8" xs="10">
+                  <h1 className="title" style={{padding: '0px 0px 30px 0px'}}>{companyName}<span className="mx-3"><i className="text-warning" style={{fontSize: '20px'}}>{companySymbol}</i></span></h1>
+                  <div style={{ overflow: 'hidden', position: 'relative', backgroundColor: 'lightgray', height: '20px', borderRadius: '20px' }}>
+                      <div style={progressBarStyles}></div>
+                      <div style={scoreStyles}>{sentiment_score}</div>
+                  </div>
+                  <p style={{ color: sentimentColor }}>Sentiment Score: {sentiment_score}</p>
+                  <br />
+                  <Row className="pick-size">
+                    <Col lg="4" md="4">
+                      <label style={labelStyles}>Current Price</label>
+                      <h6 style={{color: "#ffffff"}}>${currentPrice}</h6>
+                    </Col>
+                    <Col lg="4" md="4" sm="6">
+                      <label style={labelStyles}><i>Avg. Volume</i></label>
+                      <h6 style={{color: "#ffffff"}}>{avgVolume}</h6>
+                    </Col>
+                    <Col lg="4" md="4" sm="6">
+                      <label style={labelStyles}>Market Cap</label>
+                      <h6 style={{color: "#ffffff"}}>${marketCap}</h6>
+                    </Col>
+                  </Row>
+                  <br />
+                  {/* <p className="description text-white">
+                    Meet Wingman, a robust suite of styled pages and components,
+                    powered by Bootstrap 4. The ideal starting point for product
+                    landing pages, stylish web-apps and complete company websites.
+                  </p> */}
+                <Row>
+                  <Col>
+                    <Button color="info" href="#pablo" onClick={(e) => e.preventDefault()} size="lg" style={{color: 'white'}}>
+                      Buy Now
+                    </Button>
+                  </Col>
+                  <Col>
+                    <Button color="info" href="#pablo" onClick={(e) => e.preventDefault()} size="lg" style={{color: 'white'}}>
+                      Follow Trade
+                    </Button>
+                  </Col>
+                </Row>
+                </Col>
+                <Col md="12">
+                  <Slick {...slickSettings}>
+                    <div>
+                      <div className="info text-left">
+                      <h4 style={wordCloudCardHeadingStyles}>Keywords</h4>
+                        <WordCloud words={keyWords} />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="info text-left">
+                      <h4 style={wordCloudCardHeadingStyles}>Emotions</h4>
+                        <WordCloud words={words} />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="info text-left">
+                      <h4 style={wordCloudCardHeadingStyles}>Keywords</h4>
+                        <WordCloud words={keyWords} />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="info text-left">
+                      <h4 style={wordCloudCardHeadingStyles}>Emotions</h4>
+                        <WordCloud words={words} />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="info text-left">
+                      <h4 style={wordCloudCardHeadingStyles}>Keywords</h4>
+                        <WordCloud words={keyWords} />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="info text-left">
+                      <h4 style={wordCloudCardHeadingStyles}>Emotions</h4>
+                        <WordCloud words={words} />
+                      </div>
+                    </div>
+                  </Slick>
+                </Col>
+              </Row>
+            </Container>
+          </div>
+          {/* <div className="section">
+            <Container>
+              <Row>
+                <Col lg="6" md="12">
+                <WordCloud words={words} />
+                </Col>
+                <Col className="mx-auto" lg="6" md="12">
+                  <h2 className="title">{companyName}</h2>
+                  <div className="stats stats-right">
+                    <div className="stars text-warning">
+                      <i>{companySymbol}</i>
+                    </div>
+                  </div>
+                  <br />
+                  <br></br>
+                  <br></br>
+                  <div style={{ overflow: 'absolute', position: 'relative', backgroundColor: 'lightgray', height: '20px', borderRadius: '20px'}}>
+                      <div style={progressBarStyles}></div>
+                      <div style={scoreStyles}>{sentiment_score}</div>
+                  </div>
+                  <p style={{ color: sentimentColor }}>Sentiment Score</p>
+                  <br />
+                  <Row className="pick-size">
+                    <Col lg="4" md="4">
+                      <label style={labelStyles}>Current Price</label>
+                      <h6 style={{color: "#ffffff"}}>${currentPrice}</h6>
+                    </Col>
+                    <Col lg="4" md="4" sm="6">
+                      <label style={labelStyles}><i>Avg. Volume</i></label>
+                      <h6 style={{color: "#ffffff"}}>{avgVolume}</h6>
+                    </Col>
+                    <Col lg="4" md="4" sm="6">
+                      <label style={labelStyles}>Market Cap</label>
+                      <h6 style={{color: "#ffffff"}}>${marketCap}</h6>
+                    </Col>
+                  </Row>
+                  <br />
+                  <Row className="justify-content-start">
+                      <Col>
+                      <Button className="ml-3" color="success">
+                          Buy Now
+                      </Button>
+                      </Col>
+                      <Col>
+                      <Button className="ml-3" color="success">
+                          Follow Trade
+                      </Button>
+                      </Col>
+                  </Row>
+                </Col>
+              </Row>
+            </Container>
+          </div> */}
+        {/* </Col> */}
+        {/* <div className="section section-comments">
+          <Container>
+            <Row>
+              <Col className="ml-auto mr-auto" md="8">
+              <h3 className="title text-center">Post your comment</h3>
+                <Media className="media-post">
+                  <a
+                    className="pull-left author"
+                    href="#pablo"
+                    onClick={(e) => e.preventDefault()}
+                  >
+                    <div className="avatar">
+                      <Media
+                        alt="..."
+                        className="img-raised"
+                        src={require("Assets/img/logo-nav.png")}
+                      />
+                    </div>
+                  </a>
+                  <Media body>
+                    <Input
+                      placeholder="Write about the company"
+                      rows="4"
+                      type="textarea"
+                    />
+                    <div className="media-footer">
+                      <Button
+                        className="pull-right"
+                        color="info"
+                        href="#pablo"
+                        onClick={(e) => e.preventDefault()}
+                      >
+                        Reply
+                      </Button>
+                    </div>
+                  </Media>
+                </Media>
+                <div className="media-area">
+                  <h3 className="title text-center">Comments</h3>
+                  <Media>
+                    <a
+                      className="pull-left"
+                      href="#pablo"
+                      onClick={(e) => e.preventDefault()}
+                    >
+                      <div className="avatar">
+                        <Media
+                          alt="..."
+                          className="img-raised"
+                          src={require("Assets/img/logo-nav.png")}
+                        />
+                      </div>
+                    </a>
+                    <Media body>
+                      <Media heading tag="h5" style={labelStyles}>
+                        Anonymous{" "}
+                      </Media>
+                      <p>
+                        Chance too good. God level bars. I'm so proud of
+                        @LifeOfDesiigner #1 song in the country. Panda! Don't be
+                        scared of the truth because we need to restart the human
+                        foundation in truth I stand with the most humility. We
+                        are so blessed!
+                      </p>
+                      <br></br>
+                    </Media>
+                  </Media>
+                  <Media>
+                    <a
+                      className="pull-left"
+                      href="#pablo"
+                      onClick={(e) => e.preventDefault()}
+                    >
+                      <div className="avatar">
+                        <Media
+                          alt="..."
+                          className="img-raised"
+                          src={require("Assets/img/logo-nav.png")}
+                        />
+                      </div>
+                    </a>
+                    <Media body>
+                      <Media heading tag="h5" style={labelStyles}>
+                        Anonymous{" "}
+                      </Media>
+                      <p>
+                        Chance too good. God level bars. I'm so proud of
+                        @LifeOfDesiigner #1 song in the country. Panda! Don't be
+                        scared of the truth because we need to restart the human
+                        foundation in truth I stand with the most humility. We
+                        are so blessed!
+                      </p>
+                      <br></br>
+                    </Media>
+                  </Media>
+                </div>
+              </Col>
+            </Row>
+          </Container>
+        </div> */}
+
+        <CommentsAndNewsTabs companySymbol={companySymbol} news={news} comments={comments}></CommentsAndNewsTabs>
+      </div>
+      {/* <diym
             <div className="container">
                 <div className="row">
                     <div className="col-md-6 mt-3">
@@ -314,18 +738,15 @@ const endDate = new Date(); // Current date
                         <Button variant="primary" onClick={handleFollowTrade} className="mt-3">Follow Trade</Button>
                         
                     </div>
-
-                        {/* It will re-render everyime when someone types something in the comment box. Hard limitation of the library used.
-                        Can be done with lower level libraries but is very time intensive. Leave it as is? */}
                     <div className="col-md-6">
                         <MyWordCloud words={emotions} options={options} />
                     </div>
                 </div>
             </div>
 
-            {/* <div style={{width: '600px', height: '400px'}}>
+            <div style={{width: '600px', height: '400px'}}>
                 <WordCloud words={emotions} options={options} />
-            </div> */}
+            </div>
 
             <div className='container'>
               <h3>Comments:</h3>
@@ -344,279 +765,22 @@ const endDate = new Date(); // Current date
                   </Form.Group>
               </div>
             </div>
-        </div>
-
-        <div className="section"  style={{backgroundColor: "#6082B6"}}>
-          <Container>
-            <Row>
-              <Col lg="6" md="12">
-              <MyWordCloud words={emotions} options={options} />
-              </Col>
-              <Col className="mx-auto" lg="6" md="12">
-                <h2 className="title">{companyName}</h2>
-                <div className="stats stats-right">
-                  <div className="stars text-warning">
-                    <i>{companySymbol}</i>
-                  </div>
-                </div>
-                <br />
-                <h2 className="main-price" style={{color: "#ffffff"}}>${currentPrice}</h2>
-                <p style={{ color: 'red' }}>Sentiment Score: {sentiment_score}</p>
-                {/* <h5 className="category">Description</h5>
-                <p className="description">
-                  Eres' daring 'Grigri Fortune' swimsuit has the fit and
-                  coverage of a bikini in a one-piece silhouette. This fuchsia
-                  style is crafted from the label's sculpting peau douce fabric
-                  and has flattering cutouts through the torso and back. Wear
-                  yours with mirrored sunglasses on vacation.
-                </p> */}
-                <br />
-                <Row className="pick-size">
-                  <Col lg="4" md="4">
-                    <label>Previous close</label>
-                    <h6 style={{color: "#ffffff"}}>${prevClose}</h6>
-                  </Col>
-                  <Col lg="4" md="4" sm="6">
-                    <label>Avg. Volume</label>
-                    <h6 style={{color: "#ffffff"}}>{avgVolume}</h6>
-                  </Col>
-                  <Col lg="4" md="4" sm="6">
-                    <label>Market Cap</label>
-                    <h6 style={{color: "#ffffff"}}>${marketCap}</h6>
-                  </Col>
-                </Row>
-                <br />
-                <Row className="justify-content-start">
-                    <Col>
-                    <Button className="ml-3" color="warning">
-                        Buy Now
-                    </Button>
-                    </Col>
-                    <Col>
-                    <Button className="ml-3" color="warning">
-                        Follow Trade
-                    </Button>
-                    </Col>
-                </Row>
-              </Col>
-            </Row>
-          </Container>
-          <div className="section section-comments">
-          <Container>
-            <Row>
-              <Col className="ml-auto mr-auto" md="8">
-                <div className="media-area">
-                  <h3 className="title text-center">3 Comments</h3>
-                  <Media>
-                    <a
-                      className="pull-left"
-                      href="#pablo"
-                      onClick={(e) => e.preventDefault()}
-                    >
-                      <div className="avatar">
-                        <Media
-                          alt="..."
-                          className="img-raised"
-                          src={require("Assets/img/shirt.png")}
-                        />
-                      </div>
-                    </a>
-                    <Media body>
-                      <Media heading tag="h5">
-                        Tina Andrew{" "}
-                        <small className="text-muted">· 7 minutes ago</small>
-                      </Media>
-                      <p>
-                        Chance too good. God level bars. I'm so proud of
-                        @LifeOfDesiigner #1 song in the country. Panda! Don't be
-                        scared of the truth because we need to restart the human
-                        foundation in truth I stand with the most humility. We
-                        are so blessed!
-                      </p>
-                      <p>
-                        All praises and blessings to the families of people who
-                        never gave up on dreams. Don't forget, You're Awesome!
-                      </p>
-                      <div className="media-footer">
-                        <Button
-                          className="btn-simple pull-right"
-                          color="primary"
-                          href="#pablo"
-                          id="tooltip341431465"
-                          onClick={(e) => e.preventDefault()}
-                          size="sm"
-                        >
-                          <i className="tim-icons icon-send" /> Reply
-                        </Button>
-                        <UncontrolledTooltip
-                          delay={0}
-                          target="tooltip341431465"
-                        >
-                          Reply to Comment
-                        </UncontrolledTooltip>
-                        <Button
-                          className="btn-simple pull-right"
-                          color="danger"
-                          href="#pablo"
-                          onClick={(e) => e.preventDefault()}
-                          size="sm"
-                        >
-                          <i className="tim-icons icon-heart-2" /> 243
-                        </Button>
-                      </div>
-                    </Media>
-                  </Media>
-                  <Media>
-                    <a
-                      className="pull-left"
-                      href="#pablo"
-                      onClick={(e) => e.preventDefault()}
-                    >
-                      <div className="avatar">
-                        <Media
-                          alt="..."
-                          className="img-raised"
-                          src={require("Assets/img/shirt.png")}
-                        />
-                      </div>
-                    </a>
-                    <Media body>
-                      <Media heading tag="h5">
-                        John Camber{" "}
-                        <small className="text-muted">· Yesterday</small>
-                      </Media>
-                      <p>
-                        Hello guys, nice to have you on the platform! There will
-                        be a lot of great stuff coming soon. We will keep you
-                        posted for the latest news.
-                      </p>
-                      <p>Don't forget, You're Awesome!</p>
-                      <div className="media-footer">
-                        <Button
-                          className="btn-simple pull-right"
-                          color="primary"
-                          href="#pablo"
-                          id="tooltip871944617"
-                          onClick={(e) => e.preventDefault()}
-                          size="sm"
-                        >
-                          <i className="tim-icons icon-send" /> Reply
-                        </Button>
-                        <UncontrolledTooltip
-                          delay={0}
-                          target="tooltip871944617"
-                        >
-                          Reply to Comment
-                        </UncontrolledTooltip>
-                        <Button
-                          className="btn-simple pull-right"
-                          color="danger"
-                          href="#pablo"
-                          onClick={(e) => e.preventDefault()}
-                          size="sm"
-                        >
-                          <i className="tim-icons icon-heart-2" /> 243
-                        </Button>
-                      </div>
-                      <Media>
-                        <a
-                          className="pull-left"
-                          href="#pablo"
-                          onClick={(e) => e.preventDefault()}
-                        >
-                          <div className="avatar">
-                            <Media
-                              alt="..."
-                              className="img-raised"
-                              src={require("Assets/img/shirt.png")}
-                            />
-                          </div>
-                        </a>
-                        <Media body>
-                          <Media heading tag="h5">
-                            Tina Andrew{" "}
-                            <small className="text-muted">· 2 Days Ago</small>
-                          </Media>
-                          <p>
-                            Hello guys, nice to have you on the platform! There
-                            will be a lot of great stuff coming soon. We will
-                            keep you posted for the latest news.
-                          </p>
-                          <p>Don't forget, You're Awesome!</p>
-                          <div className="media-footer">
-                            <Button
-                              className="btn-simple pull-right"
-                              color="primary"
-                              href="#pablo"
-                              id="tooltip442113005"
-                              onClick={(e) => e.preventDefault()}
-                              size="sm"
-                            >
-                              <i className="tim-icons icon-send" /> Reply
-                            </Button>
-                            <UncontrolledTooltip
-                              delay={0}
-                              target="tooltip442113005"
-                            >
-                              Reply to Comment
-                            </UncontrolledTooltip>
-                            <Button
-                              className="btn-simple pull-right"
-                              color="danger"
-                              href="#pablo"
-                              onClick={(e) => e.preventDefault()}
-                              size="sm"
-                            >
-                              <i className="tim-icons icon-heart-2" /> 243
-                            </Button>
-                          </div>
-                        </Media>
-                      </Media>
-                    </Media>
-                  </Media>
-                </div>
-                <h3 className="title text-center">Post your comment</h3>
-                <Media className="media-post">
-                  <a
-                    className="pull-left author"
-                    href="#pablo"
-                    onClick={(e) => e.preventDefault()}
-                  >
-                    <div className="avatar">
-                      <Media
-                        alt="..."
-                        className="img-raised"
-                        src={require("Assets/img/shirt.png")}
-                      />
-                    </div>
-                  </a>
-                  <Media body>
-                    <Input
-                      placeholder="Write a nice reply or go home..."
-                      rows="4"
-                      type="textarea"
-                    />
-                    <div className="media-footer">
-                      <Button
-                        className="pull-right"
-                        color="primary"
-                        href="#pablo"
-                        onClick={(e) => e.preventDefault()}
-                      >
-                        Reply
-                      </Button>
-                    </div>
-                  </Media>
-                </Media>
-                {/* end media-post */}
-              </Col>
-            </Row>
-          </Container>
-        </div>
-        </div>
-        
+        </div> */}
         </>
     );
 }
+
+
+
+const labelStyles = {
+  color: '#d2d2d2',
+};
+
+const wordCloudCardHeadingStyles = {
+  color:'white', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: "10px"
+};
+
+
+
 
 export default Trade;

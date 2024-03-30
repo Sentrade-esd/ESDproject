@@ -26,7 +26,7 @@ import {
 
 
 const NavBar = ({ transparent}) => {
-    const navClass = transparent ? 'navbar-transparent' : 'bg-dark';
+    const navClass = transparent ? 'navbar-transparent' : 'bg-default';
 
     const [modalShow, setModalShow] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);

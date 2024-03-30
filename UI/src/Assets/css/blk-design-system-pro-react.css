@@ -20044,11 +20044,12 @@ html {
 
 .testimonials-4 .info {
   max-width: 500px;
+  height: 500px;
   border: 1px solid white;
   padding-top: 10px;
 }
 .testimonials-4 .info .description {
-  padding: 30px 40px;
+  padding: 50px 60px;
   font-weight: 500;
   line-height: 25px;
 }
@@ -23977,7 +23978,7 @@ html {
 [class*="pricing-"],
 [class*="testimonials-"],
 [class*="contactus-"] {
-  padding: 80px 0;
+  padding: 0px 0;
 }
 
 @media screen and (min-width: 991px) {
@@ -27587,7 +27588,7 @@ select.selectpicker {
 }
 
 .card-blog {
-  min-height: 550px;
+  min-height: 100px;
 }
 .card-blog .card-image {
   height: 380px;
@@ -27651,6 +27652,10 @@ select.selectpicker {
 }
 .card-blog .text .name {
   color: rgba(255, 255, 255, 0.8);
+}
+
+.card-body-font-color {
+  color: white;
 }
 
 .card-profile,
