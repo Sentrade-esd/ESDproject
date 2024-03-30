@@ -349,6 +349,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "80:80"
+      - "443:443" # Expose port 443 for https
     volumes:
       - .:/usr/src/app
     command: ["nginx", "-g", "daemon off;"]
