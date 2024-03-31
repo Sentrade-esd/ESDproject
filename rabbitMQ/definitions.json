@@ -48,6 +48,15 @@
       "auto_delete": false,
       "internal": false,
       "arguments": {}
+    },
+    {
+      "name": "stoploss_waiting_exchange",
+      "vhost": "/",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
     }
   ],
   "queues": [
@@ -71,6 +80,16 @@
       "durable": true,
       "auto_delete": false,
       "arguments": {}
+    },
+    {
+      "name": "stoploss_waiting_queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "stoploss_retry_exchange",
+        "x-message-ttl": 10000
+      }
     }
   ],
   "bindings": [
@@ -94,6 +113,14 @@
       "source":"stoploss_retry_exchange", 
       "vhost":"/", 
       "destination":"stoploss_retry_queue", 
+      "destination_type":"queue", 
+      "routing_key":"stoploss",
+      "arguments": {}
+    },
+    {
+      "source":"stoploss_waiting_exchange", 
+      "vhost":"/", 
+      "destination":"stoploss_waiting_queue", 
       "destination_type":"queue", 
       "routing_key":"stoploss",
       "arguments": {}
