@@ -204,7 +204,7 @@ async function stockPrice(query, targetDate){
             n += 1;
         }
 
-        console.log("return List:" ,returnList);
+        // console.log("return List:" ,returnList);
 
         // let timeSeries = data['Time Series (5min)'];
         // let firstKey = Object.keys(timeSeries)[0];
@@ -224,8 +224,8 @@ async function stockPrice(query, targetDate){
         // }
         // console.log("cleaned data: ", parsedData);
 
-        // return {returnList, refreshDate};
-        return returnList;
+        return {prices: returnList, refreshDate:refreshDate};
+        // return returnList;
     }
 
     // let parsedData = {};
