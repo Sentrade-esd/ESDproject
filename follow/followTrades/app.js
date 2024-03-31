@@ -65,6 +65,9 @@ async function followTrade(userId, email, ticker, targetDate, buyAmountPerFiling
             console.log("Stock Price:" , stockPrice);
             console.log("Senator Filings:" , senatorFilings);
 
+            let refreshDate = stockPrice.refreshDate // assume this is unix time
+            stockPrice = stockPrice.returnList
+
             let filings = JSON.parse(senatorFilings.data);
 
             // Convert the file_date to a date string
@@ -80,10 +83,14 @@ async function followTrade(userId, email, ticker, targetDate, buyAmountPerFiling
                 day = String(date.getDate()).padStart(2, '0');
                 filing.tx_date = `${year}-${month}-${day}`;
 
+                if (filing.file_date  >refreshDate && filing.txn_date > refreshDate){
+                  continue;  
+                } 
                 console.log(filing.file_date , filing.tx_date);
 
                 filing.file_price = stockPrice[filing.file_date]['4. close'];
                 filing.tx_price = stockPrice[filing.tx_date]['4. close'];
+
             });
 
             data['ticker'] = ticker;
