@@ -9,11 +9,33 @@ services:
   kong:
     build: 
       context: ./kongService
-      dockerfile: Dockerfile
+      dockerfile: kongDockerfile
     hostname: kong
     ports:
       - "8000:8000"
       - "8001:8001"
+    networks:
+      - kong_network
+    restart: unless-stopped
+
+  prometheus:
+    build: 
+      context: ./kongService
+      dockerfile: promDockerfile
+    hostname: prometheus
+    ports:
+      - "8090:9090"
+    networks:
+      - kong_network
+    restart: unless-stopped
+  
+  grafana:
+    build: 
+      context: ./kongService
+      dockerfile: grafanaDockerfile
+    hostname: grafana
+    ports:
+      - "8100:3000"
     networks:
       - kong_network
     restart: unless-stopped

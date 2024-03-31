@@ -1,5 +1,10 @@
 _format_version: "1.1"
-services:
+
+plugins:  
+  - name: prometheus
+
+
+services: 
   - name: sentiment-service
     url: http://sentiment_app:5001/
     routes:
