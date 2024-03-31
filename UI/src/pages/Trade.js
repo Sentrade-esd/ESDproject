@@ -6,7 +6,7 @@ import { useLocation } from 'react-router-dom';
 import { Form, 
     // Button 
 } from 'react-bootstrap';
-import WordCloud from 'Components/WordCloud'
+import WordCloud from 'Components/wordCloud.js'
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 // import Select from "react";
@@ -17,25 +17,17 @@ import Slick from "react-slick";
 // import ProgressBar from "@ramonak/react-progress-bar";
 
 
+
 import {
     Button,
-    // Card,
-    // CardBody,
-    // CardFooter,
-    // CardLink,
-    // CardTitle,
-    Media,
-    Input,
-    InputGroup,
     Container,
     Row,
     Col,
-    UncontrolledTooltip,
-    Carousel,
-    CarouselItem,
-    CarouselIndicators,
-    
-
+    Modal,
+    Label,
+    FormGroup, 
+    ModalBody, 
+    Input, 
   } from "reactstrap";
 import CommentsAndNewsTabs from 'Components/CommentsAndNewsTabs';
 
@@ -133,8 +125,6 @@ const NextButton = (props) => {
     }, 
   ]
 
-
-
   const items = [
     {
       content: (
@@ -179,6 +169,20 @@ function Trade() {
     const [activeIndex, setActiveIndex] = React.useState(0);
     const [animating, setAnimating] = React.useState(false);
     const [quantity, setQuantity] = React.useState(1);
+
+    const [buyModal, setBuyModal] = React.useState(false);
+    const [followModal, setFollowModal] = React.useState(false);
+
+
+    const toggleBuyModal = () => {
+      setBuyModal(!buyModal);
+    };
+    
+    const toggleFollowModal = () => {
+      setFollowModal(!followModal);
+    };
+    
+
     const wrapper = React.useRef(null);
     React.useEffect(() => {
       document.documentElement.scrollTop = 0;
@@ -277,87 +281,102 @@ function Trade() {
 
     const { search, sentiment_score } = jsonData.result;
 
-    const [comment, setComment] = useState('');
-
-    const handleCommentSubmit = () => {
-        var commentsArr = [];
-        if(comment) {
-           // Should send User ID and update the comments database through the endpoint provided by microservice
-        //    console.log(comment);
-
-           setComment('');
-            // Company, Comment IF NOT SURE FOLLOW DOCS
-            // When comment made, it comes in as array, need to shift right to add the new comment
-            // Locally, the user will see all the comments he make plus the 5 from DB
-            // Stored as dict key = company value = comment
-
-        }
-        localStorage.setItem("Comments",commentsArr.unshift(comment));
-
-    };
-
-    const handleFollowTrade = async() => {
+    const handleFollowTrade = async(event) => {
         // Should be calling FollowTrades here
         // Store this email, ticker, targetDate, buyAmountPerFiling, maxBuyAmount and send
+        // getting the value from form group
+        event.preventDefault();
+        let maxBuyAmount = document.getElementById("maxBuyAmount").value;
+        let buyAmountPerFiling = document.getElementById("buyAmountPerFiling").value;
+        let targetDate = document.getElementById("targetDate").value;
+
+
+        console.log("INFO: ", companySymbol, maxBuyAmount, buyAmountPerFiling, targetDate)
+
+
+        // let url = "http://localhost:5000/follow/followTrade";
+        // let data = {
+        //     email: localStorage.getItem("username"),
+        //     ticker: companySymbol,
+        //     targetDate: targetDate,
+        //     buyAmountPerFiling: buyAmountPerFiling,
+        //     maxBuyAmount: maxBuyAmount
+        // }
+
+        // try {
+        //     let response = await axios.post(url, data);
+        //     console.log(response.data);
+        //     alert('Trade followed successfully');
+        // } catch (error) {
+        //     console.error(error);
+        //     alert('Unable to follow trade');
+        // }
+
 
     };
 
-    const handleBuyStock = async () => {
+    const handleBuyStock = async (event) => {
         // Should be calling Transaction here
         // Store company name, id, email, buy amount
-        let url = "http://localhost:6002/transaction/newTrade";
-        
-        let data = {
-            UserID: localStorage.getItem("id"),
-            Email: localStorage.getItem("username"),
-            Company: localStorage.getItem("companyName"),
-            buyAmount: tradeAmount,
-            Threshold: threshold
-        }
+        event.preventDefault();
 
-        try {
-            let response = await axios.post(url, data);
-            console.log(response.data);
-            alert('Transaction successful');
-        } catch (error) {
-            console.error(error);
-            alert('Unable to process the transaction');
-        }
+        let url = "http://localhost:6002/transaction/newTrade";
+        let tradeAmount = document.getElementById("buyAmount").value;
+        let threshold = document.getElementById("stopLossAmount").value;
+
+        console.log("INFO: ", companySymbol, tradeAmount, threshold)
+
+        // let data = {
+        //     UserID: localStorage.getItem("id"),
+        //     Email: localStorage.getItem("username"),
+        //     Company: localStorage.getItem("companyName"),
+        //     buyAmount: tradeAmount,
+        //     Threshold: threshold
+        // }
+
+        // try {
+        //     let response = await axios.post(url, data);
+        //     console.log(response.data);
+        //     alert('Transaction successful');
+        // } catch (error) {
+        //     console.error(error);
+        //     alert('Unable to process the transaction');
+        // }
     };
 
-    const handleSellStock = async () => {
-        // Should be calling FollowTrades here
-        // Store this email, ticker, targetDate, buyAmountPerFiling, maxBuyAmount and send
-        let url = "http://localhost:6002/transaction/newTrade";
+    // const handleSellStock = async () => {
+    //     // Should be calling FollowTrades here
+    //     // Store this email, ticker, targetDate, buyAmountPerFiling, maxBuyAmount and send
+    //     let url = "http://localhost:6002/transaction/newTrade";
+    //     // let tradeAmount = document.getElementById("buyAmount").value;
         
-        let data = {
-            UserID: localStorage.getItem("id"),
-            Email: localStorage.getItem("username"),
-            Company: localStorage.getItem("companyName"),
-            buyAmount: tradeAmount
-        }
+    //     let data = {
+    //         UserID: localStorage.getItem("id"),
+    //         Email: localStorage.getItem("username"),
+    //         Company: localStorage.getItem("companyName"),
+    //         buyAmount: tradeAmount
+    //     }
 
-        try {
-            let response = await axios.post(url, data);
-            console.log(response.data);
-            alert('Transaction successful');
-        } catch (error) {
-            console.error(error);
-            alert('Unable to process the transaction');
-        }
-    };
+    //     try {
+    //         let response = await axios.post(url, data);
+    //         console.log(response.data);
+    //         alert('Transaction successful');
+    //     } catch (error) {
+    //         console.error(error);
+    //         alert('Unable to process the transaction');
+    //     }
+    // };
 
-    const [tradeAmount, setTradeAmount] = useState(0);
-    const [maxBuy, setMaxBuy] = useState(0);
-    const [threshold, setStopLoss] = useState(0);
+    // const [tradeAmount, setTradeAmount] = useState(0);
+    // const [maxBuy, setMaxBuy] = useState(0);
+    // const [threshold, setStopLoss] = useState(0);
 
     // const MyWordCloud = React.memo(({ words, options }) => 
     // <div style={{width: '600px', height: '400px'}}>
     //     <WordCloud words={words} options={options} />
     // </div>
 
-  const [startDate, setStartDate] = useState(new Date());
-  const endDate = new Date(); // Current date
+  // const [startDate, setStartDate] = useState(new Date());
 
   const sentimentColor = sentiment_score < 0 ? 'red' : 'green';
 
@@ -443,7 +462,7 @@ function Trade() {
                   <h1 className="title" style={{padding: '0px 0px 30px 0px'}}>{companyName}<span className="mx-3"><i className="text-warning" style={{fontSize: '20px'}}>{companySymbol}</i></span></h1>
                   <div style={{ overflow: 'hidden', position: 'relative', backgroundColor: 'lightgray', height: '20px', borderRadius: '20px' }}>
                       <div style={progressBarStyles}></div>
-                      <div style={scoreStyles}>{sentiment_score}</div>
+                      <div className='scoreStyles' style={scoreStyles}>{sentiment_score}</div>
                   </div>
                   <p style={{ color: sentimentColor }}>Sentiment Score: {sentiment_score}</p>
                   <br />
@@ -469,12 +488,12 @@ function Trade() {
                   </p> */}
                 <Row>
                   <Col>
-                    <Button color="info" href="#pablo" onClick={(e) => e.preventDefault()} size="lg" style={{color: 'white'}}>
+                    <Button color="info" onClick={toggleBuyModal} size="lg" style={{color: 'white'}}>
                       Buy Now
                     </Button>
                   </Col>
                   <Col>
-                    <Button color="info" href="#pablo" onClick={(e) => e.preventDefault()} size="lg" style={{color: 'white'}}>
+                    <Button color="info" onClick={toggleFollowModal} size="lg" style={{color: 'white'}}>
                       Follow Trade
                     </Button>
                   </Col>
@@ -766,6 +785,42 @@ function Trade() {
               </div>
             </div>
         </div> */}
+
+        <Modal styles='buyModal' isOpen={buyModal} toggle={toggleBuyModal}>
+          <ModalBody>
+          <Form>
+            <FormGroup>
+              <Label for="buyAmount">Buy Amount</Label>
+              <Input type="number" id="buyAmount" />
+            </FormGroup>
+            <FormGroup>
+              <Label for="stopLossAmount">Stop Loss Amount (optional)</Label>
+              <Input type="number" id="stopLossAmount" />
+            </FormGroup>
+            <Button type="submit" onClick={handleBuyStock}>Submit</Button>
+          </Form>
+          </ModalBody>
+        </Modal>
+        <Modal styles='followModal' isOpen={followModal} toggle={toggleFollowModal}>
+        <ModalBody>
+        <Form>
+          <FormGroup>
+            <Label for="maxBuyAmount">Max Buy Amount</Label>
+            <Input type="number" id="maxBuyAmount" />
+          </FormGroup>
+          <FormGroup>
+            <Label for="buyAmountPerFiling">Buy Amount Per Filing</Label>
+            <Input type="number" id="buyAmountPerFiling" />
+          </FormGroup>
+          <FormGroup>
+            <Label for="targetDate">Target Date</Label>
+            <Input type="date" id="targetDate" />
+          </FormGroup>
+          <Button type="submit" onClick={handleFollowTrade}>Submit</Button>
+        </Form>
+        </ModalBody>
+      </Modal>
+
         </>
     );
 }

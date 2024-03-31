@@ -162,7 +162,7 @@ const NavBar = ({ transparent}) => {
           <NavItem>
             <NavLink
               href='landing'
-              onClick={(e) => e.preventDefault()}
+              // onClick={}
             >
               Home
             </NavLink>

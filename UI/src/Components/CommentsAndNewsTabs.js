@@ -9,74 +9,26 @@ const CommentsAndNewsTabs = ({companySymbol, news, comments}) => {
     if (activeTab !== tab) setActiveTab(tab);
   };
 
-  // custom previous button for the slick component
-const PrevButton = (props) => {
-  return (
-    <Button
-      className="btn-round btn-icon btn-simple slick-prev slick-arrow"
-      color="primary"
-      aria-label="Previous"
-      type="button"
-      onClick={props.onClick}
-    >
-      <i className="tim-icons icon-minimal-left" />
-    </Button>
-  );
+  const [comment, setComment] = useState('');
+
+
+  const handleCommentSubmit = () => {
+    var commentsArr = [];
+
+    if(comment) {
+       // Should send User ID and update the comments database through the endpoint provided by microservice
+    //    console.log(comment);
+        console.log(comment)
+       setComment(comment);
+        // Company, Comment IF NOT SURE FOLLOW DOCS
+        // When comment made, it comes in as array, need to shift right to add the new comment
+        // Locally, the user will see all the comments he make plus the 5 from DB
+        // Stored as dict key = company value = comment
+
+    }
+    localStorage.setItem("Comments",commentsArr.unshift(comment));
+
 };
-// custom next button for the slick component
-const NextButton = (props) => {
-  return (
-    <Button
-      className="btn-round btn-icon btn-simple slick-next slick-arrow"
-      color="primary"
-      aria-label="Next"
-      type="button"
-    >
-      <i className="tim-icons icon-minimal-right" onClick={props.onClick} />
-    </Button>
-  );
-};
-
-  let slickSettings = {
-    dots: false,
-    infinite: true,
-    centerMode: true,
-    slidesToShow: 4,
-    slidesToScroll: 1,
-    prevArrow: <PrevButton />,
-    nextArrow: <NextButton />,
-    className: "center slider",
-    slide: "section",
-    responsive: [
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 3,
-          slidesToScroll: 1,
-          infinite: true,
-        },
-      },
-      {
-        breakpoint: 600,
-        settings: {
-          slidesToShow: 2,
-          slidesToScroll: 1,
-        },
-      },
-      {
-        breakpoint: 480,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1,
-        },
-      },
-      // You can unslick at a given breakpoint now by adding:
-      // settings: "unslick"
-      // instead of a settings object
-    ],
-  };
-
-
 
   return (
     <div className="section section-comments">
@@ -125,15 +77,17 @@ const NextButton = (props) => {
                         placeholder="Write about the company"
                         rows="4"
                         type="textarea"
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
                       />
                       <div className="media-footer">
                         <Button
                           className="pull-right"
                           color="info"
                           href="#pablo"
-                          onClick={(e) => e.preventDefault()}
+                          onClick={handleCommentSubmit}
                         >
-                          Reply
+                          Comment
                         </Button>
                       </div>
                     </Media>
@@ -214,8 +168,8 @@ const NextButton = (props) => {
 
                       return (
                         <Card key={index} className="card-blog card-plain" style={{borderColor: 'white'}}>
-                          <CardBody style={{ color: 'white' }}>
-                            <h6 className="category text-warning">{companySymbol}</h6>
+                          <CardBody>
+                            {/* <h6 className="category text-warning">{companySymbol}</h6> */}
                             <CardTitle tag="h6">
                               <a href={item.link} onClick={(e) => e.preventDefault()}>
                                 {item.title}

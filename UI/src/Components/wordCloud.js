@@ -38,7 +38,7 @@ const WordCloud = ({ words }) => {
         .append('text')
         .style('font-size', d => `${d.size}px`)
         .style('font-family', 'Impact')
-        .style('fill', (d, i) => d3.schemeCategory10[i % 10])
+        .style('fill', (d, i) => d3.schemeSet3[i % 10])
         .attr('text-anchor', 'middle')
         .attr('transform', d => `translate(${d.x},${d.y})rotate(${d.rotate})`)
         .text(d => d.text);
