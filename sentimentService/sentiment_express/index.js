@@ -105,7 +105,11 @@ cron.schedule("*/1 * * * *", async () => {
               console.log("current price from scraper: " + res.data);
 
               let size = Math.abs(Math.floor(pcntChange / 0.05));
-              sentiment_methods.triggerStoploss(cron.search, size*5, res.data);
+              try {
+                sentiment_methods.triggerStoploss(cron.search, size*5, res.data);
+              } catch (error) {
+                
+              }
             })
             .catch((error) => {
               console.log("error getting current price");
