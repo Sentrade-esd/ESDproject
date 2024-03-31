@@ -314,7 +314,7 @@ services:
       context: ./userServices
       dockerfile: transactionsDBDockerfile
     hostname: transactions_db
-    restart: always
+    restart: unless_stopped
     ports:
       - 5433:5432
     environment:
