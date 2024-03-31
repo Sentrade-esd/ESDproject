@@ -61,8 +61,8 @@ async function start_amqp() {
       const content = parsedMessage[i];
       console.log(content);
       const company = content.search;
-      const change = content.change;
-      let changeType = "  ";
+      let change = content.change;
+      let changeType = "";
       if (Number(change) < 0) {
         changeType = "decreased";
       } else {
