@@ -91,7 +91,17 @@ async function start_amqp() {
         channel.ack(message);
 
       } catch (error) {
-        console.error(`Error getting watchlist for company ${company}:`, error);
+        // console.error(error);
+        // console.error(`Error getting watchlist for company ${company}:`, error.response.data);
+
+        // if url has watchlist inside the string
+        if (error.config.url.includes("watchlist")) {
+          console.log("Error is from watchlist");
+          console.log(error.response.data);
+          channel.ack(message);
+        } else {
+          console.error(`Error getting watchlist for company ${company}:`, error.response.data);
+        }
       }
     }
     
