@@ -16,7 +16,7 @@ services:
       - "8001:8001"
     networks:
       - kong_network
-    restart: unless-stopped
+    restart: on-failure
 
   prometheus:
     build: 
@@ -27,7 +27,7 @@ services:
       - "8090:9090"
     networks:
       - kong_network
-    restart: unless-stopped
+    restart: on-failure
   
   grafana:
     build: 
@@ -38,7 +38,7 @@ services:
       - "8100:3000"
     networks:
       - kong_network
-    restart: unless-stopped
+    restart: on-failure
 
   ##########################
   # Notification Service ###
@@ -56,7 +56,7 @@ services:
       - kong_network
     environment:
       - DB_URL=watchlist_db:27017
-    restart: unless-stopped
+    restart: on-failure
   
   notification_manager:
     build: 
@@ -73,7 +73,7 @@ services:
       - AMQP_SERVER=amqp://rabbitmq:5672
       - WATCHLIST_URL=http://watchlist:3000/
       - TELEBOT_URL=http://telebot:3002/
-    restart: unless-stopped
+    restart: on-failure
 
   telebot:
     build: 
@@ -88,7 +88,7 @@ services:
       - AMQP_SERVER=amqp://rabbitmq:5672
       - BOT_TOKEN=7039505633:AAFoCvJc3XwP8N7bUd1XsjkCP5rH311TrWQ
       - BOT_URL=https://api.telegram.org/bot
-    # restart: unless-stopped
+    # restart: on-failure
 
   watchlist_db:
     build:
@@ -105,7 +105,7 @@ services:
       - watchlist_db:/data/db
     networks:
       - watchlist_network
-    restart: unless-stopped
+    restart: on-failure
 
 
   ##########################
@@ -126,7 +126,7 @@ services:
       # - ./definitions.json:/etc/rabbitmq/definitions.json
     environment:
       - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbitmq_management load_definitions "/etc/rabbitmq/definitions.json"
-    restart: unless-stopped
+    restart: on-failure
   
 
   ##########################
@@ -155,7 +155,7 @@ services:
       - sentiment_db
       - sentiment_service
       # - rabbitmq
-    restart: unless-stopped
+    restart: on-failure
 
   sentiment_service:
     build: 
@@ -167,7 +167,7 @@ services:
       - "5002:5002"
     networks:
       - sentiment_network
-    restart: unless-stopped
+    restart: on-failure
 
   scraper:
     # platform: linux/x86_64
@@ -181,7 +181,7 @@ services:
       - ALPHA_VANTAGE_API_KEY=key
       - PORT=5000
       - DB_URL=scraper_db:27017
-    restart: unless-stopped
+    restart: on-failure
     networks:
       - sentiment_network
       - scraper_network
@@ -202,7 +202,7 @@ services:
       - sentiment_db:/data/db
     networks:
       - sentiment_network
-    restart: unless-stopped
+    restart: on-failure
 
   scraper_db:
     build:
@@ -219,7 +219,7 @@ services:
       - scraper_db:/data/db
     networks:
       - scraper_network
-    restart: unless-stopped
+    restart: on-failure
 
 
   ##########################
@@ -239,7 +239,7 @@ services:
     networks:
       - user_network
       - kong_network
-    restart: unless-stopped
+    restart: on-failure
 
   user_db:
     build: 
@@ -257,7 +257,7 @@ services:
       - user_db_data:/var/lib/postgresql/data
     networks:
       - user_network
-    restart: unless-stopped
+    restart: on-failure
 
   comments_service:
     build: 
@@ -273,7 +273,7 @@ services:
     environment:
       - DB_URL=comments_db:27017
       - AMQP_SERVER=amqp://rabbitmq:5672
-    restart: unless-stopped
+    restart: on-failure
     
   comments_db:
     build: 
@@ -290,7 +290,7 @@ services:
       - comments_db:/data/db
     networks:
       - comments_network
-    restart: unless-stopped
+    restart: on-failure
 
   transactions:
     build: 
@@ -314,7 +314,7 @@ services:
       context: ./userServices
       dockerfile: transactionsDBDockerfile
     hostname: transactions_db
-    restart: unless_stopped
+    restart: on-failure
     ports:
       - 5433:5432
     environment:
