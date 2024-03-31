@@ -189,8 +189,30 @@ const sentiment_methods = {
             
           } catch (error) {
             console.error('An error occurred:', error);
-          }
+            setTimeout(() => {
+                sentiment_methods.produceNotification(json_data);
+            }, 10000); // Retry after 10 seconds
+        }
 
+    },
+
+    stoplossRetryQueue: async (json_data) => {
+        try {
+            console.log('inserting into retry queue');
+
+            const exchange = 'stoploss_retry_exchange';
+            const queue = 'stoploss_retry_queue';
+            const routingKey = 'stoploss';
+
+            sentiment_methods.channel.publish(exchange, routingKey, Buffer.from(JSON.stringify(json_data)), { persistent: true });
+            console.log('Message sent to RabbitMQ');
+
+        } catch (error) {
+            console.error('An error occurred:', error);
+            setTimeout(() => {
+                sentiment_methods.stoplossRetryQueue(json_data);
+            }, 10000); // Retry after 10 seconds
+        }
     },
 
     consumeNotification: async () => {
@@ -323,12 +345,12 @@ const sentiment_methods = {
 
                     sentiment_methods.upsert_data(Comment, filter, replacement);
                 }
+                sentiment_methods.channel.ack(message);
     
             } catch (error) {
                 console.error('An error occurred:', error);
             }
 
-            sentiment_methods.channel.ack(message);
         });
 
 
@@ -337,6 +359,40 @@ const sentiment_methods = {
         //   } catch (error) {
         //     console.error('An error occurred:', error);
         //   }
+    },
+
+    consumeStoplossRetry: async () => {
+        console.log('Consuming stoploss retry');
+
+        const exchange = 'stoploss_retry_exchange';
+        const queue = 'stoploss_retry_queue';
+        const routingKey = 'stoploss';
+
+        sentiment_methods.channel.consume(queue, async (message) => {
+            const content = JSON.parse(message.content.toString());
+            const search = content.search;
+            const size = content.size;
+
+            try {
+                sentiment_methods.getCurrentPrice(search)
+                .then(response => {
+                    // console.log(response);
+                    try {
+                        sentiment_methods.triggerStoploss(search, size, response.data);
+                        sentiment_methods.channel.ack(message);
+                    } catch (error) {
+                        console.error('error triggering stoploss', error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching current price:', error);
+                });
+
+                
+            } catch (error) {
+                console.error('An error occurred:', error);
+            }
+        });
     },
 
     scraper: async (search_term, ticker) => {
