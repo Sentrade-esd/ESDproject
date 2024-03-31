@@ -87,12 +87,14 @@ async function start_amqp() {
           telegramIds,
           teleMessage,
         });
+
+        channel.ack(message);
+
       } catch (error) {
         console.error(`Error getting watchlist for company ${company}:`, error);
       }
     }
-    channel.ack(message);
-
+    
     // console.log(content);
     // const company = content.search;
     // const change = content.change;
