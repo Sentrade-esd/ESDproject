@@ -182,6 +182,9 @@ async function stockPrice(query, targetDate){
     else {
         let data = response.data;
         console.log("data", data);
+
+        let refreshDate = data["Meta Data"]["3. Last Refreshed"];
+
         let metaData = data['Meta Data'];
         let prices = data['Time Series (Daily)'];
 
@@ -220,6 +223,8 @@ async function stockPrice(query, targetDate){
         //     }
         // }
         // console.log("cleaned data: ", parsedData);
+
+        // return {returnList, refreshDate};
         return returnList;
     }
 

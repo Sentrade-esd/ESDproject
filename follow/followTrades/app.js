@@ -51,7 +51,7 @@ async function followTrade(userId, email, ticker, targetDate, buyAmountPerFiling
     let data = {};
     let updateBalanceStatus = await checkBalance(userId, maxBuyAmount);
     // let updateBalanceStatus = true;
-    if (updateBalanceStatus){
+    if (updateBalanceStatus.data == true){
         try {
             let [
                 stockPrice, 
@@ -62,7 +62,7 @@ async function followTrade(userId, email, ticker, targetDate, buyAmountPerFiling
             ]);
 
             console.log("Account Balance:" , updateBalanceStatus);
-            // console.log("Stock Price:" , stockPrice);
+            console.log("Stock Price:" , stockPrice);
             console.log("Senator Filings:" , senatorFilings);
 
             let filings = JSON.parse(senatorFilings.data);
@@ -79,6 +79,9 @@ async function followTrade(userId, email, ticker, targetDate, buyAmountPerFiling
                 month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based in JavaScript
                 day = String(date.getDate()).padStart(2, '0');
                 filing.tx_date = `${year}-${month}-${day}`;
+
+                console.log(filing.file_date , filing.tx_date);
+
                 filing.file_price = stockPrice[filing.file_date]['4. close'];
                 filing.tx_price = stockPrice[filing.tx_date]['4. close'];
             });
