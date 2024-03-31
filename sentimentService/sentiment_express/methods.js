@@ -368,6 +368,9 @@ const sentiment_methods = {
         const queue = 'stoploss_retry_queue';
         const routingKey = 'stoploss';
 
+        const waitingExchange = 'stoploss_waiting_exchange';
+        const waitingQueue = 'stoploss_waiting_queue';
+
         sentiment_methods.channel.consume(queue, async (message) => {
             const content = JSON.parse(message.content.toString());
             const search = content.search;
@@ -376,19 +379,20 @@ const sentiment_methods = {
             try {
                 sentiment_methods.getCurrentPrice(search)
                 .then(response => {
-                    // console.log(response);
                     try {
                         sentiment_methods.triggerStoploss(search, size, response.data);
                         sentiment_methods.channel.ack(message);
                     } catch (error) {
                         console.error('error triggering stoploss', error);
+                        sentiment_methods.channel.nack(message, false, false);
+                        sentiment_methods.channel.publish(waitingExchange, routingKey, message.content);
                     }
                 })
                 .catch(error => {
                     console.error('Error fetching current price:', error);
+                    sentiment_methods.channel.nack(message, false, false);
+                    sentiment_methods.channel.publish(waitingExchange, routingKey, message.content);
                 });
-
-                
             } catch (error) {
                 console.error('An error occurred:', error);
             }
