@@ -99,12 +99,12 @@ cron.schedule("*/1 * * * *", async () => {
 
         // anybody with a stop loss of 5-25% (steps of 5), send to a endpoint with the search term and percentage change and current price
         if (pcntChange <= -0.05) {
+          let size = Math.abs(Math.floor(pcntChange / 0.05));
 
           sentiment_methods.getCurrentPrice(cron.search)
             .then((res) => {
               console.log("current price from scraper: " + res.data);
 
-              let size = Math.abs(Math.floor(pcntChange / 0.05));
               try {
                 sentiment_methods.triggerStoploss(cron.search, size*5, res.data);
               } catch (error) {
