@@ -65,7 +65,7 @@ async function followTrade(userId, email, ticker, targetDate, buyAmountPerFiling
             console.log("Stock Price:" , stockPrice);
             console.log("Senator Filings:" , senatorFilings);
 
-            let refreshDate = stockPrice.refreshDate // assume this is unix time
+            let refreshDate = stockPrice.refreshDate // assume this is date object
             stockPrice = stockPrice.returnList
 
             let filings = JSON.parse(senatorFilings.data);
@@ -84,7 +84,7 @@ async function followTrade(userId, email, ticker, targetDate, buyAmountPerFiling
                 filing.tx_date = `${year}-${month}-${day}`;
 
                 if (filing.file_date  >refreshDate && filing.txn_date > refreshDate){
-                  continue;  
+                  return;  
                 } 
                 console.log(filing.file_date , filing.tx_date);
 
