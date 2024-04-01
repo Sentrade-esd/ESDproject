@@ -168,9 +168,13 @@ function Trade() {
   const [activeIndex, setActiveIndex] = React.useState(0);
   const [animating, setAnimating] = React.useState(false);
   const [quantity, setQuantity] = React.useState(1);
-
   const [buyModal, setBuyModal] = React.useState(false);
   const [followModal, setFollowModal] = React.useState(false);
+
+  // Check if user is logged in
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState("");
+
   const [comments, setComments] = useState(
     JSON.parse(localStorage.getItem("comments")) || [
       "Apple sucks ass. THey dont produce good products. Samsung is going to take over. ",
@@ -186,6 +190,18 @@ function Trade() {
   useEffect(() => {
     console.log("comments", comments);
   }, [comments]);
+
+
+  // Use effect to check if userisLogged in
+  useEffect(() => {
+    const savedUsername = localStorage.getItem("username");
+    // const savedUsername = "hello";
+    if (savedUsername) {
+      setIsLoggedIn(true);
+      console.log("isloggedin", isLoggedIn);
+      setUsername(savedUsername);
+    }
+  }, []);
 
   const toggleFollowModal = () => {
     setFollowModal(!followModal);
@@ -540,6 +556,7 @@ function Trade() {
                       onClick={toggleBuyModal}
                       size="lg"
                       style={{ color: "white" }}
+                      disabled={!isLoggedIn}
                     >
                       Buy Now
                     </Button>
@@ -550,6 +567,7 @@ function Trade() {
                       onClick={toggleFollowModal}
                       size="lg"
                       style={{ color: "white" }}
+                      disabled={!isLoggedIn}
                     >
                       Follow Trade
                     </Button>

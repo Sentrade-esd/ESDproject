@@ -44,8 +44,8 @@ const NavBar = ({ transparent }) => {
     localStorage.getItem("pendingTeleId") || "false"
   );
   useEffect(() => {
-    // const savedUsername = localStorage.getItem("username");
-    const savedUsername = "hello";
+    const savedUsername = localStorage.getItem("username");
+    // const savedUsername = "hello";
     if (savedUsername) {
       setIsLoggedIn(true);
       console.log("isloggedin", isLoggedIn);
@@ -256,20 +256,9 @@ const NavBar = ({ transparent }) => {
                 </Row>
               </div>
               <Nav className="mx-auto" navbar>
-                {isLoggedIn ? (
-                  <>
-                    {/* <NavItem className="active">
-            <NavLink
-              href="#pablo"
-              onClick={(e) => e.preventDefault()}
-            >
-              Home
-            </NavLink>
-          </NavItem> */}
                     <NavItem>
                       <NavLink
                         href="landing"
-                        // onClick={}
                       >
                         Home
                       </NavLink>
@@ -279,6 +268,8 @@ const NavBar = ({ transparent }) => {
                         Search
                       </NavLink>
                     </NavItem>
+                {isLoggedIn ? (
+                  <>
                     <NavItem>
                       <NavLink onClick={handleTradeHistoryClick}>
                         Trades

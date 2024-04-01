@@ -8,7 +8,7 @@ import React from "react";
 import "Assets/css/nucleo-icons.css";
 import "Assets/css/blk-design-system-pro-react.css";
 import NavBar from "Components/NavBar";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -35,6 +35,25 @@ function Home() {
   const handleSearchClick = () => {
     navigate("/search");
   };
+
+  const [placeHolderText, setPlaceHolderText] = useState("");
+  const index = useRef(0);
+  const fullText = "  Start searching for sentiments of your favourite companies  ";
+
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            if (index.current < fullText.length) {
+                setPlaceHolderText((prevText) => prevText + fullText.charAt(index.current));
+                index.current++;
+            } else {
+                clearInterval(intervalId);
+            }
+        }, 100); // Speed of typewriter, adjust as needed
+        return () => clearInterval(intervalId); // Clean up on unmount
+    }, []);
+
+
+  
   // const [hasUserSession , setHasUserSession] = useState(false);
 
   // // // fake function to check if user is logged in
@@ -215,7 +234,7 @@ function Home() {
             <Container className="text-center">
               <div className="video-text">
                 <h2 className="description">
-                  Start searching for sentiments of your favourite companies
+                  {placeHolderText}
                 </h2>
                 <h1 className="title"></h1>
                 <br />
