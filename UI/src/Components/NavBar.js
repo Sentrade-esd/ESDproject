@@ -66,6 +66,8 @@ const NavBar = ({ transparent }) => {
       // Store userId in local storage
       console.log("hi");
       localStorage.setItem("teleID", teleIdFromUrl);
+      localStorage.setItem("pendingTeleId", "false");
+      setPendingTeleID("false");
       handleSignup(email, password, telegramHandle, teleIdFromUrl);
       // localStorage.setItem("edit", editFromUrl);
       // Set userId state
@@ -440,8 +442,6 @@ const SignupModal = ({
   setEmail,
   setPassword,
   setTelegramHandle,
-  show,
-  onHide,
   flipModal,
   ...props
 }) => {
@@ -501,5 +501,45 @@ const SignupModal = ({
     </Modal>
   );
 };
+// const SignupModal = ({ handleSignup, flipModal, ...props }) => {
+//   const [email, setEmail] = useState("");
+//   const [password, setPassword] = useState("");
+//   const [telegramHandle, setTelegramHandle] = useState("");
+
+//   const onSubmit = (event) => {
+//     event.preventDefault();
+//     handleSignup(email, password, telegramHandle);
+//   };
+
+//   return (
+//     <Modal {...props} size="lg" aria-labelledby="signup-modal">
+//       <Modal.Header closeButton>
+//         <Modal.Title id="signup-modal">Signup</Modal.Title>
+//       </Modal.Header>
+//       <Modal.Body>
+//         <Form onSubmit={onSubmit}>
+//           <Form.Group className="mb-3">
+//             <Form.Label>Email</Form.Label>
+//             <Form.Control type="email" placeholder="Enter email" value={email} onChange={(event) => setEmail(event.target.value)} required />
+//           </Form.Group>
+//           <Form.Group className="mb-3">
+//             <Form.Label>Password</Form.Label>
+//             <Form.Control type="password" placeholder="Password" value={password} onChange={(event) => setPassword(event.target.value)} required />
+//           </Form.Group>
+//           <Form.Group className="mb-3">
+//             <Form.Label>Telegram Handle</Form.Label>
+//             <Form.Control type="text" placeholder="Enter Telegram handle" value={telegramHandle} onChange={(event) => setTelegramHandle(event.target.value)} required />
+//           </Form.Group>
+//           <Button variant="primary" type="submit">Submit</Button>
+//         </Form>
+//       </Modal.Body>
+//       <Modal.Footer>
+//         <Button variant="secondary" onClick={flipModal}>
+//           Have an account? Login
+//         </Button>
+//       </Modal.Footer>
+//     </Modal>
+//   );
+// };
 
 export default NavBar;
