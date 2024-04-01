@@ -6162,6 +6162,7 @@ a.close.disabled {
   height: 100%;
   overflow: hidden;
   outline: 0;
+  padding: 100px;
 }
 
 .modal-dialog {
@@ -16469,6 +16470,7 @@ p.description {
   margin-bottom: 25px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.8);
+  /* color: rgba(0, 0, 0, 0); */
 }
 .title.title-up {
   text-transform: uppercase;
@@ -19410,7 +19412,7 @@ html {
   height: 100%;
   width: 100%;
   background-color: black;
-  opacity: 0.5;
+  opacity: 0.35;
   z-index: 1;
 }
 
@@ -19636,6 +19638,11 @@ html {
 }
 [class*="blogs-"] .title {
   margin-bottom: 70px;
+}
+
+.blogs-5 .card-body {
+  background-color: lightgrey;
+  color: black;
 }
 
 .blogs-1 .card.card-background .card-title,
@@ -20043,11 +20050,12 @@ html {
 
 .testimonials-4 .info {
   max-width: 500px;
+  height: 500px;
   border: 1px solid white;
   padding-top: 10px;
 }
 .testimonials-4 .info .description {
-  padding: 30px 40px;
+  padding: 50px 60px;
   font-weight: 500;
   line-height: 25px;
 }
@@ -20070,7 +20078,7 @@ html {
 }
 
 .testimonials-4 .slick-slide {
-  opacity: 0.1;
+  opacity: 0.05;
 }
 .testimonials-4 .slick-slide.slick-current.slick-active {
   opacity: 1;
@@ -20079,6 +20087,18 @@ html {
 .testimonials-4 .slick-arrow {
   margin-left: 35%;
 }
+
+.testimonials-4 button {
+  z-index: 999;
+}
+
+.testimonials-4 .scoreStyles {
+  z-index: 999;
+  opacity: 100%;
+  color: black;
+}
+
+/* .testimonials-4  */
 
 @media screen and (max-width: 1200px) {
   .testimonials-4 .info .description {
@@ -23976,7 +23996,7 @@ html {
 [class*="pricing-"],
 [class*="testimonials-"],
 [class*="contactus-"] {
-  padding: 80px 0;
+  padding: 0px 0;
 }
 
 @media screen and (min-width: 991px) {
@@ -27586,7 +27606,7 @@ select.selectpicker {
 }
 
 .card-blog {
-  min-height: 550px;
+  min-height: 100px;
 }
 .card-blog .card-image {
   height: 380px;
@@ -27650,6 +27670,10 @@ select.selectpicker {
 }
 .card-blog .text .name {
   color: rgba(255, 255, 255, 0.8);
+}
+
+.card-body-font-color {
+  color: white;
 }
 
 .card-profile,

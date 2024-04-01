@@ -1,7 +1,11 @@
 {
     "result": {
         "search": "tesla",
-        "sentiment_score": -5,
+        "sentiment_score": -10,
+        "currentPrice": "2.8500",
+        "marketCap": "6.553B",
+        "avgVolume": "38,765,832",
+        "previousClose": "2.9700",
         "emotion": {
             "joy": 1,
             "others": 16,

@@ -25,7 +25,7 @@ import {
 } from "reactstrap";
 
 const NavBar = ({ transparent }) => {
-  const navClass = transparent ? "navbar-transparent" : "bg-dark";
+  const navClass = transparent ? "navbar-transparent" : "bg-default";
 
   const [modalShow, setModalShow] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -44,8 +44,8 @@ const NavBar = ({ transparent }) => {
     localStorage.getItem("pendingTeleId") || "false"
   );
   useEffect(() => {
-    const savedUsername = localStorage.getItem("username");
-    // const savedUsername = 'hello';
+    // const savedUsername = localStorage.getItem("username");
+    const savedUsername = "hello";
     if (savedUsername) {
       setIsLoggedIn(true);
       setUsername(savedUsername);
@@ -260,7 +260,7 @@ const NavBar = ({ transparent }) => {
                     <NavItem>
                       <NavLink
                         href="landing"
-                        onClick={(e) => e.preventDefault()}
+                        // onClick={}
                       >
                         Home
                       </NavLink>
