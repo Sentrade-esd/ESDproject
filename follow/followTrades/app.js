@@ -126,16 +126,16 @@ async function followTrade(userId, email, ticker, targetDate, buyAmountPerFiling
             console.log(body);
             const response = await axios.post(`${TRANSACTION_URL}followTradeTransaction`, body);
             
-            console.log(response.data);
-            let buyAmount = response.data['buyAmount'];
-            let sellAmount = response.data['sellAmount'];
-            let totalAccountValue = response.data['totalAccountValue'];
+            console.log("This is response from transactions", response.data);
+            let buyAmount = response.data.data['buyAmount'];
+            let sellAmount = response.data.data['sellAmount'];
+            let totalAccountValue = response.data.data['totalAccountValue'];
             // let fractionalSharesBought = response.data['fractionalSharesBought'];
             // let PnL = response.data['PnL'];
 
             // return {status: 'success', data, boughtAmount: boughtAmount, fractionalSharesBought: fractionalSharesBought, PnL: PnL, sellAmount: sellAmount, company: company};
             // return {status: 'success', data, boughtAmount: boughtAmount, fractionalSharesBought: fractionalSharesBought, PnL: PnL, sellAmount: sellAmount};
-            return {status: 'success', data, buyAmount: buyAmount, sellAmount: sellAmount, totalAccountValue: totalAccountValue};
+            return {status: 'success', buyAmount: buyAmount, sellAmount: sellAmount, totalAccountValue: totalAccountValue, data};
         } catch (error){
             console.log(error);
             return {status: 'error', error};

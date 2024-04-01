@@ -156,7 +156,7 @@ const sentiment_methods = {
             try {
                 // console.log(comment);
                 console.log(sentiment_methods.sentiment_service_url)
-                axios.post(sentiment_methods.sentiment_service_url + "/analyse_comment", {"comment":comment})
+                axios.post(sentiment_methods.sentiment_service_url + "analyse_comment", {"comment":comment})
                 .then(response => {
                     console.log("analyse comment is valid");
 
@@ -234,9 +234,9 @@ const sentiment_methods = {
             const search_term = content.company;
             const comment = content.comment;
 
-            const results = await sentiment_methods.analyse_comment(comment);
-
+            
             try {
+                const results = await sentiment_methods.analyse_comment(comment);
                 // chekc if DB has a record
                 let exisiting_comments = await Comment.findOne({search: search_term});
     
