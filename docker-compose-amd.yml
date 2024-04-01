@@ -274,7 +274,7 @@ services:
   transactions_db:
     image: chernise/esdproject-transactions_db:latest
     hostname: transactions_db
-    restart: always
+    restart: unless-stopped
     ports:
       - 5433:5432
     environment:
