@@ -32,10 +32,17 @@ const NavBar = ({ transparent }) => {
   const [username, setUsername] = useState("");
   const [isLogin, setIsLogin] = useState(true);
   const [justSignedUp, setJustSignedUp] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [telegramHandle, setTelegramHandle] = useState("");
   // const [telegramID, setTelegramID] = useState(
   //   localStorage.getItem("telegramID") || null
   // );
+  const [teleID, setTeleID] = useState(localStorage.getItem("teleID") || null);
 
+  const [pendingTeleID, setPendingTeleID] = useState(
+    localStorage.getItem("pendingTeleId") || "false"
+  );
   useEffect(() => {
     const savedUsername = localStorage.getItem("username");
     // const savedUsername = 'hello';
@@ -44,7 +51,37 @@ const NavBar = ({ transparent }) => {
       setUsername(savedUsername);
     }
   }, []);
+  useEffect(() => {
+    console.log("isl", isLoggedIn);
+    console.log("islogin", isLogin);
+  }, [isLoggedIn, isLogin]);
+  useEffect(() => {
+    // Get userId from URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const teleIdFromUrl = urlParams.get("teleId");
+    // const editFromUrl = urlParams.get("edit");
+    console.log(isLoggedIn);
+    console.log(isLogin);
+    if (teleIdFromUrl !== null) {
+      // Store userId in local storage
+      console.log("hi");
+      localStorage.setItem("teleID", teleIdFromUrl);
+      handleSignup(email, password, telegramHandle, teleIdFromUrl);
+      // localStorage.setItem("edit", editFromUrl);
+      // Set userId state
+      setTeleID(teleIdFromUrl);
 
+      // setEdit(editFromUrl);
+      setIsLoggedIn(false);
+      setIsLogin(true);
+      setModalShow(true);
+    }
+    if (pendingTeleID === "true") {
+    }
+    // if (editFromUrl === "true") {
+    // }
+    console.log("teleIdFromUrl", teleIdFromUrl);
+  }, []);
   const handleLogin = (username, password) => {
     axios
       .get(`http://localhost:5000/user/${username}`)
@@ -75,7 +112,7 @@ const NavBar = ({ transparent }) => {
     setUsername("");
   };
 
-  const handleSignup = (Email, Password, TelegramHandle) => {
+  const sendToTele = (Email, Password, TelegramHandle) => {
     // axios
     //   .post("http://127.0.0.1:5000/user", {
     //     Email: Email,
@@ -103,13 +140,29 @@ const NavBar = ({ transparent }) => {
     //   .catch((error) => {
     //     console.error("There was an error while signing up!", error);
     //   });
-    const redirectToTelegramBot = () => {
-      // Replace 'YOUR_BOT_USERNAME' with your bot's username
+    const redirectToTelegramBot = async () => {
+      localStorage.setItem("pendingTeleId", "true");
+      setPendingTeleID("true");
+      try {
+        const response = await axios.get(
+          "http://localhost:3002/teleBot/redirect",
+          {
+            headers: {
+              bro: window.location.href,
+            },
+          }
+        );
 
-      const telegramDeepLink = `https://t.me/SenTrade_Bot`;
-
-      // Redirect the user to the Telegram bot chat
-      window.location.href = telegramDeepLink;
+        if (response.status === 200) {
+          const redirectUrl = response.data;
+          console.log(`Redirecting to: ${redirectUrl}`);
+          window.location.href = redirectUrl;
+        } else {
+          console.error("Failed to redirect");
+        }
+      } catch (error) {
+        console.error(`Error: ${error.message}`);
+      }
     };
     setJustSignedUp(true);
 
@@ -118,6 +171,35 @@ const NavBar = ({ transparent }) => {
 
       // localStorage.setItem("telegramPage", "true");
     }, 3000);
+  };
+  const handleSignup = (Email, Password, TelegramHandle, TeleId) => {
+    axios
+      .post("http://127.0.0.1:5000/user", {
+        Email: Email,
+        Password: Password,
+        Telehandle: TelegramHandle,
+        TeleID: TeleId,
+      })
+      .then((response) => {
+        if (response.data.code === 200) {
+          axios.get(`http://localhost:5000/user/${Email}`).then((response) => {
+            if (response.data.code === 200) {
+              localStorage.setItem("username", Email);
+              localStorage.setItem("id", response.data.data.UserID);
+              // setIsLoggedIn(true);
+              // setUsername(Email);
+            } else {
+              console.error("Fetch data after signup failed");
+            }
+          });
+        } else {
+          console.error("Signup failed");
+        }
+        // setModalShow(false);
+      })
+      .catch((error) => {
+        console.error("There was an error while signing up!", error);
+      });
   };
 
   //   const handleNewUser = (Email) => {
@@ -243,7 +325,13 @@ const NavBar = ({ transparent }) => {
             />
           ) : (
             <SignupModal
-              handleSignup={handleSignup}
+              sendToTele={sendToTele}
+              email={email}
+              password={password}
+              telegramHandle={telegramHandle}
+              setEmail={setEmail}
+              setPassword={setPassword}
+              setTelegramHandle={setTelegramHandle}
               show={modalShow}
               onHide={() => setModalShow(false)}
               flipModal={() => setIsLogin(!isLogin)}
@@ -252,7 +340,7 @@ const NavBar = ({ transparent }) => {
         </Navbar>
       )}
       {justSignedUp && <LoadingModal></LoadingModal>}
-      {/* {telegramPage && <TelegramPage />} */}
+      {pendingTeleID == "true" && <TelegramPage />}
     </>
     // <Navbar className={navClass} expand="lg">
     //   <Container>
@@ -284,6 +372,13 @@ const LoadingModal = () => {
     <div class="loader-container">
       <div class="loader"></div>
       <div class="loader-text">Redirecting you to our TeleBot...</div>
+    </div>
+  );
+};
+const TelegramPage = () => {
+  return (
+    <div>
+      <h1>Telegram Page</h1>
     </div>
   );
 };
@@ -337,14 +432,23 @@ const LoginModal = ({ handleLogin, flipModal, ...props }) => {
   );
 };
 
-const SignupModal = ({ handleSignup, flipModal, ...props }) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [telegramHandle, setTelegramHandle] = useState("");
-
+const SignupModal = ({
+  sendToTele,
+  email,
+  password,
+  telegramHandle,
+  setEmail,
+  setPassword,
+  setTelegramHandle,
+  show,
+  onHide,
+  flipModal,
+  ...props
+}) => {
   const onSubmit = (event) => {
     event.preventDefault();
-    handleSignup(email, password, telegramHandle);
+    // handleSignup(email, password, telegramHandle);
+    sendToTele();
   };
 
   return (

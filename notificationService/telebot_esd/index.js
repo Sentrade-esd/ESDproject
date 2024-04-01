@@ -4,26 +4,29 @@ const bot = new Telegraf(
 );
 const express = require("express");
 const http = require("http");
+const cors = require("cors");
 const app = express();
 
 app.use(express.json());
-
+app.use(cors());
 const server = http.createServer(app);
 
 const PORT = process.env.PORT || 3002;
-
+let referer = "";
 bot.start((ctx) => {
   // bot.telegram.setMyCommands({
   //   command: "send_Drago",
   //   description: "Send a msg to drago",
   // });
   const userId = ctx.from.id;
-
-  ctx.reply(
-    'Welcome to SenTrade. You will receive your notifications here. Please <a href="http://yourwebsite.com">click here</a> to go back to the website',
-    { parse_mode: "HTML" }
-  );
-
+  // if (!referer) {
+  //   console.error("Referer is not defined");
+  //   return;
+  // }
+  const redirectUrl = `${referer}?teleId=${userId}`;
+  console.log(`User ID: ${userId}`);
+  console.log(`Redirect URL: ${redirectUrl}`);
+  ctx.reply(`Click here to go back to the website: ${redirectUrl}`);
   // ... rest of your code
 });
 bot.command("send_Drago", (ctx) => {
@@ -47,7 +50,16 @@ app.post("/teleBot/send_message", (req, res) => {
 
   res.status(200).json({ status: "Messages sent" });
 });
-
+app.get("/teleBot/redirect", (req, res) => {
+  try {
+    referer = req.headers.bro;
+    console.log(`Request made from: ${referer}`);
+    res.status(200).send("https://t.me/SenTrade_Bot");
+  } catch (error) {
+    console.error(`Error: ${error.message}`);
+    res.status(500).send("An error occurred");
+  }
+});
 server.listen(PORT, () => {
   console.log("Server listening on port 3002");
 });
