@@ -78,8 +78,7 @@ const NavBar = ({ transparent }) => {
       setIsLogin(true);
       setModalShow(true);
     }
-    if (pendingTeleID === "true") {
-    }
+
     // if (editFromUrl === "true") {
     // }
     console.log("teleIdFromUrl", teleIdFromUrl);
