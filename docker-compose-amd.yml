@@ -14,7 +14,7 @@ services:
       - "8001:8001"
     networks:
       - kong_network
-    restart: on-failure
+    restart: unless-stopped
   
   prometheus:
     image: chernise/esdproject-prometheus:latest
@@ -22,7 +22,7 @@ services:
       - "8090:9090"
     networks:
       - kong_network
-    restart: on-failure
+    restart: unless-stopped
 
   grafana:
     image: chernise/esdproject-grafana:latest
@@ -30,7 +30,7 @@ services:
       - "8100:3000"
     networks:
       - kong_network
-    restart: on-failure
+    restart: unless-stopped
 
 
   ##########################
@@ -47,7 +47,7 @@ services:
       - kong_network
     environment:
       - DB_URL=watchlist_db:27017
-    restart: on-failure
+    restart: unless-stopped
   
   notification_manager:
     image: chernise/esdproject-notification_manager:latest
@@ -62,7 +62,7 @@ services:
       - AMQP_SERVER=amqp://rabbitmq:5672
       - WATCHLIST_URL=http://watchlist:3000/
       - TELEBOT_URL=http://telebot:3002/
-    restart: on-failure
+    restart: unless-stopped
 
   telebot:
     image: chernise/esdproject-telebot:latest
@@ -75,7 +75,7 @@ services:
       - AMQP_SERVER=amqp://rabbitmq:5672
       - BOT_TOKEN=7039505633:AAFoCvJc3XwP8N7bUd1XsjkCP5rH311TrWQ
       - BOT_URL=https://api.telegram.org/bot
-    # restart: on-failure
+    # restart: unless-stopped
 
   watchlist_db:
     image: chernise/esdproject-watchlist_db:latest
@@ -90,7 +90,7 @@ services:
       - watchlist_db:/data/db
     networks:
       - watchlist_network
-    restart: on-failure
+    restart: unless-stopped
 
 
   ##########################
@@ -109,7 +109,7 @@ services:
       # - ./definitions.json:/etc/rabbitmq/definitions.json
     environment:
       - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbitmq_management load_definitions "/etc/rabbitmq/definitions.json"
-    restart: on-failure
+    restart: unless-stopped
   
 
   ##########################
@@ -136,7 +136,7 @@ services:
       - sentiment_db
       - sentiment_service
       # - rabbitmq
-    restart: on-failure
+    restart: unless-stopped
 
   sentiment_service:
     image: chernise/esdproject-sentiment_service:latest
@@ -146,7 +146,7 @@ services:
       - "5002:5002"
     networks:
       - sentiment_network
-    restart: on-failure
+    restart: unless-stopped
 
   scraper:
     image: chernise/esdproject-scraper:latest
@@ -157,7 +157,7 @@ services:
       - ALPHA_VANTAGE_API_KEY=youralphavantageapikey
       - PORT=5000
       - DB_URL=scraper_db:27017
-    restart: on-failure
+    restart: unless-stopped
     networks:
       - sentiment_network
       - scraper_network
@@ -176,7 +176,7 @@ services:
       - sentiment_db:/data/db
     networks:
       - sentiment_network
-    restart: on-failure
+    restart: unless-stopped
 
   scraper_db:
     image: chernise/esdproject-scraper_db:latest
@@ -191,7 +191,7 @@ services:
       - scraper_db:/data/db
     networks:
       - scraper_network
-    restart: on-failure
+    restart: unless-stopped
 
 
   ##########################
@@ -209,7 +209,7 @@ services:
     networks:
       - user_network
       - kong_network
-    restart: on-failure
+    restart: unless-stopped
 
   user_db:
     image: chernise/esdproject-user_db:latest
@@ -225,7 +225,7 @@ services:
       - user_db_data:/var/lib/postgresql/data
     networks:
       - user_network
-    restart: on-failure
+    restart: unless-stopped
 
   comments_service:
     image: chernise/esdproject-comments_service:latest
@@ -239,7 +239,7 @@ services:
     environment:
       - DB_URL=comments_db:27017
       - AMQP_SERVER=amqp://rabbitmq:5672
-    restart: on-failure
+    restart: unless-stopped
     
   comments_db:
     image: chernise/esdproject-sentiment_db:latest
@@ -254,7 +254,7 @@ services:
       - comments_db:/data/db
     networks:
       - comments_network
-    restart: on-failure
+    restart: unless-stopped
 
   transactions:
     image: chernise/esdproject-transactions:latest
