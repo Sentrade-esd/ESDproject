@@ -48,6 +48,7 @@ const NavBar = ({ transparent }) => {
     const savedUsername = "hello";
     if (savedUsername) {
       setIsLoggedIn(true);
+      console.log("isloggedin", isLoggedIn);
       setUsername(savedUsername);
     }
   }, []);
@@ -62,7 +63,7 @@ const NavBar = ({ transparent }) => {
     // const editFromUrl = urlParams.get("edit");
     console.log(isLoggedIn);
     console.log(isLogin);
-    if (teleIdFromUrl !== null) {
+    if (teleIdFromUrl !== null && !isLoggedIn) {
       // Store userId in local storage
       console.log("hi");
       localStorage.setItem("teleID", teleIdFromUrl);
@@ -74,7 +75,8 @@ const NavBar = ({ transparent }) => {
       setTeleID(teleIdFromUrl);
 
       // setEdit(editFromUrl);
-      setIsLoggedIn(false);
+      // uncomment below before pushing
+      // setIsLoggedIn(false);
       setIsLogin(true);
       setModalShow(true);
     }
@@ -215,7 +217,9 @@ const NavBar = ({ transparent }) => {
       navigate("/TradeHistory");
     }
   };
-
+  const handleSearchClick = () => {
+    navigate("/search");
+  };
   return (
     <>
       {!justSignedUp && (
@@ -266,7 +270,7 @@ const NavBar = ({ transparent }) => {
                       </NavLink>
                     </NavItem>
                     <NavItem>
-                      <NavLink href="search" onClick={handleTradeHistoryClick}>
+                      <NavLink href="search" onClick={handleSearchClick}>
                         Search
                       </NavLink>
                     </NavItem>
