@@ -54,14 +54,14 @@ const startAmqp = async () => {
 
         connection.on("close", () => {
           console.error("[AMQP] reconnecting");
-          return setTimeout(start, 10000);
+          return setTimeout(start, 5000);
         });
 
         console.log("[AMQP] connected");
         resolve();
       } catch (err) {
         console.error("[AMQP] could not connect", err.message);
-        return setTimeout(start, 10000);
+        return setTimeout(start, 5000);
       }
     };
     start();
@@ -72,7 +72,8 @@ const sendToQueue = async (exchange, routingKey, msg) => {
   channel.publish(exchange, routingKey, Buffer.from(JSON.stringify(msg)), {
     persistent: true,
   });
-  console.log(`[x] Sent ${msg}`);
+  // console.log(`[x] Sent ${msg}`);
+  return true;
 };
 
 // ----------------- RESTFUL API -----------------
@@ -87,8 +88,6 @@ app.post("/comments", async (req, res) => {
   }
 
   try {
-    const msg = { company, comment };
-    await sendToQueue("comments_exchange", "comment", msg);
     const companyComments = await comments.findOneAndUpdate(
       { company: company },
       { $push: { commentsMade: comment } },
@@ -100,11 +99,21 @@ app.post("/comments", async (req, res) => {
       await companyComments.save();
     }
 
-    res.send(companyComments);
   } catch (error) {
     console.error("Error adding comment:", error);
     res.status(500).send({ message: "Error adding comment" });
   }
+
+  try {
+    const msg = { company, comment };
+    await sendToQueue("comments_exchange", "comment", msg);
+
+    res.send(companyComments);
+  } catch (error) {
+    console.error("Error sending message to queue:", error);
+    res.status(500).send({ message: "Error sending message to queue" });
+  }
+
 });
 
 app.get("/comments/:company", async (req, res) => {
