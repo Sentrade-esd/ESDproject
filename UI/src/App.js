@@ -1,8 +1,8 @@
 import logo from "./logo.svg";
 import "./App.css";
-import Navigation from "./Components/Navigation.js";
+// import Navigation from "./Components/Navigation.js";
 import NavBar from "./Components/NavBar.js";
-import HomeBody from "./Pages/HomeBody.js";
+// import HomeBody from "./Pages/HomeBody.js";
 import Home from "./Pages/Home.js";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Search from "./Pages/Search.js";
@@ -13,13 +13,14 @@ import React, { useState, useEffect } from "react";
 function Main() {
   const location = useLocation();
 
+
   return (
     <div className="App">
-      {location.pathname !== "/landing" && <NavBar transparent={false} />}
+      {(location.pathname !== "/landing" && location.pathname !== "/" && location.pathname !== '/home') && <NavBar transparent={false} />}
       <Routes>
         <Route path="/landing" element={<Home />} />
-        <Route path="/" element={<HomeBody />} />
-        <Route path="/home" element={<HomeBody />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/home" element={<Home />} />
         <Route path="/search" element={<Search />} />
         <Route path="/trade" element={<Trade />} />
         <Route path="/TradeHistory" element={<TradeHistory />} />

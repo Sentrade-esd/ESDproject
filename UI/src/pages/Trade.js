@@ -11,6 +11,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 // import Select from "react";
 import Slick from "react-slick";
+import "../Styles/global.css"
 
 
 // import React from "react";
@@ -185,11 +186,13 @@ function Trade() {
 
     const wrapper = React.useRef(null);
     React.useEffect(() => {
+      console.log('Adding product-page class')
       document.documentElement.scrollTop = 0;
       document.scrollingElement.scrollTop = 0;
       wrapper.current.scrollTop = 0;
       document.body.classList.add("product-page");
       return function cleanup() {
+        console.log('Removing product-page class')
         document.body.classList.remove("product-page");
       };
     }, []);
@@ -438,19 +441,7 @@ function Trade() {
     return (
       <>
       <div className="wrapper" ref={wrapper} style={{backgroundColor: "#1D304f"}}>
-        {/* <div className="page-header page-header-small">
-        <img
-            alt="..."
-            className="path shape"
-            src={require("Assets/img/shape-s.png")}
-          />
-          <Container>
-            <h1 className="h1-seo">Our products</h1>
-            <h3>This is the best way to find your favorite stuff</h3>
-          </Container>
-        </div> */}
-        {/* <Col className="ml-auto mr-auto" md="8"> */}
-          <div className="testimonials-4">
+        <div className="testimonials-4">
             <Container fluid>
               {/* <Row>
                 <Col className="ml-auto mr-auto text-center" md="6">

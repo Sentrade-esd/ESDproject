@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Nav, NavItem, NavLink, TabContent, TabPane, Media, Input, Button, Card, CardBody, CardTitle, CardFooter } from 'reactstrap';
 import Slick from "react-slick";
+import "../Styles/global.css";
 
 const CommentsAndNewsTabs = ({companySymbol, news, comments}) => {
   const [activeTab, setActiveTab] = useState('comments');
