@@ -6,55 +6,6 @@ import Slick from "react-slick";
 import "../Styles/global.css";
 import classnames from "classnames";
 
-
-const items2 = [
-    {content:
-      {
-          companySymbol: 'AAPL',
-          companyName: 'Apple Inc',
-          buyAmount: 100,
-          stopLoss: 0.5,
-          stocksHeld: 0.5,
-      }
-    },
-    {content:
-      {
-          companySymbol: 'TSLA',
-          companyName: 'Tesla',
-          buyAmount: 100,
-          stopLoss: 0.5,
-          stocksHeld: 0.5,
-      }
-    },
-    {content:
-      {
-          companySymbol: 'NVDA',
-          companyName: 'Nvidia',
-          buyAmount: 100,
-          stopLoss: 0.5,
-          stocksHeld: 0.5,
-      }
-    },
-    {content:
-      {
-          companySymbol: 'AAPL',
-          companyName: 'Apple',
-          buyAmount: 100,
-          stopLoss: 0.5,
-          stocksHeld: 0.5,
-      }
-    },
-    {content: 
-      {
-          companySymbol: 'SMSG',
-          companyName: 'Samsung',
-          buyAmount: 100,
-          stopLoss: 0.5,
-          stocksHeld: 0.5,
-      }
-    },
-  ];
-
 const allTransactions = [
   {
     "BuyAmount": 100,
@@ -153,40 +104,9 @@ const allTransactions = [
     "UserID": 4
   }
 ]
-
-
-  
-
-// custom previous button for the slick component
-const PrevButton = (props) => {
-    return (
-      <Button
-        className="btn-round btn-icon btn-simple slick-prev slick-arrow"
-        color="primary"
-        aria-label="Previous"
-        type="button"
-        onClick={props.onClick}
-      >
-        <i className="tim-icons icon-minimal-left" />
-      </Button>
-    );
-  };
-  // custom next button for the slick component
-  const NextButton = (props) => {
-    return (
-      <Button
-        className="btn-round btn-icon btn-simple slick-next slick-arrow"
-        color="primary"
-        aria-label="Next"
-        type="button"
-      >
-        <i className="tim-icons icon-minimal-right" onClick={props.onClick} />
-      </Button>
-    );
-  };
   
 const TradeHistory = () => {
-    const [transactions, setTransactions] = useState([]);
+    // const [transactions, setTransactions] = useState([]);
     const [tabs, setTabs] = React.useState(1);
     const [carousel1Index, setCarousel1Index] = React.useState(0);
     const [carousel2Index, setCarousel2Index] = React.useState(0);
@@ -197,6 +117,8 @@ const TradeHistory = () => {
     const [openTrades, setOpenTrades] = useState([]);
     const [closedTrades, setClosedTrades] = useState([]);
     const [pnL , setPnL] = useState(0);
+    // Uncomment this below when the microservice is ready
+    // const [allTransactions, setAllTransactions] = useState([]);
 
 
     // const email = sessionStorage.getItem('username');
@@ -211,45 +133,43 @@ const TradeHistory = () => {
       };
     }, []);
 
-    useEffect(() => {
-        const UserID = sessionStorage.getItem('id'); 
-        if (UserID) { // check if email is present
-            axios.get(`http://127.0.0.1:5004/transaction/total/${UserID}`)
-        .then(response => {
-            // setTransactions(response.data);
-            setTransactions(response.data.data.Transaction);
-        })
-        .catch(error => {
-            console.error('There was an error!', error);
-        });
-        }
-    }, []);
-
+    
     // useEffect(() => {
-    //   const categorizedItems = items2.reduce((categories, item) => {
-    //     const key = item.content.companySymbol;
-    
-    //     if (!categories[key]) {
-    //       categories[key] = {
-    //         content: {
-    //           companySymbol: key,
-    //           position: 0.0,
-    //           totalValue: 0.0,
-    //           // Add other properties as needed
-    //         },
-    //       };
+    //     const UserID = sessionStorage.getItem('id'); 
+    //     if (UserID) { // check if email is present
+    //         axios.get(`http://127.0.0.1:5004/transaction/total/${UserID}`)
+    //     .then(response => {
+    //         // setTransactions(response.data);
+    //         setTransactions(response.data.data.Transaction);
+    //     })
+    //     .catch(error => {
+    //         console.error('There was an error!', error);
+    //     });
     //     }
-    
-    //     categories[key].content.position += item.content.stocksHeld;
-    //     categories[key].content.totalValue += item.content.buyAmount;
-    //     // Add other properties as needed
-    
-    //     return categories;
-    //   }, {});
+    // }, []);
 
-    //   setCategorizedItems(categorizedItems);
-    //   console.log(categorizedItems);
-    // }, [items2]);
+
+
+    // Uncomment this below when the microservice is ready (Fetch for all transactions with UserId)
+    // useEffect(() => {
+    //   const fetchData = async () => {
+    //     try {
+    //       const TransactionsResponse = await axios.get(
+    //         `http://kong:8000/transaction/transaction/total/${UserID}`
+    //       ); // This will be the microserivce eventually
+    //       setAllTransactions(TransactionsResponse.data);
+    //     //   const CommentsResponse = await axios.get(
+    //     //     `http://kong:8000/comments/${companyName}`
+    //     //   ); // This will be the microserivce eventually
+    //     //   setComments(CommentsResponse.data);
+    //     //   localStorage.setItem("comments", JSON.stringify(response2.data));
+    //     } catch (error) {
+    //       console.error("Error fetching data:", error);
+    //     }
+    //   };
+  
+    //   fetchData();
+    // }, []);
 
 
     useEffect(() => {

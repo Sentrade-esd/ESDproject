@@ -232,7 +232,12 @@ const NavBar = ({ transparent }) => {
                 <span className="navbar-toggler-bar bar3" />
               </button>
               <NavbarBrand href="#pablo" onClick={(e) => e.preventDefault()}>
-                SenTrade
+                {/* SenTrade */}
+                <img 
+                  src={require("../Assets/img/logo.png")}
+                  alt="SenTrade"
+                  style={{height: "15px" }}
+                />
               </NavbarBrand>
             </div>
             <UncontrolledCollapse navbar toggler="#example-header-4">
