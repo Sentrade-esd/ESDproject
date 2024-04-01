@@ -15,6 +15,23 @@ services:
     networks:
       - kong_network
     restart: unless-stopped
+  
+  prometheus:
+    image: chernise/esdproject-prometheus:latest
+    ports:
+      - "8090:9090"
+    networks:
+      - kong_network
+    restart: unless-stopped
+
+  grafana:
+    image: chernise/esdproject-grafana:latest
+    ports:
+      - "8100:3000"
+    networks:
+      - kong_network
+    restart: unless-stopped
+
 
   ##########################
   # Notification Service ###
@@ -257,7 +274,7 @@ services:
   transactions_db:
     image: chernise/esdproject-transactions_db:latest
     hostname: transactions_db
-    restart: always
+    restart: unless-stopped
     ports:
       - 5433:5432
     environment:
@@ -307,6 +324,7 @@ services:
     image: chernise/esdproject-app:latest
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - .:/usr/src/app
     command: ["nginx", "-g", "daemon off;"]

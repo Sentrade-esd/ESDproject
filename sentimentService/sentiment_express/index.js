@@ -99,17 +99,22 @@ cron.schedule("*/1 * * * *", async () => {
 
         // anybody with a stop loss of 5-25% (steps of 5), send to a endpoint with the search term and percentage change and current price
         if (pcntChange <= -0.05) {
+          let size = Math.abs(Math.floor(pcntChange / 0.05));
 
           sentiment_methods.getCurrentPrice(cron.search)
             .then((res) => {
               console.log("current price from scraper: " + res.data);
 
-              let size = Math.abs(Math.floor(pcntChange / 0.05));
-              sentiment_methods.triggerStoploss(cron.search, size*5, res.data);
+              try {
+                sentiment_methods.triggerStoploss(cron.search, size*5, res.data);
+              } catch (error) {
+                sentiment_methods.stoplossRetryQueue({search: cron.search, size: size*5})
+              }
             })
             .catch((error) => {
               console.log("error getting current price");
               console.log(error);
+              sentiment_methods.stoplossRetryQueue({search: cron.search, size: size*5})
             });
 
 
@@ -140,17 +145,9 @@ cron.schedule("*/1 * * * *", async () => {
     CronJob.collection.drop();
   
     // if all sentiments not empty, create a new cron item for each sentiment
-  
     if (Object.keys(combined_sentiments).length > 0) {
       // for each item in senitments, create a new cron item
       for (let search of Object.keys(combined_sentiments)) {
-        // // console.log("search: " + search);
-        // let newCron = new CronJob({
-        //   search: search,
-        //   sentiment_score: combined_sentiments[search],
-        // });
-        // sentiment_methods.save_data(newCron);
-
         // upsert
         let filter =  { search: search };
 
@@ -160,24 +157,20 @@ cron.schedule("*/1 * * * *", async () => {
         };
 
         sentiment_methods.upsert_data(CronJob, filter, newCron);
-
-
       }
     }
 
   } catch (error) {
     console.log("cron db reset failed");
     console.log(error);
-  }
-
-
-  
+  }  
 });
 
 // start queue connection
 (async () => {
   await sentiment_methods.start_amqp();
   sentiment_methods.consumeNotification();
+  sentiment_methods.consumeStoplossRetry();
 })();
 
 

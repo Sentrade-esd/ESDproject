@@ -189,8 +189,30 @@ const sentiment_methods = {
             
           } catch (error) {
             console.error('An error occurred:', error);
-          }
+            setTimeout(() => {
+                sentiment_methods.produceNotification(json_data);
+            }, 10000); // Retry after 10 seconds
+        }
 
+    },
+
+    stoplossRetryQueue: async (json_data) => {
+        try {
+            console.log('inserting into retry queue');
+
+            const exchange = 'stoploss_retry_exchange';
+            const queue = 'stoploss_retry_queue';
+            const routingKey = 'stoploss';
+
+            sentiment_methods.channel.publish(exchange, routingKey, Buffer.from(JSON.stringify(json_data)), { persistent: true });
+            console.log('Message sent to RabbitMQ');
+
+        } catch (error) {
+            console.error('An error occurred:', error);
+            setTimeout(() => {
+                sentiment_methods.stoplossRetryQueue(json_data);
+            }, 10000); // Retry after 10 seconds
+        }
     },
 
     consumeNotification: async () => {
@@ -200,6 +222,9 @@ const sentiment_methods = {
         const exchange = 'comments_exchange';
         const queue = 'new_comment_queue';
         const routingKey = 'comment';
+
+        const waitingExchange = 'waiting_exchange';
+        const waitingQueue = 'comments_waiting_queue';
 
         // let temp1 = await channel.assertExchange(exchange, 'direct', { durable: true });
         // await channel.assertQueue(queue, { durable: true });
@@ -228,15 +253,6 @@ const sentiment_methods = {
                         }
 
                         exisiting_comments.emotion[results.emotion] += 1;
-        
-                        // let updateComment = await Comment.replaceOne({_id: exisiting_comments.id}, {
-                        //     datetime: exisiting_comments.datetime,
-                        //     search: exisiting_comments.search,
-                        //     sentiment_score: exisiting_comments.sentiment_score,
-                        //     emotion: exisiting_comments.emotion
-                        // });
-        
-                        // console.log("saving existing comment");
     
                         // upsert
                         const filter = { search: search_term };
@@ -254,20 +270,6 @@ const sentiment_methods = {
                     } else {
                         console.log("comment in db expired");
                         await Comment.deleteOne({search: search_term});
-
-                        // let newComment = new Comment({
-                        //     datetime: Date.now(),
-                        //     search: search_term,
-                        //     sentiment_score: results.score,
-                        //     // emotion: {"joy":0, "others":0, "surprise":0, "sadness":0, "fear":0, "anger":0, "disgust":0, "love":0}
-                        //     emotion: {"anger": 0, "joy": 0, "sadness": 0, "optimism": 0}
-                        // });
-
-                        // newComment.emotion[results.emotion] += 1;
-
-                        // console.log("saving new comment");
-                        // // await newComment.save();
-                        // sentiment_methods.save_data(newComment);
 
                         // upsert 
                         const filter = { search: search_term };
@@ -290,20 +292,6 @@ const sentiment_methods = {
                         // return res.json({ result: newComment });
                     }
                 } else {
-                    // if no record exists, create a new one
-                    // let newComment = new Comment({
-                    //     datetime: Date.now(),
-                    //     search: search_term,
-                    //     sentiment_score: results.score,
-                    //     // emotion: {"joy":0, "others":0, "surprise":0, "sadness":0, "fear":0, "anger":0, "disgust":0, "love":0}
-                    //     emotion: {"anger": 0, "joy": 0, "sadness": 0, "optimism": 0},
-                    // });
-        
-                    // newComment.emotion[results.emotion] += 1;
-        
-                    // console.log("saving new comment");
-                    // // await newComment.save();
-                    // sentiment_methods.save_data(newComment);
 
                     // upsert
                     const filter = { search: search_term };
@@ -323,12 +311,15 @@ const sentiment_methods = {
 
                     sentiment_methods.upsert_data(Comment, filter, replacement);
                 }
+                sentiment_methods.channel.ack(message);
     
             } catch (error) {
                 console.error('An error occurred:', error);
+
+                sentiment_methods.channel.nack(message, false, false);
+                sentiment_methods.channel.publish(waitingExchange, routingKey, message.content);
             }
 
-            sentiment_methods.channel.ack(message);
         });
 
 
@@ -337,6 +328,44 @@ const sentiment_methods = {
         //   } catch (error) {
         //     console.error('An error occurred:', error);
         //   }
+    },
+
+    consumeStoplossRetry: async () => {
+        console.log('Consuming stoploss retry');
+
+        const exchange = 'stoploss_retry_exchange';
+        const queue = 'stoploss_retry_queue';
+        const routingKey = 'stoploss';
+
+        const waitingExchange = 'waiting_exchange';
+        const waitingQueue = 'stoploss_waiting_queue';
+
+        sentiment_methods.channel.consume(queue, async (message) => {
+            const content = JSON.parse(message.content.toString());
+            const search = content.search;
+            const size = content.size;
+
+            try {
+                sentiment_methods.getCurrentPrice(search)
+                .then(response => {
+                    try {
+                        sentiment_methods.triggerStoploss(search, size, response.data);
+                        sentiment_methods.channel.ack(message);
+                    } catch (error) {
+                        console.error('error triggering stoploss', error);
+                        sentiment_methods.channel.nack(message, false, false);
+                        sentiment_methods.channel.publish(waitingExchange, routingKey, message.content);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching current price:', error);
+                    sentiment_methods.channel.nack(message, false, false);
+                    sentiment_methods.channel.publish(waitingExchange, routingKey, message.content);
+                });
+            } catch (error) {
+                console.error('An error occurred:', error);
+            }
+        });
     },
 
     scraper: async (search_term, ticker) => {

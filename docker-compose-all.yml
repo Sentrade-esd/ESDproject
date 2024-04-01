@@ -9,11 +9,33 @@ services:
   kong:
     build: 
       context: ./kongService
-      dockerfile: Dockerfile
+      dockerfile: kongDockerfile
     hostname: kong
     ports:
       - "8000:8000"
       - "8001:8001"
+    networks:
+      - kong_network
+    restart: unless-stopped
+
+  prometheus:
+    build: 
+      context: ./kongService
+      dockerfile: promDockerfile
+    hostname: prometheus
+    ports:
+      - "8090:9090"
+    networks:
+      - kong_network
+    restart: unless-stopped
+  
+  grafana:
+    build: 
+      context: ./kongService
+      dockerfile: grafanaDockerfile
+    hostname: grafana
+    ports:
+      - "8100:3000"
     networks:
       - kong_network
     restart: unless-stopped
@@ -292,7 +314,7 @@ services:
       context: ./userServices
       dockerfile: transactionsDBDockerfile
     hostname: transactions_db
-    restart: always
+    restart: unless-stopped
     ports:
       - 5433:5432
     environment:
@@ -349,6 +371,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "80:80"
+      - "443:443" # Expose port 443 for https
     volumes:
       - .:/usr/src/app
     command: ["nginx", "-g", "daemon off;"]

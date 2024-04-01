@@ -36,12 +36,17 @@ app.get('/', (req, res) => {
 })
 
 app.get ('/scraper/getNewsFromDB/:ticker', async (req, res) => {
-    const {ticker} = req.params;
+    const { ticker } = req.params;
     console.log('ticker: ', ticker);
-
-    let response = await scraperDBMethods.get(ticker);
-    console.log('response', response);
-    res.send(response);
+    
+    try {
+        let response = await scraperDBMethods.get(ticker);
+        console.log('response', response);
+        res.send(response);
+    } catch (error) {
+        console.error('An error occurred:', error);
+        res.status(500).send({ error: 'An error occurred while fetching the data.' });
+    }
 
 });
 
@@ -50,15 +55,20 @@ app.get('/scraper/getNews/:query/:ticker', async (req, res) => {
     const {query, ticker} = req.params;
     console.log(query, ticker);
     
-    // run scrapping script
-    let response = await scrape(query);
-
-    // call db endpoint to add to db for news
-    console.log('response: ', response);
-    let addToDBResponse = await scraperDBMethods.add(ticker, query, response);
-
-    // console.log('addToDBresponse', addToDBResponse);
-    res.send(response);
+    try {
+        // run scrapping script
+        let response = await scrape(query);
+    
+        // call db endpoint to add to db for news
+        console.log('response: ', response);
+        let addToDBResponse = await scraperDBMethods.add(ticker, query, response);
+    
+        // console.log('addToDBresponse', addToDBResponse);
+        res.send(response);
+    } catch (error) {
+        console.error('An error occurred:', error);
+        res.status(500).send({ error: 'An error occurred while fetching the data.' });
+    }
 })
 
 async function scrape(query){
@@ -138,11 +148,17 @@ async function addToDB(ticker, query, news){
 app.get('/scraper/pullPrice/:ticker/:targetDate', async (req, res) => { 
     const {ticker, targetDate} = req.params;
     console.log("Ticker: ", ticker, "TargetDate :", targetDate);
-    // run scrapping script
-    // return response
-    let response = await stockPrice(ticker, targetDate);
-    console.log('response', response);
-    res.send(response);
+    
+    try {
+        // run scrapping script
+        // return response
+        let response = await stockPrice(ticker, targetDate);
+        console.log('response', response);
+        res.send(response);
+    } catch (error) {
+        console.error('An error occurred:', error);
+        res.status(500).send({ error: 'An error occurred while fetching the data.' });
+    }
 })
 
 async function stockPrice(query, targetDate){
@@ -166,6 +182,9 @@ async function stockPrice(query, targetDate){
     else {
         let data = response.data;
         console.log("data", data);
+
+        let refreshDate = new Date(data["Meta Data"]["3. Last Refreshed"]); // format: "2024-03-28"
+
         let metaData = data['Meta Data'];
         let prices = data['Time Series (Daily)'];
 
@@ -185,7 +204,7 @@ async function stockPrice(query, targetDate){
             n += 1;
         }
 
-        console.log("return List:" ,returnList);
+        // console.log("return List:" ,returnList);
 
         // let timeSeries = data['Time Series (5min)'];
         // let firstKey = Object.keys(timeSeries)[0];
@@ -204,7 +223,9 @@ async function stockPrice(query, targetDate){
         //     }
         // }
         // console.log("cleaned data: ", parsedData);
-        return returnList;
+
+        return {prices: returnList, refreshDate:refreshDate};
+        // return returnList;
     }
 
     // let parsedData = {};

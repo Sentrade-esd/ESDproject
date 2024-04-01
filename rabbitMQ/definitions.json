@@ -39,6 +39,24 @@
       "auto_delete": false,
       "internal": false,
       "arguments": {}
+    },
+    {
+      "name": "stoploss_retry_exchange",
+      "vhost": "/",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "waiting_exchange",
+      "vhost": "/",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
     }
   ],
   "queues": [
@@ -55,24 +73,93 @@
       "durable": true,
       "auto_delete": false,
       "arguments": {}
+    },
+    {
+      "name": "stoploss_retry_queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "stoploss_waiting_queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "stoploss_retry_exchange",
+        "x-message-ttl": 10000
+      }
+    },
+    {
+      "name": "comments_waiting_queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "comments_exchange",
+        "x-message-ttl": 10000
+      }
+    },
+    {
+      "name": "notifications_waiting_queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "notifications_exchange",
+        "x-message-ttl": 10000
+      }
     }
   ],
   "bindings": [
-      {
-        "source":"notifications_exchange", 
-        "vhost":"/", 
-        "destination":"sentiment_notification_queue", 
-        "destination_type":"queue", 
-        "routing_key":"notify",
-        "arguments": {}
-      },
-      {
-        "source":"comments_exchange", 
-        "vhost":"/", 
-        "destination":"new_comment_queue", 
-        "destination_type":"queue", 
-        "routing_key":"comment",
-        "arguments": {}
-      }
+    {
+      "source":"notifications_exchange", 
+      "vhost":"/", 
+      "destination":"sentiment_notification_queue", 
+      "destination_type":"queue", 
+      "routing_key":"notify",
+      "arguments": {}
+    },
+    {
+      "source":"comments_exchange", 
+      "vhost":"/", 
+      "destination":"new_comment_queue", 
+      "destination_type":"queue", 
+      "routing_key":"comment",
+      "arguments": {}
+    },
+    {
+      "source":"stoploss_retry_exchange", 
+      "vhost":"/", 
+      "destination":"stoploss_retry_queue", 
+      "destination_type":"queue", 
+      "routing_key":"stoploss",
+      "arguments": {}
+    },
+    {
+      "source":"waiting_exchange", 
+      "vhost":"/", 
+      "destination":"stoploss_waiting_queue", 
+      "destination_type":"queue", 
+      "routing_key":"stoploss",
+      "arguments": {}
+    },
+    {
+      "source":"waiting_exchange", 
+      "vhost":"/", 
+      "destination":"comments_waiting_queue", 
+      "destination_type":"queue", 
+      "routing_key":"comment",
+      "arguments": {}
+    },
+    {
+      "source":"waiting_exchange", 
+      "vhost":"/", 
+      "destination":"notifications_waiting_queue", 
+      "destination_type":"queue", 
+      "routing_key":"notify",
+      "arguments": {}
+    }
   ]
 }

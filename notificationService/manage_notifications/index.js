@@ -61,8 +61,8 @@ async function start_amqp() {
       const content = parsedMessage[i];
       console.log(content);
       const company = content.search;
-      const change = content.change;
-      let changeType = "  ";
+      let change = content.change;
+      let changeType = "";
       if (Number(change) < 0) {
         changeType = "decreased";
       } else {
@@ -87,12 +87,24 @@ async function start_amqp() {
           telegramIds,
           teleMessage,
         });
+
+        channel.ack(message);
+
       } catch (error) {
-        console.error(`Error getting watchlist for company ${company}:`, error);
+        // console.error(error);
+        // console.error(`Error getting watchlist for company ${company}:`, error.response.data);
+
+        // if url has watchlist inside the string
+        if (error.config.url.includes("watchlist")) {
+          console.log("Error is from watchlist");
+          console.log(error.response.data);
+          channel.ack(message);
+        } else {
+          console.error(`Error getting watchlist for company ${company}:`, error.response.data);
+        }
       }
     }
-    channel.ack(message);
-
+    
     // console.log(content);
     // const company = content.search;
     // const change = content.change;

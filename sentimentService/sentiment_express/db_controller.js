@@ -68,131 +68,108 @@ SentimentController.get("/sentiment_query", async (req, res) => {
 
     let sentiment_flag = false;
 
-    if (sentiments) {
-        if ((Date.now() - sentiments.datetime) / 1000 < 1800) {
-            let newsFromDB = await sentiment_methods.getNewsFromDB(ticker);
-            newsArticles = newsFromDB.scrapedCompany.news;
-            console.log("In DB. Returning data...");
+    try {
+        if (sentiments) {
+            if ((Date.now() - sentiments.datetime) / 1000 < 1800) {
+                let newsFromDB = await sentiment_methods.getNewsFromDB(ticker);
+                newsArticles = newsFromDB.scrapedCompany.news;
+                console.log("In DB. Returning data...");
+            } else {
+                sentiment_flag = true;
+                // delete expired sentiment
+    
+                await Sentiment.deleteOne({search: search_term});
+            }
+    
         } else {
             sentiment_flag = true;
-            // delete expired sentiment
-
-            await Sentiment.deleteOne({search: search_term});
         }
-
-    } else {
-        sentiment_flag = true;
-    }
-
-
-    if (sentiment_flag) {
-        console.log("Not in DB. Getting data...");
-        
-        const res = await sentiment_methods.scraper(search_term, ticker);
-        newsArticles = res[1];
-        // console.log(res)
-
-    
-        console.log("Analysing...");
     
     
-        try {
-            // Wait for the promise to resolve and store the result in the variable 'results'
-            let results = await sentiment_methods.add_sentiments(res[0]);
-        
-            console.log("Inserting...");
-        
-            // const newSentiment = new Sentiment({
-            //     datetime: Date.now(),
-            //     search: search_term,
-            //     sentiment_score: results.results.headlines_score, // + results.results.description_score
-            //     emotion: results.results.emotions,
-            //     keyword: results.keyword_results
-            // });
-            // sentiments = newSentiment;
-        
-            // // await newSentiment.save();
-            // sentiment_methods.save_data(newSentiment);
-
-            const filter = { search: search_term };
-            const replacement = {
-                datetime: Date.now(),
-                search: search_term,
-                sentiment_score: results.results.headlines_score, // + results.results.description_score
-                emotion: results.results.emotions,
-                keyword: results.keyword_results
-            };
-
-            sentiments = replacement
-
-            sentiment_methods.upsert_data(Sentiment, filter, replacement);
-
-            // if (newSentiment) {
-                // set the result to the sentiments variable
-            // }
-    
-        } catch (error) {
-            // Handle any errors that occur during promise resolution
-            console.error("Error:", error);
-            return res.status(500).json({ error: "Adding to DB failed"});
-        }
-
-    }
-
-
-    // const comments_output = [];
-    let comments_flag = false;
-
-    if (comments) {
-        if ((Date.now() - comments.datetime) / 1000 < 86400) {
-            console.log("comment in db. Returning data...");
-
-        } else {
-            console.log("comment in db expired");
-
-            await Comment.deleteOne({search: search_term});
-            // delete expired comment
+        if (sentiment_flag) {
+            console.log("Not in DB. Getting data...");
             
+            const res = await sentiment_methods.scraper(search_term, ticker);
+            newsArticles = res[1];
+            // console.log(res)
+    
+        
+            console.log("Analysing...");
+        
+        
+            try {
+                // Wait for the promise to resolve and store the result in the variable 'results'
+                let results = await sentiment_methods.add_sentiments(res[0]);
+            
+                console.log("Inserting...");
+    
+                const filter = { search: search_term };
+                const replacement = {
+                    datetime: Date.now(),
+                    search: search_term,
+                    sentiment_score: results.results.headlines_score, // + results.results.description_score
+                    emotion: results.results.emotions,
+                    keyword: results.keyword_results
+                };
+    
+                sentiments = replacement
+    
+                sentiment_methods.upsert_data(Sentiment, filter, replacement);
+    
+        
+            } catch (error) {
+                // Handle any errors that occur during promise resolution
+                console.error("Error:", error);
+                return res.status(500).json({ error: "Adding to DB failed"});
+            }
+    
+        }
+    
+    
+        // const comments_output = [];
+        let comments_flag = false;
+    
+        if (comments) {
+            if ((Date.now() - comments.datetime) / 1000 < 86400) {
+                console.log("comment in db. Returning data...");
+    
+            } else {
+                console.log("comment in db expired");
+    
+                await Comment.deleteOne({search: search_term});
+                // delete expired comment
+                
+                comments_flag = true;
+            }
+        } else {
+            console.log("No comments in DB");
             comments_flag = true;
         }
-    } else {
-        console.log("No comments in DB");
-        comments_flag = true;
-    }
-
-    let combined_sentiment = {};
     
-    if (sentiments && comments && !comments_flag) {
-        console.log("combining sentiment and comments");
-
-        let comb_emotion = await sentiment_methods.combine_emotions(sentiments.emotion, comments.emotion);
-
-        combined_sentiment = {
-            search: search_term,
-            sentiment_score: sentiments.sentiment_score + comments.sentiment_score,
-            // emotion: {
-            //     "joy": sentiments.emotion.joy + comments.emotion.joy,
-            //     "others": sentiments.emotion.others + comments.emotion.others,
-            //     "surprise": sentiments.emotion.surprise + comments.emotion.surprise,
-            //     "sadness": sentiments.emotion.sadness + comments.emotion.sadness,
-            //     "fear": sentiments.emotion.fear + comments.emotion.fear,
-            //     "anger": sentiments.emotion.anger + comments.emotion.anger,
-            //     "disgust": sentiments.emotion.disgust + comments.emotion.disgust,
-            //     "love": sentiments.emotion.love + comments.emotion.love
-            // },
-            emotion: comb_emotion,
-            keyword: sentiments.keyword
+        let combined_sentiment = {};
+        
+        if (sentiments && comments && !comments_flag) {
+            console.log("combining sentiment and comments");
+    
+            let comb_emotion = await sentiment_methods.combine_emotions(sentiments.emotion, comments.emotion);
+    
+            combined_sentiment = {
+                search: search_term,
+                sentiment_score: sentiments.sentiment_score + comments.sentiment_score,
+                emotion: comb_emotion,
+                keyword: sentiments.keyword
+            }
+            return res.json({sentiments: combined_sentiment, newsArticles: newsArticles});
+        } else {
+            // return just the sentiment
+            console.log("returning just sentiment");
+            return res.json({sentiments: sentiments, newsArticles: newsArticles});
         }
-        return res.json({sentiments: combined_sentiment, newsArticles: newsArticles});
-    } else {
-        // return just the sentiment
-        console.log("returning just sentiment");
-        return res.json({sentiments: sentiments, newsArticles: newsArticles});
+    } catch (error) {
+        console.log("Error in sentiment_query");
+        console.log(error);
+        return res.status(500).json({ error: "Error getting sentiments" });
     }
-
-
-
-
 
 });
 
