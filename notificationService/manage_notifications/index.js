@@ -7,6 +7,9 @@ import axios from "axios";
 import express from "express";
 
 const queue = "sentiment_notification_queue";
+const routingKey = "notify";
+const waitingExchange = "waiting_exchange";
+const waitingQueue = "notifications_waiting_queue";
 
 const app = express();
 const PORT = 3001;
@@ -61,8 +64,8 @@ async function start_amqp() {
       const content = parsedMessage[i];
       console.log(content);
       const company = content.search;
-      const change = content.change;
-      let changeType = "  ";
+      let change = content.change;
+      let changeType = "";
       if (Number(change) < 0) {
         changeType = "decreased";
       } else {
@@ -87,12 +90,24 @@ async function start_amqp() {
           telegramIds,
           teleMessage,
         });
+
+        channel.ack(message);
+
       } catch (error) {
-        console.error(`Error getting watchlist for company ${company}:`, error);
+        // console.error(error);
+        // console.error(`Error getting watchlist for company ${company}:`, error.response.data);
+
+        // if error code is 404, it means no body has sbuscribed to the company. ack the message
+        if (error.response.status === 404) {
+          channel.ack(message);
+        } else {
+          console.error(`Error getting watchlist for company ${company}:`, error.response.data);
+          channel.nack(message, false, false);
+          channel.publish(waitingExchange, routingKey, message.content);
+        }
       }
     }
-    channel.ack(message);
-
+    
     // console.log(content);
     // const company = content.search;
     // const change = content.change;

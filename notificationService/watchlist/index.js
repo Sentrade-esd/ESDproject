@@ -104,7 +104,7 @@ app.get("/watchlist/user/:userId", async (req, res) => {
   try {
     const watchlist = await WatchlistedCompanies.findOne({ userId: userId });
     if (!watchlist) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "No users found" });
     }
 
     res.json(watchlist.watchlistedCompanies);

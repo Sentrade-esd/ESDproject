@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import jsonData from '../test.json';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import jsonData from "../test.json";
 // import WordCloud from 'react-wordcloud';
-import { useLocation } from 'react-router-dom';
-import { Form, 
-    // Button 
-} from 'react-bootstrap';
-import WordCloud from 'Components/wordCloud.js'
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
+import { useLocation } from "react-router-dom";
+import {
+  Form,
+  // Button
+} from "react-bootstrap";
+import WordCloud from "Components/wordCloud.js";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 // import Select from "react";
 import Slick from "react-slick";
 import "../Styles/global.css"
@@ -17,22 +18,21 @@ import "../Styles/global.css"
 // import React from "react";
 // import ProgressBar from "@ramonak/react-progress-bar";
 
-
-
 import {
-    Button,
-    Container,
-    Row,
-    Col,
-    Modal,
-    Label,
-    FormGroup, 
-    ModalBody, 
-    Input, 
-  } from "reactstrap";
-import CommentsAndNewsTabs from 'Components/CommentsAndNewsTabs';
+  Button,
+  Container,
+  Row,
+  Col,
+  Modal,
+  Label,
+  FormGroup,
+  ModalBody,
+  Input,
+} from "reactstrap";
+import CommentsAndNewsTabs from "Components/CommentsAndNewsTabs";
+import { local } from "d3";
 
-    // custom previous button for the slick component
+// custom previous button for the slick component
 const PrevButton = (props) => {
   return (
     <Button
@@ -60,480 +60,546 @@ const NextButton = (props) => {
   );
 };
 
-  let slickSettings = {
-    dots: false,
-    infinite: true,
-    centerMode: true,
-    slidesToShow: 4,
-    slidesToScroll: 1,
-    prevArrow: <PrevButton />,
-    nextArrow: <NextButton />,
-    className: "center slider",
-    slide: "section",
-    responsive: [
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 3,
-          slidesToScroll: 1,
-          infinite: true,
-        },
+let slickSettings = {
+  dots: false,
+  infinite: true,
+  centerMode: true,
+  slidesToShow: 4,
+  slidesToScroll: 1,
+  prevArrow: <PrevButton />,
+  nextArrow: <NextButton />,
+  className: "center slider",
+  slide: "section",
+  responsive: [
+    {
+      breakpoint: 1024,
+      settings: {
+        slidesToShow: 3,
+        slidesToScroll: 1,
+        infinite: true,
       },
-      {
-        breakpoint: 600,
-        settings: {
-          slidesToShow: 2,
-          slidesToScroll: 1,
-        },
-      },
-      {
-        breakpoint: 480,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1,
-        },
-      },
-    ],
-  };
-
-  const news = [ 
-    {
-      title: "Nvidia Just Bought 5 Artificial Intelligence (AI) Stocks. These 2 Stand Out the Most. - Yahoo Finance" , 
-      link : "https://news.google.com/rss/articles/CBMiTWh0dHBzOi8vZmluYW5jZS55YWhvby5jb20vbmV3cy9udmlkaWEtanVzdC1ib3VnaHQtNS1hcnRpZmljaWFsLTA5MjgwMDM5My5odG1s0gEA?oc=5",
-      pubDate: "2024-03-21T17:28:00.000+00:00"
-    }, 
-    {
-      title: "Nvidia Just Bought 5 Artificial Intelligence (AI) Stocks. These 2 Stand Out the Most. - Yahoo Finance" , 
-      link : "https://news.google.com/rss/articles/CBMiTWh0dHBzOi8vZmluYW5jZS55YWhvby5jb20vbmV3cy9udmlkaWEtanVzdC1ib3VnaHQtNS1hcnRpZmljaWFsLTA5MjgwMDM5My5odG1s0gEA?oc=5",
-      pubDate: "2024-03-21T17:28:00.000+00:00"
-    }, 
-    {
-      title: "Nvidia Just Bought 5 Artificial Intelligence (AI) Stocks. These 2 Stand Out the Most. - Yahoo Finance" , 
-      link : "https://news.google.com/rss/articles/CBMiTWh0dHBzOi8vZmluYW5jZS55YWhvby5jb20vbmV3cy9udmlkaWEtanVzdC1ib3VnaHQtNS1hcnRpZmljaWFsLTA5MjgwMDM5My5odG1s0gEA?oc=5",
-      pubDate: "2024-03-21T17:28:00.000+00:00"
-    }, 
-  ]
-
-  const comments = [ 
-    {
-      commentTxt: "Apple sucks ass. THey dont produce good products. Samsung is going to take over. "
-    }, 
-    {
-      commentTxt: "Apple Number 1"
-    }, 
-    {
-      commentTxt: "Apple's car is the number 1 thing next time. No cap"
-    }, 
-  ]
-
-  const items = [
-    {
-      content: (
-        <img
-          alt="..."
-          className="d-block"
-          src={require("Assets/img/shirt.png")}
-        />
-      ),
-      altText: "",
-      caption: "",
-      src: "0",
     },
     {
-      content: (
-        <img
-          alt="..."
-          className="d-block"
-          src={require("Assets/img/shorts.png")}
-        />
-      ),
-      altText: "",
-      caption: "",
-      src: "1",
+      breakpoint: 600,
+      settings: {
+        slidesToShow: 2,
+        slidesToScroll: 1,
+      },
     },
     {
-      content: (
-        <img
-          alt="..."
-
-          className="d-block"
-          src={require("Assets/img/tshirt.png")}
-        />
-      ),
-      altText: "",
-      caption: "",
-      src: "2",
+      breakpoint: 480,
+      settings: {
+        slidesToShow: 1,
+        slidesToScroll: 1,
+      },
     },
-  ];
+  ],
+};
+
+const news = [
+  {
+    title:
+      "Nvidia Just Bought 5 Artificial Intelligence (AI) Stocks. These 2 Stand Out the Most. - Yahoo Finance",
+    link: "https://news.google.com/rss/articles/CBMiTWh0dHBzOi8vZmluYW5jZS55YWhvby5jb20vbmV3cy9udmlkaWEtanVzdC1ib3VnaHQtNS1hcnRpZmljaWFsLTA5MjgwMDM5My5odG1s0gEA?oc=5",
+    pubDate: "2024-03-21T17:28:00.000+00:00",
+  },
+  {
+    title:
+      "Nvidia Just Bought 5 Artificial Intelligence (AI) Stocks. These 2 Stand Out the Most. - Yahoo Finance",
+    link: "https://news.google.com/rss/articles/CBMiTWh0dHBzOi8vZmluYW5jZS55YWhvby5jb20vbmV3cy9udmlkaWEtanVzdC1ib3VnaHQtNS1hcnRpZmljaWFsLTA5MjgwMDM5My5odG1s0gEA?oc=5",
+    pubDate: "2024-03-21T17:28:00.000+00:00",
+  },
+  {
+    title:
+      "Nvidia Just Bought 5 Artificial Intelligence (AI) Stocks. These 2 Stand Out the Most. - Yahoo Finance",
+    link: "https://news.google.com/rss/articles/CBMiTWh0dHBzOi8vZmluYW5jZS55YWhvby5jb20vbmV3cy9udmlkaWEtanVzdC1ib3VnaHQtNS1hcnRpZmljaWFsLTA5MjgwMDM5My5odG1s0gEA?oc=5",
+    pubDate: "2024-03-21T17:28:00.000+00:00",
+  },
+];
+
+const comments = [
+  "Apple sucks ass. THey dont produce good products. Samsung is going to take over. ",
+
+  "Apple Number 1",
+
+  "Apple's car is the number 1 thing next time. No cap",
+];
+
+const items = [
+  {
+    content: (
+      <img
+        alt="..."
+        className="d-block"
+        src={require("Assets/img/shirt.png")}
+      />
+    ),
+    altText: "",
+    caption: "",
+    src: "0",
+  },
+  {
+    content: (
+      <img
+        alt="..."
+        className="d-block"
+        src={require("Assets/img/shorts.png")}
+      />
+    ),
+    altText: "",
+    caption: "",
+    src: "1",
+  },
+  {
+    content: (
+      <img
+        alt="..."
+        className="d-block"
+        src={require("Assets/img/tshirt.png")}
+      />
+    ),
+    altText: "",
+    caption: "",
+    src: "2",
+  },
+];
 
 function Trade() {
-    const [activeIndex, setActiveIndex] = React.useState(0);
-    const [animating, setAnimating] = React.useState(false);
-    const [quantity, setQuantity] = React.useState(1);
+  const [activeIndex, setActiveIndex] = React.useState(0);
+  const [animating, setAnimating] = React.useState(false);
+  const [quantity, setQuantity] = React.useState(1);
 
-    const [buyModal, setBuyModal] = React.useState(false);
-    const [followModal, setFollowModal] = React.useState(false);
+  const [buyModal, setBuyModal] = React.useState(false);
+  const [followModal, setFollowModal] = React.useState(false);
+  const [comments, setComments] = useState(
+    JSON.parse(localStorage.getItem("comments")) || [
+      "Apple sucks ass. THey dont produce good products. Samsung is going to take over. ",
 
+      "Apple Number 1",
 
-    const toggleBuyModal = () => {
-      setBuyModal(!buyModal);
+      "Apple's car is the number 1 thing next time. No cap",
+    ]
+  );
+  const toggleBuyModal = () => {
+    setBuyModal(!buyModal);
+  };
+  useEffect(() => {
+    console.log("comments", comments);
+  }, [comments]);
+
+  const toggleFollowModal = () => {
+    setFollowModal(!followModal);
+  };
+
+  const wrapper = React.useRef(null);
+  React.useEffect(() => {
+    document.documentElement.scrollTop = 0;
+    document.scrollingElement.scrollTop = 0;
+    wrapper.current.scrollTop = 0;
+    document.body.classList.add("product-page");
+    return function cleanup() {
+      document.body.classList.remove("product-page");
     };
-    
-    const toggleFollowModal = () => {
-      setFollowModal(!followModal);
-    };
-    
+  }, []);
 
-    const wrapper = React.useRef(null);
-    React.useEffect(() => {
-      console.log('Adding product-page class')
-      document.documentElement.scrollTop = 0;
-      document.scrollingElement.scrollTop = 0;
-      wrapper.current.scrollTop = 0;
-      document.body.classList.add("product-page");
-      return function cleanup() {
-        console.log('Removing product-page class')
-        document.body.classList.remove("product-page");
-      };
-    }, []);
+  const onExiting = () => {
+    setAnimating(true);
+  };
 
+  const onExited = () => {
+    setAnimating(false);
+  };
 
-    const onExiting = () => {
-      setAnimating(true);
-    };
-  
-    const onExited = () => {
-      setAnimating(false);
-    };
-  
-    const next = () => {
-      if (animating) return;
-      const nextIndex = activeIndex === items.length - 1 ? 0 : activeIndex + 1;
-      setActiveIndex(nextIndex);
-    };
-  
-    const previous = () => {
-      if (animating) return;
-      const nextIndex = activeIndex === 0 ? items.length - 1 : activeIndex - 1;
-      setActiveIndex(nextIndex);
-    };
-  
-    const goToIndex = (newIndex) => {
-      if (animating) return;
-      setActiveIndex(newIndex);
-    };
-    const deleteQuantity = () => {
-      setQuantity(quantity === 0 ? 0 : quantity - 1);
-    };
-    const addQuantity = () => {
-      setQuantity(quantity === 100 ? 100 : quantity + 1);
-    };
+  const next = () => {
+    if (animating) return;
+    const nextIndex = activeIndex === items.length - 1 ? 0 : activeIndex + 1;
+    setActiveIndex(nextIndex);
+  };
 
+  const previous = () => {
+    if (animating) return;
+    const nextIndex = activeIndex === 0 ? items.length - 1 : activeIndex - 1;
+    setActiveIndex(nextIndex);
+  };
 
-    // const [data, setData] = useState(null);
+  const goToIndex = (newIndex) => {
+    if (animating) return;
+    setActiveIndex(newIndex);
+  };
+  const deleteQuantity = () => {
+    setQuantity(quantity === 0 ? 0 : quantity - 1);
+  };
+  const addQuantity = () => {
+    setQuantity(quantity === 100 ? 100 : quantity + 1);
+  };
 
-    // useEffect(() => {
-    //     const fetchData = async () => {
-    //         try {
-    //             // const response = await axios.get('https://microservice-endpoint-url'); // This will be the microserivce eventually
-    //             setData(response.data);
-    //         } catch (error) {
-    //             console.error('Error fetching data:', error);
-    //         }
-    //     };
+  const [priceData, setPriceData] = useState(null);
 
-    //     fetchData();
-    // }, []);
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const ScrapeResponse = await axios.get(
+  //         `http://kong:8000/scraper/scrapeCurrentPrice/${companyName}`
+  //       ); // This will be the microserivce eventually
+  //       setPriceData(ScrapeResponse.data);
+  //       const CommentsResponse = await axios.get(
+  //         `http://kong:8000/comments/${companyName}`
+  //       ); // This will be the microserivce eventually
+  //       setComments(CommentsResponse.data);
+  //       localStorage.setItem("comments", JSON.stringify(response2.data));
+  //     } catch (error) {
+  //       console.error("Error fetching data:", error);
+  //     }
+  //   };
 
-    // return (
-    //     <div>
-    //         <h2>New Page</h2>
-    //         {data && (
-    //             <div>
-    //                 <p>{data.title}</p>
-    //                 <p>{data.description}</p>
-    //             </div>
-    //         )}
-    //     </div>
-    // );
-    
-    // This is the company and ticker information coming over from search
-    const location = useLocation();
-    const companyName = location.state?.companyName;
-    const companySymbol = location.state?.companySymbol;
+  //   fetchData();
+  // }, []);
 
-    const currentPrice = jsonData.result.currentPrice;
-    const marketCap = jsonData.result.marketCap;
-    const avgVolume = jsonData.result.avgVolume;
-    const prevClose = jsonData.result.previousClose;
-    const keywordData = jsonData.result.keyword;
-    const emotionData = jsonData.result.emotion;
+  // return (
+  //     <div>
+  //         <h2>New Page</h2>
+  //         {data && (
+  //             <div>
+  //                 <p>{data.title}</p>
+  //                 <p>{data.description}</p>
+  //             </div>
+  //         )}
+  //     </div>
+  // );
 
+  // This is the company and ticker information coming over from search
+  const location = useLocation();
+  const companyName = location.state?.companyName;
+  const companySymbol = location.state?.companySymbol;
 
-    // Convert the keyword data object into an array of objects with text and value properties
-    const keywords = Object.entries(keywordData).map(([text, value]) => ({ text, value }));
-    const emotions = Object.entries(emotionData).map(([text, value]) => ({ text, value }));
+  const currentPrice = jsonData.result.currentPrice;
+  // const currentPrice = priceData?.currentPrice;
+  const marketCap = jsonData.result.marketCap;
+  const avgVolume = jsonData.result.avgVolume;
+  const prevClose = jsonData.result.previousClose;
+  const keywordData = jsonData.result.keyword;
+  const emotionData = jsonData.result.emotion;
 
-    console.log(marketCap, avgVolume, prevClose, keywordData, emotionData);
-    
-    const options = {
-        rotations: 0,
-        rotationAngles: [0, 0],
-        fontSizes: [24, 96],
-    };
+  // Convert the keyword data object into an array of objects with text and value properties
+  const keywords = Object.entries(keywordData).map(([text, value]) => ({
+    text,
+    value,
+  }));
+  const emotions = Object.entries(emotionData).map(([text, value]) => ({
+    text,
+    value,
+  }));
 
-    const { search, sentiment_score } = jsonData.result;
+  console.log(marketCap, avgVolume, prevClose, keywordData, emotionData);
 
-    const handleFollowTrade = async(event) => {
-        // Should be calling FollowTrades here
-        // Store this email, ticker, targetDate, buyAmountPerFiling, maxBuyAmount and send
-        // getting the value from form group
-        event.preventDefault();
-        let maxBuyAmount = document.getElementById("maxBuyAmount").value;
-        let buyAmountPerFiling = document.getElementById("buyAmountPerFiling").value;
-        let targetDate = document.getElementById("targetDate").value;
+  const options = {
+    rotations: 0,
+    rotationAngles: [0, 0],
+    fontSizes: [24, 96],
+  };
 
+  const { search, sentiment_score } = jsonData.result;
 
-        console.log("INFO: ", companySymbol, maxBuyAmount, buyAmountPerFiling, targetDate)
+  const handleFollowTrade = async (event) => {
+    // Should be calling FollowTrades here
+    // Store this email, ticker, targetDate, buyAmountPerFiling, maxBuyAmount and send
+    // getting the value from form group
+    event.preventDefault();
+    let maxBuyAmount = document.getElementById("maxBuyAmount").value;
+    let buyAmountPerFiling =
+      document.getElementById("buyAmountPerFiling").value;
+    let targetDate = document.getElementById("targetDate").value;
 
+    console.log(
+      "INFO: ",
+      companySymbol,
+      maxBuyAmount,
+      buyAmountPerFiling,
+      targetDate
+    );
 
-        // let url = "http://localhost:5000/follow/followTrade";
-        // let data = {
-        //     email: localStorage.getItem("username"),
-        //     ticker: companySymbol,
-        //     targetDate: targetDate,
-        //     buyAmountPerFiling: buyAmountPerFiling,
-        //     maxBuyAmount: maxBuyAmount
-        // }
+    // let url = "http://localhost:5000/follow/followTrade";
+    // let data = {
+    //     email: localStorage.getItem("username"),
+    //     ticker: companySymbol,
+    //     targetDate: targetDate,
+    //     buyAmountPerFiling: buyAmountPerFiling,
+    //     maxBuyAmount: maxBuyAmount
+    // }
 
-        // try {
-        //     let response = await axios.post(url, data);
-        //     console.log(response.data);
-        //     alert('Trade followed successfully');
-        // } catch (error) {
-        //     console.error(error);
-        //     alert('Unable to follow trade');
-        // }
+    // try {
+    //     let response = await axios.post(url, data);
+    //     console.log(response.data);
+    //     alert('Trade followed successfully');
+    // } catch (error) {
+    //     console.error(error);
+    //     alert('Unable to follow trade');
+    // }
+  };
 
+  const handleBuyStock = async (event) => {
+    // Should be calling Transaction here
+    // Store company name, id, email, buy amount
+    event.preventDefault();
 
-    };
+    let url = "http://localhost:6002/transaction/newTrade";
+    let tradeAmount = document.getElementById("buyAmount").value;
+    let threshold = document.getElementById("stopLossAmount").value;
 
-    const handleBuyStock = async (event) => {
-        // Should be calling Transaction here
-        // Store company name, id, email, buy amount
-        event.preventDefault();
+    console.log("INFO: ", companySymbol, tradeAmount, threshold);
 
-        let url = "http://localhost:6002/transaction/newTrade";
-        let tradeAmount = document.getElementById("buyAmount").value;
-        let threshold = document.getElementById("stopLossAmount").value;
+    // let data = {
+    //     UserID: localStorage.getItem("id"),
+    //     Email: localStorage.getItem("username"),
+    //     Company: localStorage.getItem("companyName"),
+    //     buyAmount: tradeAmount,
+    //     Threshold: threshold
+    // }
 
-        console.log("INFO: ", companySymbol, tradeAmount, threshold)
+    // try {
+    //     let response = await axios.post(url, data);
+    //     console.log(response.data);
+    //     alert('Transaction successful');
+    // } catch (error) {
+    //     console.error(error);
+    //     alert('Unable to process the transaction');
+    // }
+  };
 
-        // let data = {
-        //     UserID: localStorage.getItem("id"),
-        //     Email: localStorage.getItem("username"),
-        //     Company: localStorage.getItem("companyName"),
-        //     buyAmount: tradeAmount,
-        //     Threshold: threshold
-        // }
+  // const handleSellStock = async () => {
+  //     // Should be calling FollowTrades here
+  //     // Store this email, ticker, targetDate, buyAmountPerFiling, maxBuyAmount and send
+  //     let url = "http://localhost:6002/transaction/newTrade";
+  //     // let tradeAmount = document.getElementById("buyAmount").value;
 
-        // try {
-        //     let response = await axios.post(url, data);
-        //     console.log(response.data);
-        //     alert('Transaction successful');
-        // } catch (error) {
-        //     console.error(error);
-        //     alert('Unable to process the transaction');
-        // }
-    };
+  //     let data = {
+  //         UserID: localStorage.getItem("id"),
+  //         Email: localStorage.getItem("username"),
+  //         Company: localStorage.getItem("companyName"),
+  //         buyAmount: tradeAmount
+  //     }
 
-    // const handleSellStock = async () => {
-    //     // Should be calling FollowTrades here
-    //     // Store this email, ticker, targetDate, buyAmountPerFiling, maxBuyAmount and send
-    //     let url = "http://localhost:6002/transaction/newTrade";
-    //     // let tradeAmount = document.getElementById("buyAmount").value;
-        
-    //     let data = {
-    //         UserID: localStorage.getItem("id"),
-    //         Email: localStorage.getItem("username"),
-    //         Company: localStorage.getItem("companyName"),
-    //         buyAmount: tradeAmount
-    //     }
+  //     try {
+  //         let response = await axios.post(url, data);
+  //         console.log(response.data);
+  //         alert('Transaction successful');
+  //     } catch (error) {
+  //         console.error(error);
+  //         alert('Unable to process the transaction');
+  //     }
+  // };
 
-    //     try {
-    //         let response = await axios.post(url, data);
-    //         console.log(response.data);
-    //         alert('Transaction successful');
-    //     } catch (error) {
-    //         console.error(error);
-    //         alert('Unable to process the transaction');
-    //     }
-    // };
+  // const [tradeAmount, setTradeAmount] = useState(0);
+  // const [maxBuy, setMaxBuy] = useState(0);
+  // const [threshold, setStopLoss] = useState(0);
 
-    // const [tradeAmount, setTradeAmount] = useState(0);
-    // const [maxBuy, setMaxBuy] = useState(0);
-    // const [threshold, setStopLoss] = useState(0);
-
-    // const MyWordCloud = React.memo(({ words, options }) => 
-    // <div style={{width: '600px', height: '400px'}}>
-    //     <WordCloud words={words} options={options} />
-    // </div>
+  // const MyWordCloud = React.memo(({ words, options }) =>
+  // <div style={{width: '600px', height: '400px'}}>
+  //     <WordCloud words={words} options={options} />
+  // </div>
 
   // const [startDate, setStartDate] = useState(new Date());
 
-  const sentimentColor = sentiment_score < 0 ? 'red' : 'green';
+  const sentimentColor = sentiment_score < 0 ? "red" : "green";
 
   // Normalize sentiment_score from range [-50, 50] to [0, 100]
   const normalizedScore = Math.abs((sentiment_score / 50) * 100);
 
   const progressBarStyles = {
-      width: `${normalizedScore}%`,
-      backgroundColor: sentimentColor,
-      height: '20px',
-      position: 'absolute',
-      top: 0,
-      [sentiment_score < 0 ? 'right' : 'left']: '50%',
+    width: `${normalizedScore}%`,
+    backgroundColor: sentimentColor,
+    height: "20px",
+    position: "absolute",
+    top: 0,
+    [sentiment_score < 0 ? "right" : "left"]: "50%",
   };
   const scoreStyles = {
-      position: 'absolute',
-      top: '-40px',
-      [sentiment_score < 0 ? 'left' : 'right']: `${Math.abs(50 - normalizedScore)}%`,
-      transform: `translateX(${sentiment_score < 0 ? '-100%' : '0%'})`,
-      color: `${sentimentColor} !important`,
-      fontSize: '20px !important',
-      zIndex: 999,
-
+    position: "absolute",
+    top: "-40px",
+    [sentiment_score < 0 ? "left" : "right"]: `${Math.abs(
+      50 - normalizedScore
+    )}%`,
+    transform: `translateX(${sentiment_score < 0 ? "-100%" : "0%"})`,
+    color: `${sentimentColor} !important`,
+    fontSize: "20px !important",
+    zIndex: 999,
   };
 
   const words = [
-    { text: 'Hello', size: 40 },
-    { text: 'World', size: 30 },
-    { text: 'React', size: 35 },
-    { text: 'Fun', size: 60 },
-    { text: 'HaHA', size: 70 },
-    { text: 'LOL', size: 30 },
-    { text: 'USELESS', size: 15 },
-    { text: 'Lousy', size: 35 },
-    { text: 'Trash', size: 60 },
-    { text: 'Bull', size: 70 },
-    { text: 'Bear', size: 30 },
-    { text: 'Noob', size: 15 },
+    { text: "Hello", size: 40 },
+    { text: "World", size: 30 },
+    { text: "React", size: 35 },
+    { text: "Fun", size: 60 },
+    { text: "HaHA", size: 70 },
+    { text: "LOL", size: 30 },
+    { text: "USELESS", size: 15 },
+    { text: "Lousy", size: 35 },
+    { text: "Trash", size: 60 },
+    { text: "Bull", size: 70 },
+    { text: "Bear", size: 30 },
+    { text: "Noob", size: 15 },
     // Add more words as needed
   ];
 
   const keyWords = [
-    { text: 'Hello', size: 40 },
-    { text: 'World', size: 30 },
-    { text: 'React', size: 35 },
-    { text: 'Fun', size: 60 },
-    { text: 'HaHA', size: 70 },
-    { text: 'LOL', size: 30 },
-    { text: 'USELESS', size: 15 },
-    { text: 'Lousy', size: 35 },
-    { text: 'Trash', size: 60 },
-    { text: 'Bull', size: 70 },
-    { text: 'Bear', size: 30 },
-    { text: 'Noob', size: 15 },
+    { text: "Hello", size: 40 },
+    { text: "World", size: 30 },
+    { text: "React", size: 35 },
+    { text: "Fun", size: 60 },
+    { text: "HaHA", size: 70 },
+    { text: "LOL", size: 30 },
+    { text: "USELESS", size: 15 },
+    { text: "Lousy", size: 35 },
+    { text: "Trash", size: 60 },
+    { text: "Bull", size: 70 },
+    { text: "Bear", size: 30 },
+    { text: "Noob", size: 15 },
     // Add more words as needed
   ];
 
-
-    return (
-      <>
-      <div className="wrapper" ref={wrapper} style={{backgroundColor: "#1D304f"}}>
+  return (
+    <>
+      <div
+        className="wrapper"
+        ref={wrapper}
+        style={{ backgroundColor: "#1D304f" }}
+      >
+        {/* <div className="page-header page-header-small">
+        <img
+            alt="..."
+            className="path shape"
+            src={require("Assets/img/shape-s.png")}
+          />
+          <Container>
+            <h1 className="h1-seo">Our products</h1>
+            <h3>This is the best way to find your favorite stuff</h3>
+          </Container>
+        </div> */}
+        {/* <Col className="ml-auto mr-auto" md="8"> */}
         <div className="testimonials-4">
-            <Container fluid>
-              {/* <Row>
+          <Container fluid>
+            {/* <Row>
                 <Col className="ml-auto mr-auto text-center" md="6">
                   <h2 className="title">Join our world</h2>
                 </Col>
               </Row> */}
-              <Row>
-                <Col className="positioned" lg="4" md="8" xs="10">
-                  <h1 className="title" style={{padding: '0px 0px 30px 0px'}}>{companyName}<span className="mx-3"><i className="text-warning" style={{fontSize: '20px'}}>{companySymbol}</i></span></h1>
-                  <div style={{ overflow: 'hidden', position: 'relative', backgroundColor: 'lightgray', height: '20px', borderRadius: '20px' }}>
-                      <div style={progressBarStyles}></div>
-                      <div className='scoreStyles' style={scoreStyles}>{sentiment_score}</div>
+            <Row>
+              <Col className="positioned" lg="4" md="8" xs="10">
+                <h1 className="title" style={{ padding: "0px 0px 30px 0px" }}>
+                  {companyName}
+                  <span className="mx-3">
+                    <i className="text-warning" style={{ fontSize: "20px" }}>
+                      {companySymbol}
+                    </i>
+                  </span>
+                </h1>
+                <div
+                  style={{
+                    overflow: "hidden",
+                    position: "relative",
+                    backgroundColor: "lightgray",
+                    height: "20px",
+                    borderRadius: "20px",
+                  }}
+                >
+                  <div style={progressBarStyles}></div>
+                  <div className="scoreStyles" style={scoreStyles}>
+                    {sentiment_score}
                   </div>
-                  <p style={{ color: sentimentColor }}>Sentiment Score: {sentiment_score}</p>
-                  <br />
-                  <Row className="pick-size">
-                    <Col lg="4" md="4">
-                      <label style={labelStyles}>Current Price</label>
-                      <h6 style={{color: "#ffffff"}}>${currentPrice}</h6>
-                    </Col>
-                    <Col lg="4" md="4" sm="6">
-                      <label style={labelStyles}><i>Avg. Volume</i></label>
-                      <h6 style={{color: "#ffffff"}}>{avgVolume}</h6>
-                    </Col>
-                    <Col lg="4" md="4" sm="6">
-                      <label style={labelStyles}>Market Cap</label>
-                      <h6 style={{color: "#ffffff"}}>${marketCap}</h6>
-                    </Col>
-                  </Row>
-                  <br />
-                  {/* <p className="description text-white">
+                </div>
+                <p style={{ color: sentimentColor }}>
+                  Sentiment Score: {sentiment_score}
+                </p>
+                <br />
+                <Row className="pick-size">
+                  <Col lg="4" md="4">
+                    <label style={labelStyles}>Current Price</label>
+                    <h6 style={{ color: "#ffffff" }}>${currentPrice}</h6>
+                  </Col>
+                  <Col lg="4" md="4" sm="6">
+                    <label style={labelStyles}>
+                      <i>Avg. Volume</i>
+                    </label>
+                    <h6 style={{ color: "#ffffff" }}>{avgVolume}</h6>
+                  </Col>
+                  <Col lg="4" md="4" sm="6">
+                    <label style={labelStyles}>Market Cap</label>
+                    <h6 style={{ color: "#ffffff" }}>${marketCap}</h6>
+                  </Col>
+                </Row>
+                <br />
+                {/* <p className="description text-white">
                     Meet Wingman, a robust suite of styled pages and components,
                     powered by Bootstrap 4. The ideal starting point for product
                     landing pages, stylish web-apps and complete company websites.
                   </p> */}
                 <Row>
                   <Col>
-                    <Button color="info" onClick={toggleBuyModal} size="lg" style={{color: 'white'}}>
+                    <Button
+                      color="info"
+                      onClick={toggleBuyModal}
+                      size="lg"
+                      style={{ color: "white" }}
+                    >
                       Buy Now
                     </Button>
                   </Col>
                   <Col>
-                    <Button color="info" onClick={toggleFollowModal} size="lg" style={{color: 'white'}}>
+                    <Button
+                      color="info"
+                      onClick={toggleFollowModal}
+                      size="lg"
+                      style={{ color: "white" }}
+                    >
                       Follow Trade
                     </Button>
                   </Col>
                 </Row>
-                </Col>
-                <Col md="12">
-                  <Slick {...slickSettings}>
-                    <div>
-                      <div className="info text-left">
+              </Col>
+              <Col md="12">
+                <Slick {...slickSettings}>
+                  <div>
+                    <div className="info text-left">
                       <h4 style={wordCloudCardHeadingStyles}>Keywords</h4>
-                        <WordCloud words={keyWords} />
-                      </div>
+                      <WordCloud words={keyWords} />
                     </div>
-                    <div>
-                      <div className="info text-left">
+                  </div>
+                  <div>
+                    <div className="info text-left">
                       <h4 style={wordCloudCardHeadingStyles}>Emotions</h4>
-                        <WordCloud words={words} />
-                      </div>
+                      <WordCloud words={words} />
                     </div>
-                    <div>
-                      <div className="info text-left">
+                  </div>
+                  <div>
+                    <div className="info text-left">
                       <h4 style={wordCloudCardHeadingStyles}>Keywords</h4>
-                        <WordCloud words={keyWords} />
-                      </div>
+                      <WordCloud words={keyWords} />
                     </div>
-                    <div>
-                      <div className="info text-left">
+                  </div>
+                  <div>
+                    <div className="info text-left">
                       <h4 style={wordCloudCardHeadingStyles}>Emotions</h4>
-                        <WordCloud words={words} />
-                      </div>
+                      <WordCloud words={words} />
                     </div>
-                    <div>
-                      <div className="info text-left">
+                  </div>
+                  <div>
+                    <div className="info text-left">
                       <h4 style={wordCloudCardHeadingStyles}>Keywords</h4>
-                        <WordCloud words={keyWords} />
-                      </div>
+                      <WordCloud words={keyWords} />
                     </div>
-                    <div>
-                      <div className="info text-left">
+                  </div>
+                  <div>
+                    <div className="info text-left">
                       <h4 style={wordCloudCardHeadingStyles}>Emotions</h4>
-                        <WordCloud words={words} />
-                      </div>
+                      <WordCloud words={words} />
                     </div>
-                  </Slick>
-                </Col>
-              </Row>
-            </Container>
-          </div>
-          {/* <div className="section">
+                  </div>
+                </Slick>
+              </Col>
+            </Row>
+          </Container>
+        </div>
+        {/* <div className="section">
             <Container>
               <Row>
                 <Col lg="6" md="12">
@@ -688,7 +754,12 @@ function Trade() {
           </Container>
         </div> */}
 
-        <CommentsAndNewsTabs companySymbol={companySymbol} news={news} comments={comments}></CommentsAndNewsTabs>
+        <CommentsAndNewsTabs
+          companySymbol={companySymbol}
+          news={news}
+          comments={comments}
+          setComments={setComments}
+        ></CommentsAndNewsTabs>
       </div>
       {/* <diym
             <div className="container">
@@ -777,8 +848,8 @@ function Trade() {
             </div>
         </div> */}
 
-        <Modal styles='buyModal' isOpen={buyModal} toggle={toggleBuyModal}>
-          <ModalBody>
+      <Modal styles="buyModal" isOpen={buyModal} toggle={toggleBuyModal}>
+        <ModalBody>
           <Form>
             <FormGroup>
               <Label for="buyAmount">Buy Amount</Label>
@@ -788,45 +859,52 @@ function Trade() {
               <Label for="stopLossAmount">Stop Loss Amount (optional)</Label>
               <Input type="number" id="stopLossAmount" />
             </FormGroup>
-            <Button type="submit" onClick={handleBuyStock}>Submit</Button>
+            <Button type="submit" onClick={handleBuyStock}>
+              Submit
+            </Button>
           </Form>
-          </ModalBody>
-        </Modal>
-        <Modal styles='followModal' isOpen={followModal} toggle={toggleFollowModal}>
-        <ModalBody>
-        <Form>
-          <FormGroup>
-            <Label for="maxBuyAmount">Max Buy Amount</Label>
-            <Input type="number" id="maxBuyAmount" />
-          </FormGroup>
-          <FormGroup>
-            <Label for="buyAmountPerFiling">Buy Amount Per Filing</Label>
-            <Input type="number" id="buyAmountPerFiling" />
-          </FormGroup>
-          <FormGroup>
-            <Label for="targetDate">Target Date</Label>
-            <Input type="date" id="targetDate" />
-          </FormGroup>
-          <Button type="submit" onClick={handleFollowTrade}>Submit</Button>
-        </Form>
         </ModalBody>
       </Modal>
-
-        </>
-    );
+      <Modal
+        styles="followModal"
+        isOpen={followModal}
+        toggle={toggleFollowModal}
+      >
+        <ModalBody>
+          <Form>
+            <FormGroup>
+              <Label for="maxBuyAmount">Max Buy Amount</Label>
+              <Input type="number" id="maxBuyAmount" />
+            </FormGroup>
+            <FormGroup>
+              <Label for="buyAmountPerFiling">Buy Amount Per Filing</Label>
+              <Input type="number" id="buyAmountPerFiling" />
+            </FormGroup>
+            <FormGroup>
+              <Label for="targetDate">Target Date</Label>
+              <Input type="date" id="targetDate" />
+            </FormGroup>
+            <Button type="submit" onClick={handleFollowTrade}>
+              Submit
+            </Button>
+          </Form>
+        </ModalBody>
+      </Modal>
+    </>
+  );
 }
 
-
-
 const labelStyles = {
-  color: '#d2d2d2',
+  color: "#d2d2d2",
 };
 
 const wordCloudCardHeadingStyles = {
-  color:'white', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: "10px"
+  color: "white",
+  textAlign: "center",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: "10px",
 };
-
-
-
 
 export default Trade;

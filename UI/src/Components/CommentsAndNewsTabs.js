@@ -1,35 +1,42 @@
-import React, { useState } from 'react';
-import { Container, Row, Col, Nav, NavItem, NavLink, TabContent, TabPane, Media, Input, Button, Card, CardBody, CardTitle, CardFooter } from 'reactstrap';
+import React, { useState } from "react";
+import {
+  Container,
+  Row,
+  Col,
+  Nav,
+  NavItem,
+  NavLink,
+  TabContent,
+  TabPane,
+  Media,
+  Input,
+  Button,
+  Card,
+  CardBody,
+  CardTitle,
+  CardFooter,
+} from "reactstrap";
 import Slick from "react-slick";
 import "../Styles/global.css";
 
-const CommentsAndNewsTabs = ({companySymbol, news, comments}) => {
-  const [activeTab, setActiveTab] = useState('comments');
-
-  const toggleTab = tab => {
+const CommentsAndNewsTabs = ({
+  companySymbol,
+  news,
+  comments,
+  setComments,
+}) => {
+  const [activeTab, setActiveTab] = useState("comments");
+  const [comment, setComment] = useState("");
+  const toggleTab = (tab) => {
     if (activeTab !== tab) setActiveTab(tab);
   };
 
-  const [comment, setComment] = useState('');
-
-
-  const handleCommentSubmit = () => {
-    var commentsArr = [];
-
-    if(comment) {
-       // Should send User ID and update the comments database through the endpoint provided by microservice
-    //    console.log(comment);
-        console.log(comment)
-       setComment(comment);
-        // Company, Comment IF NOT SURE FOLLOW DOCS
-        // When comment made, it comes in as array, need to shift right to add the new comment
-        // Locally, the user will see all the comments he make plus the 5 from DB
-        // Stored as dict key = company value = comment
-
-    }
-    localStorage.setItem("Comments",commentsArr.unshift(comment));
-
-};
+  const handleCommentSubmit = (e) => {
+    e.preventDefault(); // Prevent the default form submission behavior
+    setComments((prevComments) => [...prevComments, comment]); // Add the new comment to the comments array
+    localStorage.setItem("comments", JSON.stringify([...comments, comment])); // Store the updated comments array in local storage
+    setComment(""); // Clear the comment input field
+  };
 
   return (
     <div className="section section-comments">
@@ -39,16 +46,16 @@ const CommentsAndNewsTabs = ({companySymbol, news, comments}) => {
             <Nav tabs>
               <NavItem>
                 <NavLink
-                  className={`${activeTab === 'comments' ? 'active' : ''}`}
-                  onClick={() => toggleTab('comments')}
+                  className={`${activeTab === "comments" ? "active" : ""}`}
+                  onClick={() => toggleTab("comments")}
                 >
                   Comments
                 </NavLink>
               </NavItem>
               <NavItem>
                 <NavLink
-                  className={`${activeTab === 'news' ? 'active' : ''}`}
-                  onClick={() => toggleTab('news')}
+                  className={`${activeTab === "news" ? "active" : ""}`}
+                  onClick={() => toggleTab("news")}
                 >
                   News
                 </NavLink>
@@ -100,30 +107,28 @@ const CommentsAndNewsTabs = ({companySymbol, news, comments}) => {
                     {comments.map((comment, index) => {
                       return (
                         <Media>
-                        <a
-                          className="pull-left"
-                          href="#pablo"
-                          onClick={(e) => e.preventDefault()}
-                        >
-                          <div className="avatar">
-                            <Media
-                              alt="..."
-                              className="img-raised"
-                              src={require("Assets/img/logo-nav.png")}
-                            />
-                          </div>
-                        </a>
-                        <Media body>
-                          <Media heading tag="h5" style={labelStyles}>
-                            Anonymous{" "}
+                          <a
+                            className="pull-left"
+                            href="#pablo"
+                            onClick={(e) => e.preventDefault()}
+                          >
+                            <div className="avatar">
+                              <Media
+                                alt="..."
+                                className="img-raised"
+                                src={require("Assets/img/logo-nav.png")}
+                              />
+                            </div>
+                          </a>
+                          <Media body>
+                            <Media heading tag="h5" style={labelStyles}>
+                              Anonymous{" "}
+                            </Media>
+                            <p>{comment}</p>
+                            <br></br>
                           </Media>
-                          <p>
-                            {comment.commentTxt}
-                          </p>
-                          <br></br>
                         </Media>
-                        </Media>
-                      )
+                      );
                     })}
                     {/* <Media>
                     <a
@@ -163,31 +168,39 @@ const CommentsAndNewsTabs = ({companySymbol, news, comments}) => {
                 <div className="blogs-5">
                   <Row>
                     <Col className="ml-auto mr-auto">
-                    {news.map((item, index) => {
-                      const date = new Date(item.pubDate);
-                      const readableDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                      {news.map((item, index) => {
+                        const date = new Date(item.pubDate);
+                        const readableDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
 
-                      return (
-                        <Card key={index} className="card-blog card-plain" style={{borderColor: 'white'}}>
-                          <CardBody>
-                            {/* <h6 className="category text-warning">{companySymbol}</h6> */}
-                            <CardTitle tag="h6">
-                              <a href={item.link} onClick={(e) => e.preventDefault()}>
-                                {item.title}
-                              </a>
-                            </CardTitle>
-                            <CardFooter>
-                              <div className="author" >
-                                <span className="ml-1">{readableDate}</span>
-                              </div>
-                              <div className="stats stats-right">
-                                <i className="tim-icons icon-heart-2" /> {item.likes}
-                              </div>
-                            </CardFooter>
-                          </CardBody>
-                        </Card>
-                      );
-                    })}
+                        return (
+                          <Card
+                            key={index}
+                            className="card-blog card-plain"
+                            style={{ borderColor: "white" }}
+                          >
+                            <CardBody>
+                              {/* <h6 className="category text-warning">{companySymbol}</h6> */}
+                              <CardTitle tag="h6">
+                                <a
+                                  href={item.link}
+                                  onClick={(e) => e.preventDefault()}
+                                >
+                                  {item.title}
+                                </a>
+                              </CardTitle>
+                              <CardFooter>
+                                <div className="author">
+                                  <span className="ml-1">{readableDate}</span>
+                                </div>
+                                <div className="stats stats-right">
+                                  <i className="tim-icons icon-heart-2" />{" "}
+                                  {item.likes}
+                                </div>
+                              </CardFooter>
+                            </CardBody>
+                          </Card>
+                        );
+                      })}
                       {/* <Card className="card-blog card-plain" style={{borderColor: 'white'}}>
                         <CardBody style={{ color: 'white' }}>
                           <h6 className="category text-warning">{companySymbol}</h6>
@@ -208,7 +221,7 @@ const CommentsAndNewsTabs = ({companySymbol, news, comments}) => {
                       </Card> */}
                     </Col>
                   </Row>
-              </div>
+                </div>
               </TabPane>
             </TabContent>
           </Col>
@@ -219,11 +232,11 @@ const CommentsAndNewsTabs = ({companySymbol, news, comments}) => {
 };
 
 const labelStyles = {
-  color: '#d2d2d2',
+  color: "#d2d2d2",
 };
 
 const whiteColor = {
-  color: '#ffffff',
+  color: "#ffffff",
 };
 
 export default CommentsAndNewsTabs;

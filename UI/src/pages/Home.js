@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 // import Container from 'react-bootstrap/Container';
 // import Row from 'react-bootstrap/Row';
 // import Col from 'react-bootstrap/Col';
@@ -7,30 +7,34 @@ import React from 'react';
 // import '../styles/HomeBody.css';
 import "Assets/css/nucleo-icons.css";
 import "Assets/css/blk-design-system-pro-react.css";
-import NavBar from 'Components/NavBar';
-import {useState, useEffect} from 'react';
+import NavBar from "Components/NavBar";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 import {
-    Button,
-    UncontrolledCollapse,
-    Label,
-    FormGroup,
-    Input,
-    InputGroupAddon,
-    InputGroupText,
-    InputGroup,
-    NavbarBrand,
-    Navbar,
-    NavItem,
-    NavLink,
-    Nav,
-    Container,
-    Row,
-    Col,
-  } from "reactstrap";
+  Button,
+  UncontrolledCollapse,
+  Label,
+  FormGroup,
+  Input,
+  InputGroupAddon,
+  InputGroupText,
+  InputGroup,
+  NavbarBrand,
+  Navbar,
+  NavItem,
+  NavLink,
+  Nav,
+  Container,
+  Row,
+  Col,
+} from "reactstrap";
 
-function Home(){
-
+function Home() {
+  const navigate = useNavigate();
+  const handleSearchClick = () => {
+    navigate("/search");
+  };
   // const [hasUserSession , setHasUserSession] = useState(false);
 
   // // // fake function to check if user is logged in
@@ -52,10 +56,9 @@ function Home(){
   //   checkUserSession();
   // }, []);
 
-
   // async function checkUser() {
   //   const savedUsername = localStorage.getItem("username");
-    
+
   //   if (savedUsername) {
   //     console.log("User is logged in");
   //     return true;
@@ -63,7 +66,6 @@ function Home(){
   //   console.log("User is not logged in")
   //   return true;
   // }
-
 
   return (
     //     <Container fluid>
@@ -97,10 +99,10 @@ function Home(){
     //     </Row>
     // </Container>
     <>
-          {/* ********* HEADER 4 w/ VIDEO ********* */}
-          <div className="header header-4">
-          <div className="header-wrapper">
-            {/* <Navbar className="navbar-transparent" expand="lg">
+      {/* ********* HEADER 4 w/ VIDEO ********* */}
+      <div className="header header-4">
+        <div className="header-wrapper">
+          {/* <Navbar className="navbar-transparent" expand="lg">
               <Container>
                 <div className="navbar-translate">
                   <button className="navbar-toggler" id="example-header-4">
@@ -196,41 +198,45 @@ function Home(){
                 </UncontrolledCollapse>
               </Container>
             </Navbar> */}
-            <NavBar transparent={true} />
-            <div className="page-header header-video header-filter">
-              <div className="overlay" />
-              <video
-                autoPlay="autoplay"
-                loop="loop"
-                muted="muted"
-                playsInline="playsinline"
-              >
-                <source
-                  src={require("../Assets/video/Mt_Baker.mp4")}
-                  type="video/mp4"
-                />
-              </video>
-              <Container className="text-center">
-                <div className="video-text">
-                  <h2 className="description">An Innovative Approach</h2>
-                  <h1 className="title"></h1>
-                  <br />
-                  <Button
-                    className="btn-simple btn-neutral"
-                    color="default"
-                    href="#pablo"
-                    onClick={(e) => e.preventDefault()}
-                  >
-                    Start Now
-                  </Button>
-                </div>
-              </Container>
-            </div>
+          <NavBar transparent={true} />
+          <div className="page-header header-video header-filter">
+            <div className="overlay" />
+            <video
+              autoPlay="autoplay"
+              loop="loop"
+              muted="muted"
+              playsInline="playsinline"
+            >
+              <source
+                src={require("../Assets/video/Mt_Baker.mp4")}
+                type="video/mp4"
+              />
+            </video>
+            <Container className="text-center">
+              <div className="video-text">
+                <h2 className="description">
+                  Start searching for sentiments of your favourite companies
+                </h2>
+                <h1 className="title"></h1>
+                <br />
+                <Button
+                  className="btn-simple btn-neutral"
+                  color="default"
+                  href="#pablo"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleSearchClick();
+                  }}
+                >
+                  Search Now
+                </Button>
+              </div>
+            </Container>
           </div>
         </div>
-        {/* ********* END HEADER 4 ********* */}
+      </div>
+      {/* ********* END HEADER 4 ********* */}
     </>
-    
-    );
+  );
 }
 export default Home;

@@ -25,8 +25,9 @@ COPY . /app
 FROM base AS release
 RUN apt-get update 
 RUN apt-get install -y libatomic1
+RUN apt-get install -y chromium
+
 COPY --from=dependencies /app/prod_node_modules ./node_modules
 COPY --from=build /app . 
-RUN apt-get install -y chromium
 EXPOSE 5000
 CMD ["node", "app.js"]

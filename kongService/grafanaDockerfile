@@ -1,0 +1,11 @@
+# Use the official Grafana image as the base image
+FROM grafana/grafana
+
+# Copy the Grafana provisioning files into the container
+COPY grafana.yml /etc/grafana/provisioning/datasources/
+
+# Expose the Grafana web interface port
+EXPOSE 3000
+
+# Start Grafana
+ENTRYPOINT [ "/run.sh" ]
