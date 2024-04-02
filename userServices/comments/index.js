@@ -87,7 +87,7 @@ app.post("/comments", async (req, res) => {
       .send({ message: "Company and comment are required" });
   }
 
-  const companyComments = null;
+  let companyComments = null;
 
   try {
     companyComments = await comments.findOneAndUpdate(
