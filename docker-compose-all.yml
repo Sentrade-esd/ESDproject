@@ -75,20 +75,21 @@ services:
       - TELEBOT_URL=http://telebot:3002/
     restart: unless-stopped
 
-  telebot:
-    build: 
-      context: ./notificationService/telebot_esd
-      dockerfile: Dockerfile
-    command: npm start
-    ports:
-      - 3002:3002
-    networks:
-      - notification_service
-    environment:
-      - AMQP_SERVER=amqp://rabbitmq:5672
-      - BOT_TOKEN=7039505633:AAFoCvJc3XwP8N7bUd1XsjkCP5rH311TrWQ
-      - BOT_URL=https://api.telegram.org/bot
-    # restart: unless-stopped
+  # telebot:
+  #   build: 
+  #     context: ./notificationService/telebot_esd
+  #     dockerfile: Dockerfile
+  #   command: npm start
+  #   ports:
+  #     - 3002:3002
+  #   networks:
+  #     - notification_service
+  #     - kong_network
+  #   environment:
+  #     - AMQP_SERVER=amqp://rabbitmq:5672
+  #     - BOT_TOKEN=7039505633:AAFoCvJc3XwP8N7bUd1XsjkCP5rH311TrWQ
+  #     - BOT_URL=https://api.telegram.org/bot
+  #   # restart: unless-stopped
 
   watchlist_db:
     build:

@@ -62,6 +62,12 @@ SentimentController.get("/sentiment_query", async (req, res) => {
     const ticker = req.query.ticker;
     let newsArticles = null;
 
+    // const urlll = `${sentiment_methods.scraper_url}/scraper/scrapeCurrentPrice?ticker=${ticker}`;
+
+    //     const response = await axios.get(urlll);
+
+
+    //     console.log(response.data);
 
     let sentiments = await Sentiment.findOne({search: search_term});
     let comments = await Comment.findOne({search: search_term});         // TO USE: combine comments and news sentiments and return 
@@ -92,7 +98,8 @@ SentimentController.get("/sentiment_query", async (req, res) => {
             const res = await sentiment_methods.scraper(search_term, ticker);
             newsArticles = res[1];
             // console.log(res)
-    
+            
+            // console.log(newsArticles)
         
             console.log("Analysing...");
         

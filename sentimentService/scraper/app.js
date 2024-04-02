@@ -1,5 +1,10 @@
 // Requiring module
 const express = require("express");
+const cors = require("cors");
+const { Worker } = require('worker_threads');
+
+
+
 // let puppeteer = require("puppeteer-extra");
 let puppeteer = require("puppeteer");
 
@@ -23,7 +28,7 @@ const scraperDBMethods = require("./scraperDBmethods");
 
 // Creating express object
 const app = express();
-
+app.use(cors());
 // Handling GET request
 app.get("/", (req, res) => {
   res.send(
@@ -49,95 +54,119 @@ app.get("/scraper/getNewsFromDB/:ticker", async (req, res) => {
 });
 
 // Handling GET query scrape to news artcles about a company using the Google News
+// app.get("/scraper/getNews/:query/:ticker", async (req, res) => {
+//   const { query, ticker } = req.params;
+//   console.log(query, ticker);
+
+//   try {
+//     // run scrapping script
+//     let response = await scrape(query);
+
+//     // call db endpoint to add to db for news
+//     console.log("response: ", response);
+//     let addToDBResponse = await scraperDBMethods.add(ticker, query, response);
+
+//     // console.log('addToDBresponse', addToDBResponse);
+//     res.send(response);
+//   } catch (error) {
+//     console.error("An error occurred:", error);
+//     res
+//       .status(500)
+//       .send({ error: "An error occurred while fetching the data." });
+//   }
+// });
+
 app.get("/scraper/getNews/:query/:ticker", async (req, res) => {
   const { query, ticker } = req.params;
   console.log(query, ticker);
 
   try {
-    // run scrapping script
-    let response = await scrape(query);
+    // Create a worker thread to perform CPU-bound task
+    const worker = new Worker('./methodsGetNews.js');
+    
+    // Listen for messages from the worker thread
+    worker.on('message', message => {
+        // Send response back to the client
+        res.send(message);
+    });
 
-    // call db endpoint to add to db for news
-    console.log("response: ", response);
-    let addToDBResponse = await scraperDBMethods.add(ticker, query, response);
+    // Send message to worker thread with query and ticker
+    worker.postMessage({ query, ticker });
 
-    // console.log('addToDBresponse', addToDBResponse);
-    res.send(response);
   } catch (error) {
     console.error("An error occurred:", error);
-    res
-      .status(500)
-      .send({ error: "An error occurred while fetching the data." });
+    res.status(500).send({ error: "An error occurred while fetching the data." });
   }
 });
 
-async function scrape(query) {
-  let url = `https://news.google.com/rss/search?q=${query}&hl=en-SG&gl=SG&ceid=SG:en`;
-  let response = await axios.get(url);
-  let content = response.data;
-  // console.log(content);
 
-  // Convert xml2js.parseString to return a Promise
-  let result = await new Promise((resolve, reject) => {
-    xml2js.parseString(content, function (err, result) {
-      if (err) reject(err);
-      else resolve(result);
-    });
-  });
+// async function scrape(query) {
+//   let url = `https://news.google.com/rss/search?q=${query}&hl=en-SG&gl=SG&ceid=SG:en`;
+//   let response = await axios.get(url);
+//   let content = response.data;
+//   // console.log(content);
 
-  let items = result.rss.channel[0].item;
+//   // Convert xml2js.parseString to return a Promise
+//   let result = await new Promise((resolve, reject) => {
+//     xml2js.parseString(content, function (err, result) {
+//       if (err) reject(err);
+//       else resolve(result);
+//     });
+//   });
 
-  let results = [];
+//   let items = result.rss.channel[0].item;
 
-  for (let i = 0; i < 80; i++) {
-    let item = items[i];
-    let title = item.title[0].split(" - ")[0];
-    let pubDate = item.pubDate[0];
-    // Change pubDate to sgt
-    let date = new Date(pubDate);
-    let sgtDate = new Date(date.getTime() + 8 * 60 * 60 * 1000); // SGT => UTC+8
-    let datetime = sgtDate.toISOString();
+//   let results = [];
 
-    // Parse the HTML in the description to extract the text
-    // let dom = new JSDOM(item.description[0]);
-    // let description = dom.window.document.querySelector('a').textContent;
+//   for (let i = 0; i < 80; i++) {
+//     let item = items[i];
+//     let title = item.title[0].split(" - ")[0];
+//     let pubDate = item.pubDate[0];
+//     // Change pubDate to sgt
+//     let date = new Date(pubDate);
+//     let sgtDate = new Date(date.getTime() + 8 * 60 * 60 * 1000); // SGT => UTC+8
+//     let datetime = sgtDate.toISOString();
 
-    // include obj in results only if the result is less than a week old
-    if (date > new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000)) {
-      let link = item.link[0];
-      let obj = {
-        i,
-        title,
-        // description,
-        link,
-        datetime,
-      };
-      // console.log(obj);
-      results.push(obj);
-    }
-  }
+//     // Parse the HTML in the description to extract the text
+//     // let dom = new JSDOM(item.description[0]);
+//     // let description = dom.window.document.querySelector('a').textContent;
 
-  // Now you can return items or use it elsewhere in your code
-  // return items;
-  // console.log('results: ', results);
-  return results;
-}
+//     // include obj in results only if the result is less than a week old
+//     if (date > new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000)) {
+//       let link = item.link[0];
+//       let obj = {
+//         i,
+//         title,
+//         // description,
+//         link,
+//         datetime,
+//       };
+//       // console.log(obj);
+//       results.push(obj);
+//     }
+//   }
 
-async function addToDB(ticker, query, news) {
-  let response;
-  try {
-    // const {email, ticker, targetDate, buyAmountPerFiling, maxBuyAmount} = req.body;
-    let body = {
-      ticker: ticker,
-      companyName: query,
-      news: news,
-    };
-    response = await scraperDBMethods.add();
-  } catch (error) {
-    console.log(error);
-  }
-  return response.data;
-}
+//   // Now you can return items or use it elsewhere in your code
+//   // return items;
+//   // console.log('results: ', results);
+//   return results;
+// }
+
+// async function addToDB(ticker, query, news) {
+//   let response;
+//   try {
+//     // const {email, ticker, targetDate, buyAmountPerFiling, maxBuyAmount} = req.body;
+//     let body = {
+//       ticker: ticker,
+//       companyName: query,
+//       news: news,
+//     };
+//     response = await scraperDBMethods.add();
+//   } catch (error) {
+//     console.log(error);
+//   }
+//   return response.data;
+// }
 
 // Handling GET query scraper to scrape for the stock price using the Alpha Vantage API
 app.get("/scraper/pullPrice/:ticker/:targetDate", async (req, res) => {
@@ -273,9 +302,22 @@ app.get("/scraper/scrapeCurrentPrice", async (req, res) => {
   console.log("Ticker: ", ticker);
 
   try {
-    let response = await scrapePrice(ticker);
-    console.log("Current Price: ", response);
-    res.send(response);
+    // let response = await scrapePrice(ticker);
+    // console.log("Current Price: ", response);
+    // res.send(response);
+
+    const worker = new Worker('./methodsGetCurrentPrice.js');
+    
+    // Listen for messages from the worker thread
+    worker.on('message', message => {
+        // Send response back to the client
+        res.send(message);
+    });
+
+    // Send message to worker thread with query and ticker
+    worker.postMessage({ ticker });
+
+
   } catch (error) {
     console.error(error);
     // return 500 with error message
@@ -295,60 +337,60 @@ async function convertCompanyToTicker(company) {
   return ticker;
 }
 
-async function scrapePrice(query) {
-  // let browser = await puppeteer.launch({
-  //     args: chromium.args,
-  //     defaultViewport: chromium.defaultViewport,
-  //     executablePath: await chromium.executablePath(),
-  //     headless: chromium.headless,
-  // });
-  let browser = await puppeteer.launch({
-    headless: "new",
-    executablePath: "/usr/bin/chromium",
-    args: ["--no-sandbox"],
-  });
-  let page = await browser.newPage();
+// async function scrapePrice(query) {
+//   // let browser = await puppeteer.launch({
+//   //     args: chromium.args,
+//   //     defaultViewport: chromium.defaultViewport,
+//   //     executablePath: await chromium.executablePath(),
+//   //     headless: chromium.headless,
+//   // });
+//   let browser = await puppeteer.launch({
+//     headless: "new",
+//     executablePath: "/usr/bin/chromium",
+//     args: ["--no-sandbox"],
+//   });
+//   let page = await browser.newPage();
 
-  let url = `https://sg.finance.yahoo.com/quote/${query}`;
-  // await page.goto(url);
-  await page.goto(url, { waitUntil: "networkidle2" });
-  let priceSelector =
-    "#quote-header-info > div.My\\(6px\\).Pos\\(r\\).smartphone_Mt\\(6px\\).W\\(100\\%\\) > div.D\\(ib\\).Va\\(m\\).Maw\\(65\\%\\).Ov\\(h\\) > div.D\\(ib\\).Mend\\(20px\\) > fin-streamer.Fw\\(b\\).Fz\\(36px\\).Mb\\(-4px\\).D\\(ib\\)";
-  let alternatePriceSelector =
-    "#quote-header-info > div.My\\(6px\\).Pos\\(r\\).smartphone_Mt\\(6px\\).W\\(100\\%\\) > div.D\\(ib\\).Va\\(m\\).Maw\\(65\\%\\).Ov\\(h\\) > div > fin-streamer.Fw\\(b\\).Fz\\(36px\\).Mb\\(-4px\\).D\\(ib\\) > span"; // Replace with your alternate selector
-  // let descriptionSelector = 'p.Mt\\(15px\\).Lh\\(1.6\\)';
-  let marketCapSelector = `[data-test="MARKET_CAP-value"]`;
-  let avgVolumeSelector = `[data-test="AVERAGE_VOLUME_3MONTH-value"]`;
-  let previousCloseSelector = '[data-test="PREV_CLOSE-value"]';
+//   let url = `https://sg.finance.yahoo.com/quote/${query}`;
+//   // await page.goto(url);
+//   await page.goto(url, { waitUntil: "networkidle2" });
+//   let priceSelector =
+//     "#quote-header-info > div.My\\(6px\\).Pos\\(r\\).smartphone_Mt\\(6px\\).W\\(100\\%\\) > div.D\\(ib\\).Va\\(m\\).Maw\\(65\\%\\).Ov\\(h\\) > div.D\\(ib\\).Mend\\(20px\\) > fin-streamer.Fw\\(b\\).Fz\\(36px\\).Mb\\(-4px\\).D\\(ib\\)";
+//   let alternatePriceSelector =
+//     "#quote-header-info > div.My\\(6px\\).Pos\\(r\\).smartphone_Mt\\(6px\\).W\\(100\\%\\) > div.D\\(ib\\).Va\\(m\\).Maw\\(65\\%\\).Ov\\(h\\) > div > fin-streamer.Fw\\(b\\).Fz\\(36px\\).Mb\\(-4px\\).D\\(ib\\) > span"; // Replace with your alternate selector
+//   // let descriptionSelector = 'p.Mt\\(15px\\).Lh\\(1.6\\)';
+//   let marketCapSelector = `[data-test="MARKET_CAP-value"]`;
+//   let avgVolumeSelector = `[data-test="AVERAGE_VOLUME_3MONTH-value"]`;
+//   let previousCloseSelector = '[data-test="PREV_CLOSE-value"]';
 
-  let data = {};
-  try {
-    await page.waitForSelector(priceSelector, { timeout: 5000 }); // Wait for 5 seconds
-    data.price = await page.evaluate((priceSelector) => {
-      return document.querySelector(priceSelector).innerText;
-    }, priceSelector);
-    console.log("No Error, All is good");
-  } catch (error) {
-    console.log("Error in priceSelector", error);
-    await page.waitForSelector(alternatePriceSelector, { timeout: 5000 }); // Wait for 5 seconds
-    data.price = await page.evaluate((alternatePriceSelector) => {
-      return document.querySelector(alternatePriceSelector).innerText;
-    }, alternatePriceSelector);
-  }
+//   let data = {};
+//   try {
+//     await page.waitForSelector(priceSelector, { timeout: 5000 }); // Wait for 5 seconds
+//     data.price = await page.evaluate((priceSelector) => {
+//       return document.querySelector(priceSelector).innerText;
+//     }, priceSelector);
+//     console.log("No Error, All is good");
+//   } catch (error) {
+//     console.log("Error in priceSelector", error);
+//     await page.waitForSelector(alternatePriceSelector, { timeout: 5000 }); // Wait for 5 seconds
+//     data.price = await page.evaluate((alternatePriceSelector) => {
+//       return document.querySelector(alternatePriceSelector).innerText;
+//     }, alternatePriceSelector);
+//   }
 
-  data.marketCap = await page.evaluate((marketCapSelector) => {
-    return document.querySelector(marketCapSelector).innerText;
-  }, marketCapSelector);
-  data.avgVolume = await page.evaluate((avgVolumeSelector) => {
-    return document.querySelector(avgVolumeSelector).innerText;
-  }, avgVolumeSelector);
-  data.previousClose = await page.evaluate((previousCloseSelector) => {
-    return document.querySelector(previousCloseSelector).innerText;
-  }, previousCloseSelector);
+//   data.marketCap = await page.evaluate((marketCapSelector) => {
+//     return document.querySelector(marketCapSelector).innerText;
+//   }, marketCapSelector);
+//   data.avgVolume = await page.evaluate((avgVolumeSelector) => {
+//     return document.querySelector(avgVolumeSelector).innerText;
+//   }, avgVolumeSelector);
+//   data.previousClose = await page.evaluate((previousCloseSelector) => {
+//     return document.querySelector(previousCloseSelector).innerText;
+//   }, previousCloseSelector);
 
-  await browser.close();
-  return data;
-}
+//   await browser.close();
+//   return data;
+// }
 
 // Port Number
 const PORT = process.env.PORT || 5000;

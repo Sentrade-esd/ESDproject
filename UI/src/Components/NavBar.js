@@ -256,9 +256,9 @@ const NavBar = ({ transparent }) => {
               <NavbarBrand href="#pablo" onClick={(e) => e.preventDefault()}>
                 {/* SenTrade */}
                 <img
-                  src={require("../Assets/img/logo.png")}
+                  src={require("../Assets/img/navLogo.png")}
                   alt="SenTrade"
-                  style={{ height: "15px" }}
+                  style={{ height: "40px" }}
                 />
               </NavbarBrand>
             </div>

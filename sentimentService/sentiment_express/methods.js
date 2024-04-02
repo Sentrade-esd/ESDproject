@@ -460,11 +460,13 @@ const sentiment_methods = {
     },
 
     getCurrentPrice: async (company) => {
-        const url = `${sentiment_methods.scraper_url}/scraper/scrapeCurrentPrice`;
+        const url = `${sentiment_methods.scraper_url}/scraper/scrapeCurrentPrice?company=${company}`;
 
-        const response = await axios.get(url, { params: { company } });
+        // const response = await axios.get(url, { params: { company } });
+        const response = await axios.get(url);
 
-        // console.log(response);
+
+        console.log(response);
 
         return response;
 

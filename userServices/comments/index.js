@@ -1,10 +1,13 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const cors = require("cors");
+
 const { Schema } = mongoose;
 const amqp = require("amqplib");
 const app = express();
 const PORT = 6001;
 app.use(express.json());
+app.use(cors());
 
 const DB_service_url =
   process.env.DB_URL || "mongodb://127.0.0.1:27017/comments";
@@ -87,8 +90,10 @@ app.post("/comments", async (req, res) => {
       .send({ message: "Company and comment are required" });
   }
 
+  let companyComments = null;
+
   try {
-    const companyComments = await comments.findOneAndUpdate(
+    companyComments = await comments.findOneAndUpdate(
       { company: company },
       { $push: { commentsMade: comment } },
       { new: true, upsert: true }
@@ -139,5 +144,5 @@ app.get("/comments/:company", async (req, res) => {
 
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`, );
 });
