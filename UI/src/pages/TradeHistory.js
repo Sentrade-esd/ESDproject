@@ -6,6 +6,12 @@ import Slick from "react-slick";
 import "../Styles/global.css";
 import classnames from "classnames";
 
+import { useContext } from 'react';
+import {AlertContext} from '../Components/AlertContext.js';
+import {LoadingContext} from '../Components/LoadingContext.js';
+
+import { UncontrolledAlert } from 'reactstrap';
+
 const allTransactions = [
   {
     "BuyAmount": 100,
@@ -117,6 +123,10 @@ const TradeHistory = () => {
     const [openTrades, setOpenTrades] = useState([]);
     const [closedTrades, setClosedTrades] = useState([]);
     const [pnL , setPnL] = useState(0);
+
+
+    const {alert, setAlert} = useContext(AlertContext);
+    const { isLoading, setIsLoading } = useContext(LoadingContext);
     // Uncomment this below when the microservice is ready
     // const [allTransactions, setAllTransactions] = useState([]);
 
@@ -302,6 +312,20 @@ const TradeHistory = () => {
 
     return (
         <>
+        {isLoading ? (
+            <UncontrolledAlert className='alert-with-icon' id='noMargin' color='info' backgroundColor='info'>
+              <span>
+                <b>Loading -</b>
+                Following Trades...
+              </span>
+            </UncontrolledAlert>
+        ) : (
+            alert && (
+                <UncontrolledAlert className="alert-with-icon alert-success" id='noMargin' backgroundColor='success'>
+                  <b>Transaction -</b><span dangerouslySetInnerHTML={alert}></span>
+                </UncontrolledAlert>
+            )
+        )}
         <div className="wrapper" ref={wrapper}>
             <div className='testimonials-4' style={{backgroundColor: '#1D304f'}}>
             <Container className='pt-5 pb-5'>
