@@ -41,7 +41,7 @@ function Home() {
 
   const [placeHolderText, setPlaceHolderText] = useState("");
   const index = useRef(0);
-  const fullText = "  Start searching for sentiments of your favourite companies  ";
+  const fullText = "  Search for sentiments of your favourite companies  ";
 
     useEffect(() => {
         const intervalId = setInterval(() => {
@@ -231,7 +231,7 @@ function Home() {
               playsInline="playsinline"
             >
               <source
-                src={require("../Assets/video/Mt_Baker.mp4")}
+                src={require("../Assets/video/bgVideo.mp4")}
                 type="video/mp4"
               />
             </video>
