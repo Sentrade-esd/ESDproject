@@ -12,105 +12,7 @@ import {LoadingContext} from '../Components/LoadingContext.js';
 
 import { UncontrolledAlert } from 'reactstrap';
 
-const allTransactions = [
-  {
-    "BuyAmount": 100,
-    "Company": "LCID",
-    "DateTimestamp": "Sun, 24 Mar 2024 01:12:29 GMT",
-    "Email": "web2@example.com",
-    "SellAmount": null,
-    "StocksHeld": 25,
-    "StopLossSentimentThreshold": 0.05,
-    "TotalAccountValue": 900.0,
-    "TransactionID": 1,
-    "UserID": 4
-  },
-  {
-    "BuyAmount": 100.0,
-    "Company": "NVDA",
-    "DateTimestamp": "Sun, 24 Mar 2024 02:12:11 GMT",
-    "Email": "test2@t.com",
-    "SellAmount": 134.00,
-    "StocksHeld": 1,
-    "StopLossSentimentThreshold": 0.05,
-    "TotalAccountValue": 934.00,
-    "TransactionID": 2,
-    "UserID": 4
-  },
-  {
-    "BuyAmount": 220.0,
-    "Company": "AAPL",
-    "DateTimestamp": "Sun, 24 Mar 2024 03:12:11 GMT",
-    "Email": "test2@t.com",
-    "SellAmount": 310.00,
-    "StocksHeld": 2,
-    "StopLossSentimentThreshold": 0.05,
-    "TotalAccountValue": 1024.00,
-    "TransactionID": 3,
-    "UserID": 4
-  },
-  {
-    "BuyAmount": 100,
-    "Company": "LCID",
-    "DateTimestamp": "Sun, 24 Mar 2024 01:12:29 GMT",
-    "Email": "web2@example.com",
-    "SellAmount": 75,
-    "StocksHeld": 25,
-    "StopLossSentimentThreshold": 0.05,
-    "TotalAccountValue": 999.00,
-    "TransactionID": 1,
-    "UserID": 4
-  },
-  {
-    "BuyAmount": 130.0,
-    "Company": "NVDA",
-    "DateTimestamp": "Sun, 24 Mar 2024 04:12:11 GMT",
-    "Email": "test2@t.com",
-    "SellAmount": null,
-    "StocksHeld": 1,
-    "StopLossSentimentThreshold": 0.05,
-    "TotalAccountValue": 869.00,
-    "TransactionID": 4,
-    "UserID": 4
-  },
-  {
-    "BuyAmount": 139.00,
-    "Company": "NVDA",
-    "DateTimestamp": "Sun, 24 Mar 2024 05:12:11 GMT",
-    "Email": "test2@t.com",
-    "SellAmount": null,
-    "StocksHeld": 1,
-    "StopLossSentimentThreshold": 0.05,
-    "TotalAccountValue": 730.00,
-    "TransactionID": 5,
-    "UserID": 4
-  },
-  {
-    "BuyAmount": 140.00,
-    "Company": "NVDA",
-    "DateTimestamp": "Sun, 24 Mar 2024 06:12:11 GMT",
-    "Email": "test2@t.com",
-    "SellAmount": null,
-    "StocksHeld": 1,
-    "StopLossSentimentThreshold": 0.05,
-    "TotalAccountValue": 590.00,
-    "TransactionID": 6,
-    "UserID": 4
-  },
-  {
-    "BuyAmount": 130.00,
-    "Company": "NVDA",
-    "DateTimestamp": "Sun, 24 Mar 2024 05:12:11 GMT",
-    "Email": "test2@t.com",
-    "SellAmount": 150.00,
-    "StocksHeld": 1,
-    "StopLossSentimentThreshold": 0.05,
-    "TotalAccountValue": 740.00,
-    "TransactionID": 5,
-    "UserID": 4
-  }
-]
-  
+
 const TradeHistory = () => {
     // const [transactions, setTransactions] = useState([]);
     const [tabs, setTabs] = React.useState(1);
@@ -123,27 +25,17 @@ const TradeHistory = () => {
     const [openTrades, setOpenTrades] = useState([]);
     const [closedTrades, setClosedTrades] = useState([]);
     const [pnL , setPnL] = useState(0);
+    const [totalAssetsValue, setTotalAssetsValue] = useState(0);
 
 
     const {alert, setAlert} = useContext(AlertContext);
     const { isLoading, setIsLoading } = useContext(LoadingContext);
     // Uncomment this below when the microservice is ready
-    // const [allTransactions, setAllTransactions] = useState([]);
+    const [allTransactions, setAllTransactions] = useState([]);
+    const [UserID, setUserID] = useState(0);
+    const [username, setUsername] = useState("");
 
-
-    // const email = sessionStorage.getItem('username');
-    const wrapper = React.useRef(null);
-    React.useEffect(() => {
-      document.documentElement.scrollTop = 0;
-      document.scrollingElement.scrollTop = 0;
-      wrapper.current.scrollTop = 0;
-      document.body.classList.add("blog-post");
-      return function cleanup() {
-        document.body.classList.remove("blog-post");
-      };
-    }, []);
-
-    
+  
     // useEffect(() => {
     //     const UserID = sessionStorage.getItem('id'); 
     //     if (UserID) { // check if email is present
@@ -158,37 +50,48 @@ const TradeHistory = () => {
     //     }
     // }, []);
 
-
+    useEffect(()=> {
+      // const savedUserID = localStorage.getItem('UserID');
+      // const userName = lcoalStorage.getItem('UserName');
+      const savedUserID = 1;
+      const savedUsername= "usertest@email.com"
+      
+      setUserID(savedUserID);
+      setUsername(savedUsername);
+    })
 
     // Uncomment this below when the microservice is ready (Fetch for all transactions with UserId)
-    // useEffect(() => {
-    //   const fetchData = async () => {
-    //     try {
-    //       const TransactionsResponse = await axios.get(
-    //         `http://kong:8000/transaction/transaction/total/${UserID}`
-    //       ); // This will be the microserivce eventually
-    //       setAllTransactions(TransactionsResponse.data);
-    //     //   const CommentsResponse = await axios.get(
-    //     //     `http://kong:8000/comments/${companyName}`
-    //     //   ); // This will be the microserivce eventually
-    //     //   setComments(CommentsResponse.data);
-    //     //   localStorage.setItem("comments", JSON.stringify(response2.data));
-    //     } catch (error) {
-    //       console.error("Error fetching data:", error);
-    //     }
-    //   };
-  
-    //   fetchData();
-    // }, []);
+    useEffect(() => {
+      const fetchData = async () => {
+        try {
+          const TransactionsResponse = await axios.get(
+            `http://20.78.38.247:8000/transaction/total/1`
+          ); 
+          const LatestTransactionResponse = await axios.get(
+            `http://20.78.38.247:8000/transaction/1`
+          );
 
+          console.log("ALL TRANSACTIONS:", TransactionsResponse.data);
+          console.log("LATEST TRANSACTION:", LatestTransactionResponse.data);
+
+          setAllTransactions(TransactionsResponse.data.data.Transaction);
+          setCurrentBalance(LatestTransactionResponse.data.data.TotalAccountValue);
+
+        
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
+      };
+      fetchData();
+    }, []);
 
     useEffect(() => {
-      const openTrades = allTransactions.filter((transaction) => transaction.SellAmount === null);
+      console.log('UseEffect 2 is happening');
+      const openTrades = allTransactions.slice(1).filter((transaction) => transaction.SellAmount === null);
       setOpenTrades(openTrades);
       const closedTrades = allTransactions.filter((transaction) => transaction.SellAmount !== null);
       setClosedTrades(closedTrades);
       
-
       const newCategorizedItems = openTrades.reduce((categories, item) => {
         const key = item.Company;
     
@@ -210,9 +113,7 @@ const TradeHistory = () => {
       }, {});
 
       setCategorizedItems(newCategorizedItems);
-
-      const currentBalance = allTransactions[allTransactions.length - 1].TotalAccountValue;
-      setCurrentBalance(currentBalance);
+      // setCurrentBalance(currentBalance);
 
       let newPnL = 1000 - currentBalance;
       setPnL(newPnL);
@@ -223,13 +124,44 @@ const TradeHistory = () => {
       //   console.log(error);
       // }
 
+      // let currentTotalAssetsValue = 0;
+      // openTrades.forEach(async (stock)=> {
+      //   console.log("STOCK", stock.Company);
+      //   async function fetchData() {
+      //     try {
+      //       console.log("Fetching stock data");
+      //       const stockData = await axios.get(`http://20.78.38.247:8000/scraper/scrapeCurrentPrice?company=${stock.Company}`);
+      //       console.log(stockData.data.price);
+      //       const currentPrice = stockData.data.price;
+      //       const totalValue = currentPrice * stock.StocksHeld;
+      //       currentTotalAssetsValue += totalValue;
+      //       setTotalAssetsValue(currentTotalAssetsValue);
+      //     }
+      //     catch (error){
+      //       console.error("Error fetching data:", error);
+      //     }
+      //   }
+      //   fetchData();
+      // })
+
     }, [allTransactions]);
 
+  
     // async function fetchPrices(openTrades){
     //   const promises = openTrades.map(async (trade) => {
     //     const response = await axios.get(`http://
     // }
 
+    const wrapper = React.useRef(null);
+    React.useEffect(() => {
+      document.documentElement.scrollTop = 0;
+      document.scrollingElement.scrollTop = 0;
+      wrapper.current.scrollTop = 0;
+      document.body.classList.add("blog-post");
+      return function cleanup() {
+        document.body.classList.remove("blog-post");
+      };
+    }, []);
 
     const onExiting = (carousel) => {
         if (carousel === 1) {
@@ -310,6 +242,55 @@ const TradeHistory = () => {
     }
     };
 
+
+    const handleSell = async(item) => {
+      console.log("SELLING", item);
+
+      async function fetchSellAmount() {
+        try {
+          const stockData = await axios.get(`http://20.78.38.247:8000/scraper/scrapeCurrentPrice?company=${item.Company}`);
+          console.log(stockData.data.price);
+          const currentPrice = stockData.data.price;
+          const sellAmount = currentPrice * item.StocksHeld;
+          return sellAmount;
+        }
+        catch(error){
+          console.error("Error fetching data:", error);
+        }
+      }
+
+      // sell stock
+      const sellAmount = await fetchSellAmount();
+      console.log("SELL AMOUNT", sellAmount);
+
+      // async function sellStock() {
+      //   try {
+      //     let body = {
+      //       "UserID": UserID,
+      //       "Email": username,
+      //       "Company": item.Company,
+      //       // "BuyAmount": item.BuyAmount,
+      //       "SellAmount": sellAmount,
+      //       // "StocksHeld": 0,
+      //       "Ticker": item.Ticker,
+      //       "Transaction": item.TransactionID,
+      //     }
+      //     const sellResponse = await axios.post('http://20.78.38.247:8000/transaction/sell', body);
+      //   }
+      //   catch(error){
+      //     console.error('Error selling stock:', error);
+      //   }
+      // }
+
+
+      
+
+      // fetch price of stock using scraper
+
+    }
+
+
+
     return (
         <>
         {isLoading ? (
@@ -330,7 +311,10 @@ const TradeHistory = () => {
             <div className='testimonials-4' style={{backgroundColor: '#1D304f'}}>
             <Container className='pt-5 pb-5'>
                 <Row>
-                  <Col md="6">
+                  <Col md="6" className="d-flex justify-content-center align-items-center">
+                    {openTrades.length === 0 ? (
+                      <h6 style={{color:"white"}}>No Opening Trades</h6>
+                    ) : (
                       <Carousel
                       activeIndex={carousel2Index}
                       // next={() => next(2, items2)}
@@ -347,7 +331,7 @@ const TradeHistory = () => {
                           onClickHandler={(newIndex) => goToIndex(newIndex, 2)}
                       />
                       {openTrades.map((item, key) => {
-                          console.log("ITEM", item);
+                        // console.log("ITEM", item);
                           return (
                               <CarouselItem
                               onExiting={() => onExiting(2)}
@@ -381,7 +365,8 @@ const TradeHistory = () => {
                                               className="mt-4"
                                               color="info"
                                               href="#pablo"
-                                              onClick={(e) => e.preventDefault()}
+                                              // onClick={(e) => {e.preventDefault(), 
+                                              //   handleSell(item)}}
                                               >
                                               Sell Now
                                               </Button>
@@ -389,7 +374,7 @@ const TradeHistory = () => {
                                       </Card> 
                                   </Col>
                               </Row>
-                          </CarouselItem>
+                              </CarouselItem>
                           // <CarouselItem
                           //     onExiting={() => onExiting(2)}
                           //     onExited={() => onExited(2)}
@@ -460,6 +445,7 @@ const TradeHistory = () => {
                           <i className="tim-icons icon-minimal-right" />
                       </a>
                       </Carousel>
+                    )}
                   </Col>
                   <Col md='6'>
                     <Col md='10'>
@@ -470,9 +456,10 @@ const TradeHistory = () => {
                             className="img-center img-fluid rounded-circle"
                             src={require("Assets/img/logo-nav.png")}
                           />
-                          <h4 className="title">My Account</h4>
+                          <h4 className="title" id='noMargin'>My Account</h4>
                         </CardHeader>
                         <CardBody>
+                          <p className='d-flex justify-content-center'>{username}</p>
                           <Nav
                             className="nav-tabs-primary justify-content-center"
                             tabs
@@ -533,7 +520,7 @@ const TradeHistory = () => {
                                       {/* <i className="tim-icons icon-chart-bar-32" /> */}
                                       Total Assets
                                     </td>
-                                    <td className="text-right" style={{backgroundColor: '#1D304f'}}>${}</td>
+                                    <td className="text-right" style={{backgroundColor: '#1D304f'}}>${totalAssetsValue}</td>
                                   </tr>
                                 </tbody>
                               </Table>

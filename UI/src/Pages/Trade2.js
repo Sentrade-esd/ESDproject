@@ -12,9 +12,10 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 // import Select from "react";
 import Slick from "react-slick";
-import "../Styles/global.css";
-import { AlertContext } from "../Components/AlertContext.js";
-import { LoadingContext } from "../Components/LoadingContext.js";
+import "../Styles/global.css"
+import {AlertContext} from '../Components/AlertContext.js';
+import {LoadingContext} from '../Components/LoadingContext.js';
+
 // import React from "react";
 // import ProgressBar from "@ramonak/react-progress-bar";
 
@@ -32,7 +33,11 @@ import {
 } from "reactstrap";
 import CommentsAndNewsTabs from "Components/CommentsAndNewsTabs";
 import { local } from "d3";
-const apiUrl = process.env.KONG_URL;
+
+const sleep = (milliseconds) => {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+};
+
 // custom previous button for the slick component
 const PrevButton = (props) => {
   return (
@@ -46,9 +51,6 @@ const PrevButton = (props) => {
       <i className="tim-icons icon-minimal-left" />
     </Button>
   );
-};
-const sleep = (milliseconds) => {
-  return new Promise((resolve) => setTimeout(resolve, milliseconds));
 };
 // custom next button for the slick component
 const NextButton = (props) => {
@@ -174,41 +176,43 @@ function Trade() {
   const [quantity, setQuantity] = React.useState(1);
   const [buyModal, setBuyModal] = React.useState(false);
   const [followModal, setFollowModal] = React.useState(false);
-  const [price, setPrice] = useState(null);
-  const [marketCap, setMarketCap] = useState(null);
-  const [avgVolume, setAvgVolume] = useState(null);
+  const {alert, setAlert} = useContext(AlertContext);
+
+  const { isLoading, setIsLoading } = useContext(LoadingContext);
+
   // Check if user is logged in
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  //   const [username, setUsername] = useState("");
-  const [sentiment_score, setSentimentScore] = useState(null);
-  const { alert, setAlert } = useContext(AlertContext);
-  const { isLoading, setIsLoading } = useContext(LoadingContext);
-  const [emotion, setEmotion] = useState(null);
-  const [keyword, setKeyword] = useState(null);
-  const [keyWords, setKeyWords] = useState(null);
-  const [emotions, setEmotions] = useState(null);
+  const [username, setUsername] = useState("");
+  const [UserID, setUserID] = useState(0);
+
   const [comments, setComments] = useState(
-    JSON.parse(localStorage.getItem("comments")) || []
+    JSON.parse(localStorage.getItem("comments")) || [
+      "Apple sucks ass. THey dont produce good products. Samsung is going to take over. ",
+
+      "Apple Number 1",
+
+      "Apple's car is the number 1 thing next time. No cap",
+    ]
   );
-  const [news, SetNews] = useState([]);
   const toggleBuyModal = () => {
     setBuyModal(!buyModal);
   };
   useEffect(() => {
     console.log("comments", comments);
   }, [comments]);
-  const [userId, setUserId] = useState(localStorage.getItem("UserId") || null);
-  const [username, setUsername] = useState(
-    localStorage.getItem("username") || ""
-  );
+
   // Use effect to check if userisLogged in
   useEffect(() => {
-    const savedUsername = localStorage.getItem("username");
-    // const savedUsername = "hello";
+    // const savedUsername = localStorage.getItem("username");
+    // const savedUserID = localStorage.getItem('UserID');
+    const savedUsername = "hello";
+    const savedUserID = '5';
+
     if (savedUsername) {
       setIsLoggedIn(true);
       console.log("isloggedin", isLoggedIn);
       setUsername(savedUsername);
+      setUserID(savedUserID);
     }
   }, []);
 
@@ -258,67 +262,27 @@ function Trade() {
     setQuantity(quantity === 100 ? 100 : quantity + 1);
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setComments([]);
-      localStorage.setItem("comments", JSON.stringify([]));
-      // fetches current price, market cap, and average volume
-      try {
-        const ScrapeResponse = await axios.get(
-          `http://20.78.38.247:8000/scraper/scrapeCurrentPrice?ticker=${encodeURIComponent(
-            companySymbol
-          )}`
-        );
-        setPrice(ScrapeResponse.data.price);
+  const [priceData, setPriceData] = useState(null);
 
-        setMarketCap(ScrapeResponse.data.marketCap);
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const ScrapeResponse = await axios.get(
+  //         `http://kong:8000/scraper/scrapeCurrentPrice/${companyName}`
+  //       ); // This will be the microserivce eventually
+  //       setPriceData(ScrapeResponse.data);
+  //       const CommentsResponse = await axios.get(
+  //         `http://kong:8000/comments/${companyName}`
+  //       ); // This will be the microserivce eventually
+  //       setComments(CommentsResponse.data);
+  //       localStorage.setItem("comments", JSON.stringify(response2.data));
+  //     } catch (error) {
+  //       console.error("Error fetching data:", error);
+  //     }
+  //   };
 
-        setAvgVolume(ScrapeResponse.data.avgVolume);
-      } catch (error) {
-        console.error(
-          "Error fetching price, market cap, and average volume:",
-          error
-        );
-      }
-      // fetches latest 20 comments
-      try {
-        console.log("companyName", companyName);
-        console.log("companySymbol", companySymbol);
-        const CommentsResponse = await axios.get(
-          `http://20.78.38.247:8000/comments/${companyName}`
-        );
-        setComments(CommentsResponse.data);
-        localStorage.setItem("comments", JSON.stringify(CommentsResponse.data));
-      } catch (error) {
-        if (error.response && error.response.status === 404) {
-          setComments([]);
-          localStorage.setItem("comments", JSON.stringify([]));
-        } else {
-          throw error;
-        }
-      }
-      // fetches sentiment score and news
-      try {
-        const SentimentResponse = await axios.get(
-          `http://20.78.38.247:8000/sentimentAPI/sentiment_query?search_term=${companyName}&ticker=${companySymbol}`
-        );
-        // Rest of your code
-        // localStorage.setItem(
-        //   "sentiment_score",
-        //   SentimentResponse.data.sentiments.sentiment_score
-        // );
-        console.log("SentimentResponse", SentimentResponse);
-        setSentimentScore(SentimentResponse.data.sentiments.sentiment_score);
-        setEmotion(SentimentResponse.data.sentiments.emotion);
-        setKeyword(SentimentResponse.data.sentiments.keyword);
-        SetNews(SentimentResponse.data.newsArticles);
-      } catch (error) {
-        console.error("Error fetching sentiment:", error);
-      }
-    };
-
-    fetchData();
-  }, []);
+  //   fetchData();
+  // }, []);
 
   // return (
   //     <div>
@@ -337,38 +301,25 @@ function Trade() {
   const companyName = location.state?.companyName;
   const companySymbol = location.state?.companySymbol;
 
-  // const currentPrice = jsonData.result.currentPrice;
+  const currentPrice = jsonData.result.currentPrice;
   // const currentPrice = priceData?.currentPrice;
-  // const marketCap = jsonData.result.marketCap;
-  // const avgVolume = jsonData.result.avgVolume;
-  // const prevClose = jsonData.result.previousClose;
+  const marketCap = jsonData.result.marketCap;
+  const avgVolume = jsonData.result.avgVolume;
+  const prevClose = jsonData.result.previousClose;
   const keywordData = jsonData.result.keyword;
   const emotionData = jsonData.result.emotion;
 
   // Convert the keyword data object into an array of objects with text and value properties
-  useEffect(() => {
-    if (keyword !== null && emotion !== null) {
-      const keywords = Object.entries(keyword).map(([text, size]) => ({
-        text,
-        size,
-      }));
-      console.log("keywords", keywords);
-      setKeyWords(keywords);
-      const emotions = Object.entries(emotion).map(([text, size]) => ({
-        text,
-        size,
-      }));
-      console.log("emotions", emotions);
-      setEmotions(emotions);
-    }
-  }, [keyword, emotion]);
-  // console.log(marketCap, avgVolume, prevClose, keywordData, emotionData);
-  useEffect(() => {
-    console.log("keyWord", keyword);
-    console.log("emotion", emotion);
-    console.log("keywords", keyWords);
-    console.log("emotions", emotions);
-  }, [keyWords, emotions, keyword, emotion]);
+  const keywords = Object.entries(keywordData).map(([text, value]) => ({
+    text,
+    value,
+  }));
+  const emotions = Object.entries(emotionData).map(([text, value]) => ({
+    text,
+    value,
+  }));
+
+  console.log(marketCap, avgVolume, prevClose, keywordData, emotionData);
 
   const options = {
     rotations: 0,
@@ -376,7 +327,7 @@ function Trade() {
     fontSizes: [24, 96],
   };
 
-  // const { search, sentiment_score } = jsonData.result;
+  const { search, sentiment_score } = jsonData.result;
 
   const handleFollowTrade = async (event) => {
     // Should be calling FollowTrades here
@@ -397,14 +348,14 @@ function Trade() {
     );
 
     let body = {
-      userId: userId,
-      email: username,
-      ticker: companySymbol,
-      targetDate: targetDate,
-      buyAmountPerFiling: buyAmountPerFiling,
-      maxBuyAmount: maxBuyAmount,
-      company: companyName,
-    };
+      "userId": UserID,
+      "email": username,
+      "ticker": companySymbol,
+      "targetDate": targetDate,
+      "buyAmountPerFiling": buyAmountPerFiling,
+      "maxBuyAmount": maxBuyAmount,
+      "company": companyName,
+    }
 
     console.log("Body:", body);
 
@@ -412,66 +363,63 @@ function Trade() {
     setIsLoading(true);
 
     try {
-      const followTradeResponse = await axios.get(
-        `http://20.78.38.247:8000/followTrade/buy`,
-        body
-      );
-      //   await sleep(10000);
+      // const followTradeResponse = await axios.get(`http://kong:8000/followTrade/buy`, body)
+      await sleep(10000);
       setIsLoading(false);
-      //   let followTradeResponse = {
-      //     status: "success",
-      //     buyAmount: 100,
-      //     sellAmount: 148.05,
-      //     totalAccountValue: 1143.98,
-      //     data: {
-      //       ticker: "NVDA",
-      //       filings: [
-      //         {
-      //           file_date: "2024-01-26",
-      //           tx_date: "2024-01-02",
-      //           full_name: "Markwayne Mullin",
-      //           order_type: "Purchase",
-      //           ticker: "NVDA",
-      //           tx_estimate: 15001,
-      //           file_price: "610.3100",
-      //           tx_price: "481.6800",
-      //         },
-      //       ],
-      //       userId: 1,
-      //       currentPrice: "903.5600",
-      //       maxBuyAmount: 500,
-      //       buyAmountPerFiling: 100,
-      //       company: "NVIDIA",
-      //       email: "ProbablyPassedFromUI",
-      //     },
-      //   };
-      if (!followTradeResponse.status) {
-        // alert('Unable to process the transaction')
-        setAlert("Unsuccessful. Please try again later.");
-      } else {
+      let followTradeResponse = 
+      {
+        "status": "success",
+        "buyAmount": 100,
+        "sellAmount": 148.05,
+        "totalAccountValue": 1143.98,
+        "data": {
+            "ticker": "NVDA",
+            "filings": [
+                {
+                    "file_date": "2024-01-26",
+                    "tx_date": "2024-01-02",
+                    "full_name": "Markwayne Mullin",
+                    "order_type": "Purchase",
+                    "ticker": "NVDA",
+                    "tx_estimate": 15001,
+                    "file_price": "610.3100",
+                    "tx_price": "481.6800"
+                }
+            ],
+            "userId": 1,
+            "currentPrice": "903.5600",
+            "maxBuyAmount": 500,
+            "buyAmountPerFiling": 100,
+            "company": "NVIDIA",
+            "email": "ProbablyPassedFromUI"
+        }
+      }    
+      if (!followTradeResponse.status){
+          // alert('Unable to process the transaction')
+        setAlert('Unsuccessful. Please try again later.');
+      } else{
         // alert('Transaction successful');
         setAlert({
           __html: `Successful...
           <div style="display: flex; justify-content: space-between; margin-top: 5px;">
-            <p style="margin-top: 3px">Company: ${
-              followTradeResponse.data.company
-            }</p>
+            <p style="margin-top: 3px">Company: ${followTradeResponse.data.company}</p>
             <p>Buy Amount: ${followTradeResponse.buyAmount}</p>
             <p>Sell Amount: ${followTradeResponse.sellAmount}</p>
             <p>Total Account Value: ${followTradeResponse.totalAccountValue}</p>
-            <p>Current PnL: ${(
-              followTradeResponse.sellAmount - followTradeResponse.buyAmount
-            ).toFixed(2)}</p>
-          </div>`,
-        });
+            <p>Current PnL: ${(followTradeResponse.sellAmount-followTradeResponse.buyAmount).toFixed(2)}</p>
+          </div>`
+        }
+        );
       }
-    } catch (error) {
+    } catch (error){
       setIsLoading(false);
       console.error(error);
-      setAlert(
-        "Unsuccessful... An error occured while fetching the data. Please try again later"
-      );
+      setAlert('Unsuccessful... An error occured while fetching the data. Please try again later');
     }
+
+
+
+    
   };
 
   const handleBuyStock = async (event) => {
@@ -479,24 +427,7 @@ function Trade() {
     // Store company name, id, email, buy amount
     event.preventDefault();
 
-    let body = {
-      UserID: userId,
-      Email: username,
-      Company: companyName,
-      buyAmount: tradeAmount,
-      currentPrice: price,
-      Threshold: null,
-      Ticker: companySymbol,
-    };
-
-    axios
-      .post("http://20.78.38.247:8000/transaction/newTrade", body)
-      .then((response) => {
-        console.log(response.data);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+    let url = "http://localhost:6002/transaction/newTrade";
     let tradeAmount = document.getElementById("buyAmount").value;
     let threshold = document.getElementById("stopLossAmount").value;
 
@@ -579,64 +510,54 @@ function Trade() {
     zIndex: 999,
   };
 
-  // const words = [
-  //   { text: "Hello", size: 40 },
-  //   { text: "World", size: 30 },
-  //   { text: "React", size: 35 },
-  //   { text: "Fun", size: 60 },
-  //   { text: "HaHA", size: 70 },
-  //   { text: "LOL", size: 30 },
-  //   { text: "USELESS", size: 15 },
-  //   { text: "Lousy", size: 35 },
-  //   { text: "Trash", size: 60 },
-  //   { text: "Bull", size: 70 },
-  //   { text: "Bear", size: 30 },
-  //   { text: "Noob", size: 15 },
-  //   // Add more words as needed
-  // ];
+  const words = [
+    { text: "Hello", size: 40 },
+    { text: "World", size: 30 },
+    { text: "React", size: 35 },
+    { text: "Fun", size: 60 },
+    { text: "HaHA", size: 70 },
+    { text: "LOL", size: 30 },
+    { text: "USELESS", size: 15 },
+    { text: "Lousy", size: 35 },
+    { text: "Trash", size: 60 },
+    { text: "Bull", size: 70 },
+    { text: "Bear", size: 30 },
+    { text: "Noob", size: 15 },
+    // Add more words as needed
+  ];
 
-  // const keyWords = [
-  //   { text: "Hello", size: 40 },
-  //   { text: "World", size: 30 },
-  //   { text: "React", size: 35 },
-  //   { text: "Fun", size: 60 },
-  //   { text: "HaHA", size: 70 },
-  //   { text: "LOL", size: 30 },
-  //   { text: "USELESS", size: 15 },
-  //   { text: "Lousy", size: 35 },
-  //   { text: "Trash", size: 60 },
-  //   { text: "Bull", size: 70 },
-  //   { text: "Bear", size: 30 },
-  //   { text: "Noob", size: 15 },
-  //   // Add more words as needed
-  // ];
+  const keyWords = [
+    { text: "Hello", size: 40 },
+    { text: "World", size: 30 },
+    { text: "React", size: 35 },
+    { text: "Fun", size: 60 },
+    { text: "HaHA", size: 70 },
+    { text: "LOL", size: 30 },
+    { text: "USELESS", size: 15 },
+    { text: "Lousy", size: 35 },
+    { text: "Trash", size: 60 },
+    { text: "Bull", size: 70 },
+    { text: "Bear", size: 30 },
+    { text: "Noob", size: 15 },
+    // Add more words as needed
+  ];
 
   return (
     <>
-      {isLoading ? (
-        <UncontrolledAlert
-          className="alert-with-icon"
-          id="noMargin"
-          color="info"
-          backgroundColor="info"
-        >
-          <span>
-            <b>Loading -</b>
-            Following Trades...
-          </span>
-        </UncontrolledAlert>
-      ) : (
-        alert && (
-          <UncontrolledAlert
-            className="alert-with-icon alert-success"
-            id="noMargin"
-            backgroundColor="success"
-          >
-            <b>Transaction -</b>
-            <span dangerouslySetInnerHTML={alert}></span>
-          </UncontrolledAlert>
-        )
-      )}
+        {isLoading ? (
+            <UncontrolledAlert className='alert-with-icon' id='noMargin' color='info' backgroundColor='info'>
+              <span>
+                <b>Loading -</b>
+                Following Trades...
+              </span>
+            </UncontrolledAlert>
+        ) : (
+            alert && (
+                <UncontrolledAlert className="alert-with-icon alert-success" id='noMargin' backgroundColor='success'>
+                  <b>Transaction -</b><span dangerouslySetInnerHTML={alert}></span>
+                </UncontrolledAlert>
+            )
+        )}
       <div
         className="wrapper"
         ref={wrapper}
@@ -682,34 +603,27 @@ function Trade() {
                 >
                   <div style={progressBarStyles}></div>
                   <div className="scoreStyles" style={scoreStyles}>
-                    {sentiment_score === null ? "Loading..." : sentiment_score}
+                    {sentiment_score}
                   </div>
                 </div>
                 <p style={{ color: sentimentColor }}>
-                  Sentiment Score:{" "}
-                  {sentiment_score === null ? "Loading..." : sentiment_score}
+                  Sentiment Score: {sentiment_score}
                 </p>
                 <br />
                 <Row className="pick-size">
                   <Col lg="4" md="4">
                     <label style={labelStyles}>Current Price</label>
-                    <h6 style={{ color: "#ffffff" }}>
-                      ${price === null ? "Loading..." : price}
-                    </h6>
+                    <h6 style={{ color: "#ffffff" }}>${currentPrice}</h6>
                   </Col>
                   <Col lg="4" md="4" sm="6">
                     <label style={labelStyles}>
                       <i>Avg. Volume</i>
                     </label>
-                    <h6 style={{ color: "#ffffff" }}>
-                      {avgVolume === null ? "Loading..." : avgVolume}
-                    </h6>
+                    <h6 style={{ color: "#ffffff" }}>{avgVolume}</h6>
                   </Col>
                   <Col lg="4" md="4" sm="6">
                     <label style={labelStyles}>Market Cap</label>
-                    <h6 style={{ color: "#ffffff" }}>
-                      ${marketCap === null ? "Loading..." : marketCap}
-                    </h6>
+                    <h6 style={{ color: "#ffffff" }}>${marketCap}</h6>
                   </Col>
                 </Row>
                 <br />
@@ -736,7 +650,7 @@ function Trade() {
                       onClick={toggleFollowModal}
                       size="lg"
                       style={{ color: "white" }}
-                      //   disabled={!isLoggedIn}
+                      disabled={!isLoggedIn}
                     >
                       Follow Trade
                     </Button>
@@ -748,61 +662,37 @@ function Trade() {
                   <div>
                     <div className="info text-left">
                       <h4 style={wordCloudCardHeadingStyles}>Keywords</h4>
-                      {keyWords === null ? (
-                        "Loading..."
-                      ) : (
-                        <WordCloud words={keyWords} />
-                      )}
+                      <WordCloud words={keyWords} />
                     </div>
                   </div>
                   <div>
                     <div className="info text-left">
                       <h4 style={wordCloudCardHeadingStyles}>Emotions</h4>
-                      {emotions === null ? (
-                        "Loading..."
-                      ) : (
-                        <WordCloud words={emotions} />
-                      )}
+                      <WordCloud words={words} />
                     </div>
                   </div>
                   <div>
                     <div className="info text-left">
                       <h4 style={wordCloudCardHeadingStyles}>Keywords</h4>
-                      {keyWords === null ? (
-                        "Loading..."
-                      ) : (
-                        <WordCloud words={keyWords} />
-                      )}
+                      <WordCloud words={keyWords} />
                     </div>
                   </div>
                   <div>
                     <div className="info text-left">
                       <h4 style={wordCloudCardHeadingStyles}>Emotions</h4>
-                      {emotions === null ? (
-                        "Loading..."
-                      ) : (
-                        <WordCloud words={emotions} />
-                      )}
+                      <WordCloud words={words} />
                     </div>
                   </div>
                   <div>
                     <div className="info text-left">
                       <h4 style={wordCloudCardHeadingStyles}>Keywords</h4>
-                      {keyWords === null ? (
-                        "Loading..."
-                      ) : (
-                        <WordCloud words={keyWords} />
-                      )}
+                      <WordCloud words={keyWords} />
                     </div>
                   </div>
                   <div>
                     <div className="info text-left">
                       <h4 style={wordCloudCardHeadingStyles}>Emotions</h4>
-                      {emotions === null ? (
-                        "Loading..."
-                      ) : (
-                        <WordCloud words={emotions} />
-                      )}
+                      <WordCloud words={words} />
                     </div>
                   </div>
                 </Slick>
@@ -967,7 +857,6 @@ function Trade() {
 
         <CommentsAndNewsTabs
           companySymbol={companySymbol}
-          companyName={companyName}
           news={news}
           comments={comments}
           setComments={setComments}
@@ -1096,7 +985,7 @@ function Trade() {
               <Label for="targetDate">Target Date</Label>
               <Input type="date" id="targetDate" />
             </FormGroup>
-            <Button type="submit" onClick={handleFollowTrade}>
+            <Button type="submit" onClick={(e) => {  handleFollowTrade(e); setFollowModal(false); }}>
               Submit
             </Button>
           </Form>

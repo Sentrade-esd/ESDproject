@@ -112,6 +112,16 @@ const NavBar = ({ transparent }) => {
             setUserId(response.data.data.UserID);
             setModalShow(false);
             navigate("/");
+            try {
+              const body = {
+                userID: userId,
+                email: username,
+              };
+
+              axios.post("http://20.78.38.247:8000/transaction/setup", body);
+            } catch (error) {
+              console.error(error);
+            }
           } else {
             console.error("Wrong password");
           }
