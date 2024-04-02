@@ -6,6 +6,12 @@ services:
       dockerfile: Dockerfile
     ports:
       - "80:80"
+      - "443:443" # Expose port 443 for https
     volumes:
       - .:/usr/src/app
     command: ["nginx", "-g", "daemon off;"]
+    # networks:
+    #   - kong_network
+    environment:
+      # - KONG_URL=http://kong:8000/
+      - KONG_URL=http://20.78.38.247:8000/

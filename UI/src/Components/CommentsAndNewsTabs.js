@@ -18,9 +18,10 @@ import {
 } from "reactstrap";
 import Slick from "react-slick";
 import "../Styles/global.css";
-
+import axios from "axios";
 const CommentsAndNewsTabs = ({
   companySymbol,
+  companyName,
   news,
   comments,
   setComments,
@@ -35,11 +36,27 @@ const CommentsAndNewsTabs = ({
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
 
-  const handleCommentSubmit = (e) => {
+  const handleCommentSubmit = async (e) => {
     e.preventDefault(); // Prevent the default form submission behavior
     setComments((prevComments) => [...prevComments, comment]); // Add the new comment to the comments array
     localStorage.setItem("comments", JSON.stringify([...comments, comment])); // Store the updated comments array in local storage
     setComment(""); // Clear the comment input field
+    try {
+      const commentData = {
+        company: companyName,
+        comment: comment,
+      };
+      console.log("commentData", commentData);
+      const CommentsResponse = await axios.post(
+        `http://20.78.38.247:8000/comments/`,
+        commentData
+      );
+      if (CommentsResponse.status === 200) {
+        console.log("yes bro");
+      }
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+    }
   };
 
   useEffect(() => {
@@ -51,6 +68,10 @@ const CommentsAndNewsTabs = ({
       setUsername(savedUsername);
     }
   }, []);
+  useEffect(() => {
+    console.log("commentslol", comments);
+    console.log("news", news);
+  }, [comments, news]);
 
   return (
     <div className="section section-comments">
@@ -108,7 +129,7 @@ const CommentsAndNewsTabs = ({
                           color="info"
                           // href="#pablo"
                           onClick={handleCommentSubmit}
-                          disabled={!isLoggedIn}
+                          // disabled={!isLoggedIn}
                         >
                           Comment
                         </Button>
@@ -116,7 +137,10 @@ const CommentsAndNewsTabs = ({
                     </Media>
                   </Media>
                   {/* Comment section */}
-                  <div className="media-area">
+                  <div
+                    className="media-area"
+                    style={{ overflowY: "auto", maxHeight: "500px" }}
+                  >
                     <h3 className="title text-center">Comments</h3>
                     {/* Your comments */}
                     {comments.map((comment, index) => {
@@ -180,42 +204,46 @@ const CommentsAndNewsTabs = ({
                 {/* Your news section */}
                 <h3 className="title text-center">News</h3>
                 {/* Your news content */}
-                <div className="blogs-5">
+                <div
+                  className="blogs-5"
+                  style={{ overflowY: "auto", maxHeight: "500px" }}
+                >
                   <Row>
                     <Col className="ml-auto mr-auto">
-                      {news.map((item, index) => {
-                        const date = new Date(item.pubDate);
-                        const readableDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                      {news &&
+                        news.map((item, index) => {
+                          const date = new Date(item.datetime);
+                          const readableDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
 
-                        return (
-                          <Card
-                            key={index}
-                            className="card-blog card-plain"
-                            style={{ borderColor: "white" }}
-                          >
-                            <CardBody>
-                              {/* <h6 className="category text-warning">{companySymbol}</h6> */}
-                              <CardTitle tag="h6">
-                                <a
-                                  href={item.link}
-                                  onClick={(e) => e.preventDefault()}
-                                >
-                                  {item.title}
-                                </a>
-                              </CardTitle>
-                              <CardFooter>
-                                <div className="author">
-                                  <span className="ml-1">{readableDate}</span>
-                                </div>
-                                <div className="stats stats-right">
-                                  <i className="tim-icons icon-heart-2" />{" "}
-                                  {item.likes}
-                                </div>
-                              </CardFooter>
-                            </CardBody>
-                          </Card>
-                        );
-                      })}
+                          return (
+                            <Card
+                              key={index}
+                              className="card-blog card-plain"
+                              style={{ borderColor: "white" }}
+                            >
+                              <CardBody>
+                                {/* <h6 className="category text-warning">{companySymbol}</h6> */}
+                                <CardTitle tag="h6">
+                                  <a
+                                    href={item.link}
+                                    onClick={(e) => e.preventDefault()}
+                                  >
+                                    {item.title}
+                                  </a>
+                                </CardTitle>
+                                <CardFooter>
+                                  <div className="author">
+                                    <span className="ml-1">{readableDate}</span>
+                                  </div>
+                                  <div className="stats stats-right">
+                                    <i className="tim-icons icon-heart-2" />{" "}
+                                    {item.likes}
+                                  </div>
+                                </CardFooter>
+                              </CardBody>
+                            </Card>
+                          );
+                        })}
                       {/* <Card className="card-blog card-plain" style={{borderColor: 'white'}}>
                         <CardBody style={{ color: 'white' }}>
                           <h6 className="category text-warning">{companySymbol}</h6>

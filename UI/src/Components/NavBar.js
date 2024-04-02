@@ -2,7 +2,7 @@ import React from "react";
 // import { Navbar, Container, Nav } from 'react-bootstrap';
 import { Modal, Button, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 
 import {
@@ -23,18 +23,27 @@ import {
   Row,
   Col,
 } from "reactstrap";
+import { local } from "d3";
 
 const NavBar = ({ transparent }) => {
   const navClass = transparent ? "navbar-transparent" : "bg-default";
 
   const [modalShow, setModalShow] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState(
+    localStorage.getItem("username") || null
+  );
+  const [userId, setUserId] = useState(localStorage.getItem("UserId") || null);
   const [isLogin, setIsLogin] = useState(true);
   const [justSignedUp, setJustSignedUp] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [telegramHandle, setTelegramHandle] = useState("");
+  const [email, setEmail] = useState(localStorage.getItem("email") || null);
+  const [password, setPassword] = useState(
+    localStorage.getItem("password") || null
+  );
+  const [telegramHandle, setTelegramHandle] = useState(
+    localStorage.getItem("telegramHandle") || null
+  );
+
   // const [telegramID, setTelegramID] = useState(
   //   localStorage.getItem("telegramID") || null
   // );
@@ -43,13 +52,13 @@ const NavBar = ({ transparent }) => {
   const [pendingTeleID, setPendingTeleID] = useState(
     localStorage.getItem("pendingTeleId") || "false"
   );
+  const signupCalled = useRef(false);
   useEffect(() => {
-    const savedUsername = localStorage.getItem("username");
+    const savedUserID = localStorage.getItem("UserId");
     // const savedUsername = "hello";
-    if (savedUsername) {
+    if (savedUserID) {
       setIsLoggedIn(true);
       console.log("isloggedin", isLoggedIn);
-      setUsername(savedUsername);
     }
   }, []);
   useEffect(() => {
@@ -58,6 +67,8 @@ const NavBar = ({ transparent }) => {
   }, [isLoggedIn, isLogin]);
   useEffect(() => {
     // Get userId from URL parameters
+    // clear local storage
+    // localStorage.clear();
     const urlParams = new URLSearchParams(window.location.search);
     const teleIdFromUrl = urlParams.get("teleId");
     // const editFromUrl = urlParams.get("edit");
@@ -65,10 +76,12 @@ const NavBar = ({ transparent }) => {
     console.log(isLogin);
     if (teleIdFromUrl !== null && !isLoggedIn) {
       // Store userId in local storage
+      // signupCalled.current = true;
       console.log("hi");
       localStorage.setItem("teleID", teleIdFromUrl);
       localStorage.setItem("pendingTeleId", "false");
       setPendingTeleID("false");
+      // console.log("heyy", email, password, telegramHandle, teleIdFromUrl);
       handleSignup(email, password, telegramHandle, teleIdFromUrl);
       // localStorage.setItem("edit", editFromUrl);
       // Set userId state
@@ -76,7 +89,7 @@ const NavBar = ({ transparent }) => {
 
       // setEdit(editFromUrl);
       // uncomment below before pushing
-      // setIsLoggedIn(false);
+      setIsLoggedIn(false);
       setIsLogin(true);
       setModalShow(true);
     }
@@ -87,16 +100,18 @@ const NavBar = ({ transparent }) => {
   }, []);
   const handleLogin = (username, password) => {
     axios
-      .get(`http://localhost:5000/user/${username}`)
+      .get(`http://20.78.38.247:8000/user/getUser?email=${username}`)
       .then((response) => {
         if (response.data.code === 200) {
           if (password === response.data.data.Password) {
             console.log(response.data.data);
             localStorage.setItem("username", username); // Note that username is actually the email
-            localStorage.setItem("id", response.data.data.UserID);
+            localStorage.setItem("UserId", response.data.data.UserID);
             setIsLoggedIn(true);
             setUsername(username);
+            setUserId(response.data.data.UserID);
             setModalShow(false);
+            navigate("/");
           } else {
             console.error("Wrong password");
           }
@@ -148,7 +163,7 @@ const NavBar = ({ transparent }) => {
       setPendingTeleID("true");
       try {
         const response = await axios.get(
-          "http://localhost:3002/teleBot/redirect",
+          "http://20.78.38.247:8000/teleBot/redirect",
           {
             headers: {
               bro: window.location.href,
@@ -176,8 +191,13 @@ const NavBar = ({ transparent }) => {
     }, 3000);
   };
   const handleSignup = (Email, Password, TelegramHandle, TeleId) => {
+    console.log("teleid", TeleId);
+    console.log("email", Email);
+    console.log("password", Password);
+    console.log("telegramhandle", TelegramHandle);
+    console.log("lolol");
     axios
-      .post("http://127.0.0.1:5000/user", {
+      .post("http://20.78.38.247:8000/user", {
         Email: Email,
         Password: Password,
         Telehandle: TelegramHandle,
@@ -185,16 +205,18 @@ const NavBar = ({ transparent }) => {
       })
       .then((response) => {
         if (response.data.code === 200) {
-          axios.get(`http://localhost:5000/user/${Email}`).then((response) => {
-            if (response.data.code === 200) {
-              localStorage.setItem("username", Email);
-              localStorage.setItem("id", response.data.data.UserID);
-              // setIsLoggedIn(true);
-              // setUsername(Email);
-            } else {
-              console.error("Fetch data after signup failed");
-            }
-          });
+          axios
+            .get(`http://20.78.38.247:8000/user/${Email}`)
+            .then((response) => {
+              if (response.data.code === 200) {
+                localStorage.setItem("username", Email);
+                localStorage.setItem("id", response.data.data.UserID);
+                // setIsLoggedIn(true);
+                // setUsername(Email);
+              } else {
+                console.error("Fetch data after signup failed");
+              }
+            });
         } else {
           console.error("Signup failed");
         }
@@ -233,10 +255,10 @@ const NavBar = ({ transparent }) => {
               </button>
               <NavbarBrand href="#pablo" onClick={(e) => e.preventDefault()}>
                 {/* SenTrade */}
-                <img 
+                <img
                   src={require("../Assets/img/logo.png")}
                   alt="SenTrade"
-                  style={{height: "15px" }}
+                  style={{ height: "15px" }}
                 />
               </NavbarBrand>
             </div>
@@ -256,18 +278,14 @@ const NavBar = ({ transparent }) => {
                 </Row>
               </div>
               <Nav className="mx-auto" navbar>
-                    <NavItem>
-                      <NavLink
-                        href="landing"
-                      >
-                        Home
-                      </NavLink>
-                    </NavItem>
-                    <NavItem>
-                      <NavLink href="search" onClick={handleSearchClick}>
-                        Search
-                      </NavLink>
-                    </NavItem>
+                <NavItem>
+                  <NavLink href="landing">Home</NavLink>
+                </NavItem>
+                <NavItem>
+                  <NavLink href="search" onClick={handleSearchClick}>
+                    Search
+                  </NavLink>
+                </NavItem>
                 {isLoggedIn ? (
                   <>
                     <NavItem>
@@ -463,7 +481,11 @@ const SignupModal = ({
               type="email"
               placeholder="Enter email"
               value={email}
-              onChange={(event) => setEmail(event.target.value)}
+              onChange={(event) => {
+                const email = event.target.value;
+                setEmail(email);
+                localStorage.setItem("email", email);
+              }}
               required
             />
           </Form.Group>
@@ -473,7 +495,11 @@ const SignupModal = ({
               type="password"
               placeholder="Password"
               value={password}
-              onChange={(event) => setPassword(event.target.value)}
+              onChange={(event) => {
+                const password = event.target.value;
+                setPassword(password);
+                localStorage.setItem("password", password);
+              }}
               required
             />
           </Form.Group>
@@ -483,7 +509,11 @@ const SignupModal = ({
               type="text"
               placeholder="Enter Telegram handle"
               value={telegramHandle}
-              onChange={(event) => setTelegramHandle(event.target.value)}
+              onChange={(event) => {
+                const telegramHandle = event.target.value;
+                setTelegramHandle(telegramHandle);
+                localStorage.setItem("telegramHandle", telegramHandle);
+              }}
               required
             />
           </Form.Group>

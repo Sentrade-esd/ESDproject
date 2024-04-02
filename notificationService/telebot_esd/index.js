@@ -26,7 +26,9 @@ bot.start((ctx) => {
   const redirectUrl = `${referer}?teleId=${userId}`;
   console.log(`User ID: ${userId}`);
   console.log(`Redirect URL: ${redirectUrl}`);
-  ctx.reply(`Click here to go back to the website: ${redirectUrl}`);
+  ctx.reply(`[Click here to go back to the website](${redirectUrl})`, {
+    parse_mode: "Markdown",
+  });
   // ... rest of your code
 });
 bot.command("send_Drago", (ctx) => {
