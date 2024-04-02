@@ -32,22 +32,27 @@ class ModelLoader:
 
     def __init__(self):
         self.sentiment_model = pipeline(
-            # model="siebert/sentiment-roberta-large-english")
-            model="lxyuan/distilbert-base-multilingual-cased-sentiments-student")
+            "text-classification", 
+            model="lxyuan/distilbert-base-multilingual-cased-sentiments-student"
+        )
         
         self.emotion_model = pipeline(
-            # model="finiteautomata/bertweet-base-emotion-analysis")
-            # model="transformersbook/distilbert-base-uncased-finetuned-emotion")
+            "text-classification", 
             model="cardiffnlp/twitter-roberta-base-emotion")
 
         self.comments_emotion_model = pipeline(
-            model="SamLowe/roberta-base-go_emotions")
+            "text-classification", 
+            model="SamLowe/roberta-base-go_emotions"
+        )
         
         self.keyword_ext_model = pipeline(
-            model="yanekyuk/bert-keyword-extractor")
+            "token-classification", 
+        model="yanekyuk/bert-keyword-extractor")
         
         self.keyword_senti_model = pipeline(
-            model="cardiffnlp/twitter-roberta-base-sentiment-latest")
+            "text-classification", 
+            model="cardiffnlp/twitter-roberta-base-sentiment-latest"
+        )
         
     
     def extract_keywords(self, batch_headlines):

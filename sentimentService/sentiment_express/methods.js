@@ -124,7 +124,7 @@ const sentiment_methods = {
             // let keyword_results = null;
 
             try {
-                axios.post(sentiment_methods.sentiment_service_url + "/analyse_headlines", json_data)
+                axios.post(sentiment_methods.sentiment_service_url + "analyse_headlines", json_data)
                 .then(response => {
                     console.log("analyse headlines is valid");
                     // console.log(response.data);
@@ -372,7 +372,7 @@ const sentiment_methods = {
         const url = `${sentiment_methods.scraper_url}/scraper/getNews/${search_term}/${ticker}`;
 
         const response = await axios.get(url);
-        // console.log(response);
+        // console.log(response.data);
 
         // json parse response.data
         const data = response.data;
