@@ -2,6 +2,23 @@ _format_version: "1.1"
 
 plugins:  
   - name: prometheus
+  - name: cors
+    config:
+      origins:
+        - "*"
+      methods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - PATCH
+        - OPTIONS
+      headers:
+        - "*"
+      exposed_headers:
+        - "*"
+      credentials: true
+      max_age: 3600
 
 
 services: 
