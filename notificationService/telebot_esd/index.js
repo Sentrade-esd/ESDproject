@@ -7,6 +7,8 @@ const http = require("http");
 const cors = require("cors");
 const app = express();
 
+const tinyurl = require("tinyurl-api");
+
 app.use(express.json());
 app.use(cors());
 const server = http.createServer(app);
@@ -52,9 +54,12 @@ app.post("/teleBot/send_message", (req, res) => {
 
   res.status(200).json({ status: "Messages sent" });
 });
-app.get("/teleBot/redirect", (req, res) => {
+app.get("/teleBot/redirect", async (req, res) => {
   try {
     referer = req.headers.bro;
+
+    referer = await tinyurl(referer);
+
     console.log(`Request made from: ${referer}`);
     res.status(200).send("https://t.me/SenTrade_Bot");
   } catch (error) {
