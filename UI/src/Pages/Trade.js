@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import jsonData from "../test.json";
 // import WordCloud from 'react-wordcloud';
@@ -12,6 +12,9 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 // import Select from "react";
 import Slick from "react-slick";
+import "../Styles/global.css"
+import {AlertContext} from '../Components/AlertContext.js';
+import {LoadingContext} from '../Components/LoadingContext.js';
 
 // import React from "react";
 // import ProgressBar from "@ramonak/react-progress-bar";
@@ -26,9 +29,14 @@ import {
   FormGroup,
   ModalBody,
   Input,
+  UncontrolledAlert,
 } from "reactstrap";
 import CommentsAndNewsTabs from "Components/CommentsAndNewsTabs";
 import { local } from "d3";
+
+const sleep = (milliseconds) => {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+};
 
 // custom previous button for the slick component
 const PrevButton = (props) => {
@@ -166,9 +174,17 @@ function Trade() {
   const [activeIndex, setActiveIndex] = React.useState(0);
   const [animating, setAnimating] = React.useState(false);
   const [quantity, setQuantity] = React.useState(1);
-
   const [buyModal, setBuyModal] = React.useState(false);
   const [followModal, setFollowModal] = React.useState(false);
+  const {alert, setAlert} = useContext(AlertContext);
+
+  const { isLoading, setIsLoading } = useContext(LoadingContext);
+
+  // Check if user is logged in
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState("");
+  const [UserID, setUserID] = useState(0);
+
   const [comments, setComments] = useState(
     JSON.parse(localStorage.getItem("comments")) || [
       "Apple sucks ass. THey dont produce good products. Samsung is going to take over. ",
@@ -184,6 +200,21 @@ function Trade() {
   useEffect(() => {
     console.log("comments", comments);
   }, [comments]);
+
+  // Use effect to check if userisLogged in
+  useEffect(() => {
+    // const savedUsername = localStorage.getItem("username");
+    // const savedUserID = localStorage.getItem('UserID');
+    const savedUsername = "hello";
+    const savedUserID = '5';
+
+    if (savedUsername) {
+      setIsLoggedIn(true);
+      console.log("isloggedin", isLoggedIn);
+      setUsername(savedUsername);
+      setUserID(savedUserID);
+    }
+  }, []);
 
   const toggleFollowModal = () => {
     setFollowModal(!followModal);
@@ -316,23 +347,80 @@ function Trade() {
       targetDate
     );
 
-    // let url = "http://localhost:5000/follow/followTrade";
-    // let data = {
-    //     email: localStorage.getItem("username"),
-    //     ticker: companySymbol,
-    //     targetDate: targetDate,
-    //     buyAmountPerFiling: buyAmountPerFiling,
-    //     maxBuyAmount: maxBuyAmount
-    // }
+    let body = {
+      "userId": UserID,
+      "email": username,
+      "ticker": companySymbol,
+      "targetDate": targetDate,
+      "buyAmountPerFiling": buyAmountPerFiling,
+      "maxBuyAmount": maxBuyAmount,
+      "company": companyName,
+    }
 
-    // try {
-    //     let response = await axios.post(url, data);
-    //     console.log(response.data);
-    //     alert('Trade followed successfully');
-    // } catch (error) {
-    //     console.error(error);
-    //     alert('Unable to follow trade');
-    // }
+    console.log("Body:", body);
+
+    // Uncomment this when microservice is up
+    setIsLoading(true);
+
+    try {
+      // const followTradeResponse = await axios.get(`http://kong:8000/followTrade/buy`, body)
+      await sleep(3000);
+      setIsLoading(false);
+      let followTradeResponse = 
+      {
+        "status": "success",
+        "buyAmount": 100,
+        "sellAmount": 148.05,
+        "totalAccountValue": 1143.98,
+        "data": {
+            "ticker": "NVDA",
+            "filings": [
+                {
+                    "file_date": "2024-01-26",
+                    "tx_date": "2024-01-02",
+                    "full_name": "Markwayne Mullin",
+                    "order_type": "Purchase",
+                    "ticker": "NVDA",
+                    "tx_estimate": 15001,
+                    "file_price": "610.3100",
+                    "tx_price": "481.6800"
+                }
+            ],
+            "userId": 1,
+            "currentPrice": "903.5600",
+            "maxBuyAmount": 500,
+            "buyAmountPerFiling": 100,
+            "company": "NVIDIA",
+            "email": "ProbablyPassedFromUI"
+        }
+      }    
+      if (!followTradeResponse.status){
+          // alert('Unable to process the transaction')
+        setAlert('Unsuccessful. Please try again later.');
+      } else{
+        // alert('Transaction successful');
+        setAlert({
+          __html: `
+          Successful...
+          <div style="display: flex; justify-content: space-between; margin-top: 5px">
+            <p>Company: ${followTradeResponse.data.company}</p>
+            <p>Buy Amount: ${followTradeResponse.buyAmount}</p>
+            <p>Sell Amount: ${followTradeResponse.sellAmount}</p>
+            <p>Total Account Value: ${followTradeResponse.totalAccountValue}</p>
+            <p>Current PnL: ${followTradeResponse.sellAmount-followTradeResponse.buyAmount}</p>
+          </div>`
+        }
+        );
+      }
+    } catch (error){
+      setIsLoading(false);
+      console.error(error);
+      setAlert('Unsuccessful... An error occured while fetching the data. Please try again later');
+    }
+
+
+
+    
   };
 
   const handleBuyStock = async (event) => {
@@ -457,6 +545,20 @@ function Trade() {
 
   return (
     <>
+        {isLoading ? (
+            <UncontrolledAlert className='alert-with-icon alert-noMargin' color='info'>
+              <span>
+                <b>Loading -</b>
+                Following Trades...
+              </span>
+            </UncontrolledAlert>
+        ) : (
+            alert && (
+                <UncontrolledAlert className="alert-with-icon alert-noMargin alert-success">
+                  <b>Transaction -</b><span dangerouslySetInnerHTML={alert}></span>
+                </UncontrolledAlert>
+            )
+        )}
       <div
         className="wrapper"
         ref={wrapper}
@@ -538,6 +640,7 @@ function Trade() {
                       onClick={toggleBuyModal}
                       size="lg"
                       style={{ color: "white" }}
+                      disabled={!isLoggedIn}
                     >
                       Buy Now
                     </Button>
@@ -548,6 +651,7 @@ function Trade() {
                       onClick={toggleFollowModal}
                       size="lg"
                       style={{ color: "white" }}
+                      disabled={!isLoggedIn}
                     >
                       Follow Trade
                     </Button>
@@ -882,7 +986,7 @@ function Trade() {
               <Label for="targetDate">Target Date</Label>
               <Input type="date" id="targetDate" />
             </FormGroup>
-            <Button type="submit" onClick={handleFollowTrade}>
+            <Button type="submit" onClick={(e) => {  handleFollowTrade(e); setFollowModal(false); }}>
               Submit
             </Button>
           </Form>
