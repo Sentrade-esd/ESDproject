@@ -117,9 +117,11 @@ function Search() {
     const selectCompany = (companyName, companySymbol) => {
         console.log(companyName + ' - ' + companySymbol);
 
-        localStorage.setItem('companyName', companyName);
-        localStorage.setItem('companySymbol', companySymbol);
+        // localStorage.setItem('companyName', companyName);
+        // localStorage.setItem('companySymbol', companySymbol);
 
+        companyName = 'Apple Inc.';
+        companySymbol = 'AAPL';
         // Navigate to the Trade page using state
         navigate("/trade", {
             state: { companyName, companySymbol },
@@ -139,7 +141,7 @@ function Search() {
     return (
         <>
         {isLoading ? (
-            <UncontrolledAlert className='alert-with-icon alert-noMargin' color='info'>
+            <UncontrolledAlert className='alert-with-icon' id='noMargin' color='info' backgroundColor='info'>
               <span>
                 <b>Loading -</b>
                 Following Trades...
@@ -147,7 +149,7 @@ function Search() {
             </UncontrolledAlert>
         ) : (
             alert && (
-                <UncontrolledAlert className="alert-with-icon alert-noMargin alert-success">
+                <UncontrolledAlert className="alert-with-icon alert-success" id='noMargin' backgroundColor='success'>
                   <b>Transaction -</b><span dangerouslySetInnerHTML={alert}></span>
                 </UncontrolledAlert>
             )
@@ -193,7 +195,10 @@ function Search() {
                       />
                     </Col>
                     <Col md="4" xs="6">
-                      <Button color="warning" onClick={handleSearchButtonClick}>Search</Button>
+                      <Button color="warning" onClick={
+                        // handleSearchButtonClick
+                        selectCompany
+                        }>Search</Button>
                     </Col>
                   </Row>
                   <Row style={{paddingTop: '10px'}}>

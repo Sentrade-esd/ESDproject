@@ -5506,15 +5506,20 @@ a.badge-darker.focus {
 
 .alert {
   position: relative;
+  /* margin-bottom: 0rem; */
   padding: 0.9rem 1.25rem;
   /* margin-bottom: 1rem; */
+  margin-bottom: 0rem;
   border: 0.0625rem solid transparent;
   border-radius: 0.2857rem;
+  background-color: inherit;
 }
 
-.alert-noMargin {
-  margin-bottom: 0;
+#noMargin {
+  margin-bottom: 0px;
+  border-radius: 0px;
 }
+
 
 .alert-heading {
   color: inherit;

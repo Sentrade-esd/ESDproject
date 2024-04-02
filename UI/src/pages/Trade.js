@@ -364,7 +364,7 @@ function Trade() {
 
     try {
       // const followTradeResponse = await axios.get(`http://kong:8000/followTrade/buy`, body)
-      await sleep(3000);
+      await sleep(10000);
       setIsLoading(false);
       let followTradeResponse = 
       {
@@ -400,14 +400,13 @@ function Trade() {
       } else{
         // alert('Transaction successful');
         setAlert({
-          __html: `
-          Successful...
-          <div style="display: flex; justify-content: space-between; margin-top: 5px">
-            <p>Company: ${followTradeResponse.data.company}</p>
+          __html: `Successful...
+          <div style="display: flex; justify-content: space-between; margin-top: 5px;">
+            <p style="margin-top: 3px">Company: ${followTradeResponse.data.company}</p>
             <p>Buy Amount: ${followTradeResponse.buyAmount}</p>
             <p>Sell Amount: ${followTradeResponse.sellAmount}</p>
             <p>Total Account Value: ${followTradeResponse.totalAccountValue}</p>
-            <p>Current PnL: ${followTradeResponse.sellAmount-followTradeResponse.buyAmount}</p>
+            <p>Current PnL: ${(followTradeResponse.sellAmount-followTradeResponse.buyAmount).toFixed(2)}</p>
           </div>`
         }
         );
@@ -546,7 +545,7 @@ function Trade() {
   return (
     <>
         {isLoading ? (
-            <UncontrolledAlert className='alert-with-icon alert-noMargin' color='info'>
+            <UncontrolledAlert className='alert-with-icon' id='noMargin' color='info' backgroundColor='info'>
               <span>
                 <b>Loading -</b>
                 Following Trades...
@@ -554,7 +553,7 @@ function Trade() {
             </UncontrolledAlert>
         ) : (
             alert && (
-                <UncontrolledAlert className="alert-with-icon alert-noMargin alert-success">
+                <UncontrolledAlert className="alert-with-icon alert-success" id='noMargin' backgroundColor='success'>
                   <b>Transaction -</b><span dangerouslySetInnerHTML={alert}></span>
                 </UncontrolledAlert>
             )

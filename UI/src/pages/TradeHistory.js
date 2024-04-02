@@ -313,7 +313,7 @@ const TradeHistory = () => {
     return (
         <>
         {isLoading ? (
-            <UncontrolledAlert className='alert-with-icon alert-noMargin' color='info'>
+            <UncontrolledAlert className='alert-with-icon' id='noMargin' color='info' backgroundColor='info'>
               <span>
                 <b>Loading -</b>
                 Following Trades...
@@ -321,7 +321,7 @@ const TradeHistory = () => {
             </UncontrolledAlert>
         ) : (
             alert && (
-                <UncontrolledAlert className="alert-with-icon alert-noMargin alert-success">
+                <UncontrolledAlert className="alert-with-icon alert-success" id='noMargin' backgroundColor='success'>
                   <b>Transaction -</b><span dangerouslySetInnerHTML={alert}></span>
                 </UncontrolledAlert>
             )
