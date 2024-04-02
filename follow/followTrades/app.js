@@ -1,5 +1,6 @@
 // Requiring module
 const express = require('express');
+const cors = require('cors');
 
 // Axios module
 const axios = require('axios');
@@ -22,7 +23,7 @@ const SENATOR_URL = process.env.SENATOR_URL || 'http://localhost:5001/';
 // Creating express object
 const app = express();
 app.use(express.json());
-
+app.use(cors());
 // Handling GET request
 app.get('/', (req, res) => { 
 	res.send('A Google News Scraper '
