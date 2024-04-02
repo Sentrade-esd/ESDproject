@@ -232,7 +232,12 @@ const NavBar = ({ transparent }) => {
                 <span className="navbar-toggler-bar bar3" />
               </button>
               <NavbarBrand href="#pablo" onClick={(e) => e.preventDefault()}>
-                SenTrade
+                {/* SenTrade */}
+                <img 
+                  src={require("../Assets/img/navLogo.png")}
+                  alt="SenTrade"
+                  style={{height: "40px" }}
+                />
               </NavbarBrand>
             </div>
             <UncontrolledCollapse navbar toggler="#example-header-4">
@@ -251,20 +256,9 @@ const NavBar = ({ transparent }) => {
                 </Row>
               </div>
               <Nav className="mx-auto" navbar>
-                {isLoggedIn ? (
-                  <>
-                    {/* <NavItem className="active">
-            <NavLink
-              href="#pablo"
-              onClick={(e) => e.preventDefault()}
-            >
-              Home
-            </NavLink>
-          </NavItem> */}
                     <NavItem>
                       <NavLink
                         href="landing"
-                        // onClick={}
                       >
                         Home
                       </NavLink>
@@ -274,6 +268,8 @@ const NavBar = ({ transparent }) => {
                         Search
                       </NavLink>
                     </NavItem>
+                {isLoggedIn ? (
+                  <>
                     <NavItem>
                       <NavLink onClick={handleTradeHistoryClick}>
                         Trades

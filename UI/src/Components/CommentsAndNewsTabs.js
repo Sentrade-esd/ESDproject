@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Container,
   Row,
@@ -17,6 +17,7 @@ import {
   CardFooter,
 } from "reactstrap";
 import Slick from "react-slick";
+import "../Styles/global.css";
 
 const CommentsAndNewsTabs = ({
   companySymbol,
@@ -30,12 +31,26 @@ const CommentsAndNewsTabs = ({
     if (activeTab !== tab) setActiveTab(tab);
   };
 
+  // Check if user is logged in
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState("");
+
   const handleCommentSubmit = (e) => {
     e.preventDefault(); // Prevent the default form submission behavior
     setComments((prevComments) => [...prevComments, comment]); // Add the new comment to the comments array
     localStorage.setItem("comments", JSON.stringify([...comments, comment])); // Store the updated comments array in local storage
     setComment(""); // Clear the comment input field
   };
+
+  useEffect(() => {
+    const savedUsername = localStorage.getItem("username");
+    // const savedUsername = "hello";
+    if (savedUsername) {
+      setIsLoggedIn(true);
+      console.log("isloggedin", isLoggedIn);
+      setUsername(savedUsername);
+    }
+  }, []);
 
   return (
     <div className="section section-comments">
@@ -91,8 +106,9 @@ const CommentsAndNewsTabs = ({
                         <Button
                           className="pull-right"
                           color="info"
-                          href="#pablo"
+                          // href="#pablo"
                           onClick={handleCommentSubmit}
+                          disabled={!isLoggedIn}
                         >
                           Comment
                         </Button>
@@ -108,7 +124,7 @@ const CommentsAndNewsTabs = ({
                         <Media>
                           <a
                             className="pull-left"
-                            href="#pablo"
+                            // href="#pablo"
                             onClick={(e) => e.preventDefault()}
                           >
                             <div className="avatar">
