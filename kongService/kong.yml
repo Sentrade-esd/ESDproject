@@ -30,6 +30,7 @@ services:
           - /sentimentAPI
         methods:
           - GET
+          - OPTIONS
         strip_path: false
 
       - name: query-route
@@ -37,6 +38,7 @@ services:
           - /sentimentAPI/sentiment_query  # Define the full path including the base path
         methods:
           - GET
+          - OPTIONS
         strip_path: false
 
       - name: comment-route
@@ -44,6 +46,7 @@ services:
           - /sentimentAPI/sentiment_comment  # Define the full path including the base path
         methods:
           - POST
+          - OPTIONS
         strip_path: false
 
   - name: scraper-service
@@ -52,6 +55,7 @@ services:
       - name: scrapeCurrentPrice-route
         methods:
           - GET
+          - OPTIONS
         paths:
           - /scraper/scrapeCurrentPrice
         strip_path: false
@@ -64,6 +68,7 @@ services:
           - /watchlist/add
         methods:
           - POST
+          - OPTIONS
         strip_path: false
         
       - name: watchlist-remove
@@ -71,6 +76,7 @@ services:
           - /watchlist/remove
         methods:
           - POST
+          - OPTIONS
         strip_path: false
 
       - name: watchlist-getuser
@@ -78,6 +84,7 @@ services:
           - /watchlist/user
         methods:
           - GET
+          - OPTIONS
         strip_path: false
 
       - name: watchlist-getcompany
@@ -85,6 +92,7 @@ services:
           - /watchlist/company
         methods:
           - GET
+          - OPTIONS
         strip_path: false
 
   - name: user-service
@@ -96,6 +104,7 @@ services:
         methods:
           - GET
           - POST
+          - OPTIONS
         strip_path: false
 
       - name: get-user
@@ -103,6 +112,7 @@ services:
           - /user/getUser
         methods:
           - GET
+          - OPTIONS
         strip_path: false
 
 
@@ -114,6 +124,7 @@ services:
           - /comments
         methods:
           - POST
+          - OPTIONS
         strip_path: false
 
       - name: get-company
@@ -121,6 +132,7 @@ services:
           - /comments/
         methods:
           - GET
+          - OPTIONS
         strip_path: false
 
   - name: transactions-service
@@ -131,6 +143,7 @@ services:
         - /transaction
         methods:
         - GET
+        - OPTIONS
         strip_path: false
 
       - name: transaction-total-by-id-route
@@ -138,6 +151,7 @@ services:
         - /transaction/total
         methods:
         - GET
+        - OPTIONS
         strip_path: false
 
       - name: transaction-newTrade-route
@@ -145,6 +159,7 @@ services:
         - /transaction/newTrade
         methods:
         - POST
+        - OPTIONS
         strip_path: false
 
       - name: transaction-updateTrade-route
@@ -152,6 +167,7 @@ services:
         - /transaction/updateTrade
         methods:
         - POST
+        - OPTIONS
         strip_path: false
 
       - name: transaction-checkBalance-route
@@ -159,6 +175,7 @@ services:
         - /transaction/checkBalance
         methods:
         - GET
+        - OPTIONS
         strip_path: false
 
       - name: transaction-setup-route
@@ -166,6 +183,7 @@ services:
         - /transaction/setup
         methods:
         - POST
+        - OPTIONS
         strip_path: false
 
   - name: follow-trade-service
@@ -174,6 +192,7 @@ services:
       - name: root-route
         methods:
         - GET
+        - OPTIONS
         paths:
         - /
         strip_path: false
@@ -181,6 +200,7 @@ services:
       - name: followTrade-buy-route
         methods:
         - POST
+        - OPTIONS
         paths:
         - /followTrade/buy
         strip_path: false
@@ -191,12 +211,14 @@ services:
       - name: send-message
         methods:
           - POST
+          - OPTIONS
         paths:
           - /teleBot/send_message
         strip_path: false
       - name: register-user
         methods:
           - GET
+          - OPTIONS
         paths:
           - /teleBot/redirect       #### temporary
         strip_path: false
