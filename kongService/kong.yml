@@ -188,11 +188,17 @@ services:
   - name: telebot-service
     url: http://telebot:3002/
     routes: 
-      - name: register-user
+      - name: send-message
         methods:
           - POST
         paths:
-          - /register       #### temporary
+          - /teleBot/send_message
+        strip_path: false
+      - name: register-user
+        methods:
+          - GET
+        paths:
+          - /teleBot/redirect       #### temporary
         strip_path: false
 
   
