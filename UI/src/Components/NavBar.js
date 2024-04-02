@@ -44,8 +44,8 @@ const NavBar = ({ transparent }) => {
     localStorage.getItem("pendingTeleId") || "false"
   );
   useEffect(() => {
-    const savedUsername = localStorage.getItem("username");
-    // const savedUsername = "hello";
+    // const savedUsername = localStorage.getItem("username");
+    const savedUsername = "hello";
     if (savedUsername) {
       setIsLoggedIn(true);
       console.log("isloggedin", isLoggedIn);

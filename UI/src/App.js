@@ -9,6 +9,8 @@ import Search from "./Pages/Search.js";
 import Trade from "./Pages/Trade.js";
 import TradeHistory from "./Pages/TradeHistory.js";
 import React, { useState, useEffect } from "react";
+import { AlertProvider } from "./Components/Alert.js";
+import { LoadingProvider } from "./Components/Loading.js";
 
 function Main() {
   const location = useLocation();
@@ -31,9 +33,13 @@ function Main() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <Main />
-    </BrowserRouter>
+    <AlertProvider>
+      <LoadingProvider>
+      <BrowserRouter>
+        <Main />
+      </BrowserRouter>
+      </LoadingProvider>
+    </AlertProvider>
   );
 }
 

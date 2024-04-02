@@ -8,7 +8,8 @@ import React from "react";
 import "Assets/css/nucleo-icons.css";
 import "Assets/css/blk-design-system-pro-react.css";
 import NavBar from "Components/NavBar";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
+import { AlertContext } from '../Components/AlertContext'; // adjust the path as needed
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -35,6 +36,8 @@ function Home() {
   const handleSearchClick = () => {
     navigate("/search");
   };
+
+  const { alert, setAlert } = useContext(AlertContext);
 
   const [placeHolderText, setPlaceHolderText] = useState("");
   const index = useRef(0);
@@ -118,6 +121,7 @@ function Home() {
     //     </Row>
     // </Container>
     <>
+      {/* {alert && <div className='alert'>{alert}</div>} */}
       {/* ********* HEADER 4 w/ VIDEO ********* */}
       <div className="header header-4">
         <div className="header-wrapper">

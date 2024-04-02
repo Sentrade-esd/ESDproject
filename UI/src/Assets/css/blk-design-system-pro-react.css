@@ -5507,9 +5507,13 @@ a.badge-darker.focus {
 .alert {
   position: relative;
   padding: 0.9rem 1.25rem;
-  margin-bottom: 1rem;
+  /* margin-bottom: 1rem; */
   border: 0.0625rem solid transparent;
   border-radius: 0.2857rem;
+}
+
+.alert-noMargin {
+  margin-bottom: 0;
 }
 
 .alert-heading {

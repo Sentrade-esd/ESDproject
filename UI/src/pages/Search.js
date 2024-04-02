@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef , useContext} from 'react';
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
@@ -9,6 +9,10 @@ import NavBar from 'Components/NavBar';
 
 import { Input } from 'reactstrap';
 import '../Styles/global.css';
+
+import { UncontrolledAlert } from 'reactstrap';
+import {AlertContext} from '../Components/AlertContext.js';
+import {LoadingContext} from '../Components/LoadingContext.js';
 
 
 function Search() {
@@ -21,6 +25,11 @@ function Search() {
         searchInputRef.current.focus();
         setResults([]);
     };
+
+    const {alert, setAlert} = useContext(AlertContext);
+    const { isLoading, setIsLoading } = useContext(LoadingContext);
+
+
 
     const navigate = useNavigate();
 
@@ -129,6 +138,20 @@ function Search() {
 
     return (
         <>
+        {isLoading ? (
+            <UncontrolledAlert className='alert-with-icon alert-noMargin' color='info'>
+              <span>
+                <b>Loading -</b>
+                Following Trades...
+              </span>
+            </UncontrolledAlert>
+        ) : (
+            alert && (
+                <UncontrolledAlert className="alert-with-icon alert-noMargin alert-success">
+                  <b>Transaction -</b><span dangerouslySetInnerHTML={alert}></span>
+                </UncontrolledAlert>
+            )
+        )}
         <div className="page-header" style={{ backgroundColor: "#1D304f" }}>
           <img
             alt="..."
