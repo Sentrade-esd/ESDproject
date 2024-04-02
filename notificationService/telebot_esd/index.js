@@ -76,9 +76,9 @@ app.post("/teleBot/send_message", (req, res) => {
 });
 app.get("/teleBot/redirect", async (req, res) => {
   try {
-    referer = req.headers.bro;
+    // referer = req.headers.bro;
 
-    referer = await tinyurl(referer);
+    referer = await tinyurl(req.headers.bro);
 
     console.log(`Request made from: ${referer}`);
     res.status(200).send("https://t.me/SenTrade_Bot");
