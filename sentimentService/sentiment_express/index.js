@@ -103,10 +103,18 @@ cron.schedule("*/1 * * * *", async () => {
 
           sentiment_methods.getCurrentPrice(cron.search)
             .then((res) => {
-              console.log("current price from scraper: " + res.data);
+              //   {
+              //     "price": "170.03",
+              //     "marketCap": "2.626T",
+              //     "avgVolume": "61,281,215",
+              //     "previousClose": "171.48"
+              // }
+              let currPrice = res.data.price;
+
+              console.log("current price from scraper: " + currPrice);
 
               try {
-                sentiment_methods.triggerStoploss(cron.search, size*5, res.data);
+                sentiment_methods.triggerStoploss(cron.search, size*5, currPrice);
               } catch (error) {
                 sentiment_methods.stoplossRetryQueue({search: cron.search, size: size*5})
               }
