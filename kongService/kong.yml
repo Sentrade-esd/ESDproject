@@ -55,7 +55,6 @@ services:
       - name: scrapeCurrentPrice-route
         methods:
           - GET
-          - OPTIONS
         paths:
           - /scraper/scrapeCurrentPrice
         strip_path: false
