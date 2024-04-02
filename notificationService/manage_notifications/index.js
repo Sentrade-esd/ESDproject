@@ -5,6 +5,7 @@
 import amqplib from "amqplib";
 import axios from "axios";
 import express from "express";
+import cors from "cors";
 
 const queue = "sentiment_notification_queue";
 const routingKey = "notify";
@@ -22,6 +23,7 @@ let connection = null;
 let channel = null;
 
 app.use(express.json());
+app.use(cors());
 
 async function start_amqp() {
   return new Promise((resolve, reject) => {

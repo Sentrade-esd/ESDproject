@@ -1,5 +1,6 @@
 // Requiring module
 const express = require("express");
+const cors = require("cors");
 // let puppeteer = require("puppeteer-extra");
 let puppeteer = require("puppeteer");
 
@@ -23,7 +24,7 @@ const scraperDBMethods = require("./scraperDBmethods");
 
 // Creating express object
 const app = express();
-
+app.use(cors());
 // Handling GET request
 app.get("/", (req, res) => {
   res.send(
