@@ -173,7 +173,7 @@ function Search() {
                 <Col className="ml-auto mr-auto" lg="6" md="8" xs="12">
                   <h1 className="title">
                     Search for <br />
-                    <strong className="text-warning">a Company</strong>
+                    <strong style={{color:'#CF50DD'}}>a Company</strong>
                   </h1>
                   <p className="description">
                     Fetch Sentiments and Senator Filings
@@ -255,7 +255,7 @@ function Search() {
                             style={{ overflow: "visible" }}
                             transform="matrix(0.9488 0 0 0.9488 25 53.1187)"
                             width="1000"
-                            xlinkHref={require("Assets/img/logo-nav.png")}
+                            xlinkHref={require("Assets/img/company.png")}
                           />
                         </g>
                       </g>
@@ -282,7 +282,7 @@ function Search() {
                             style={{ overflow: "visible" }}
                             transform="matrix(0.9488 0 0 0.9488 25 53.1187)"
                             width="1000"
-                            xlinkHref={require("Assets/img/logo-nav.png")}
+                            xlinkHref={require("Assets/img/company.png")}
                           />
                         </g>
                       </g>
