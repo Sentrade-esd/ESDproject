@@ -87,8 +87,10 @@ app.post("/comments", async (req, res) => {
       .send({ message: "Company and comment are required" });
   }
 
+  const companyComments = null;
+
   try {
-    const companyComments = await comments.findOneAndUpdate(
+    companyComments = await comments.findOneAndUpdate(
       { company: company },
       { $push: { commentsMade: comment } },
       { new: true, upsert: true }
