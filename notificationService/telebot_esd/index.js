@@ -33,9 +33,29 @@ bot.start((ctx) => {
   });
   // ... rest of your code
 });
-bot.command("send_Drago", (ctx) => {
-  bot.telegram.sendMessage(491465735, "Hello, Drago!");
-});
+// bot.command("send_Drago", async (ctx) => {
+
+//   // const userId = ctx.from.id;
+//   // // if (!referer) {
+//   // //   console.error("Referer is not defined");
+//   // //   return;
+//   // // }
+//   // const redirectUrl = `${referer}?teleId=${userId}`;
+//   // console.log(`User ID: ${userId}`);
+//   // console.log(`Redirect URL: ${redirectUrl}`);
+//   // ctx.reply(`[Click here to go back to the website](${redirectUrl})`, {
+//   //   parse_mode: "Markdown",
+//   // });
+
+//   let url = "http://localhost:5001/";
+
+//   let tiny = await tinyurl(url);
+//   console.log(tiny);
+
+//   bot.telegram.sendMessage(491465735, `[Click here to go back to the website](${tiny})`, {
+//     parse_mode: "Markdown",
+//   });
+// });
 bot.launch();
 // server.listen(process.env.PORT || 3002, () => {
 //   console.log("Server listening on port 3001");
