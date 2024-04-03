@@ -291,17 +291,17 @@ def follow_trade_transaction():
     print(no_of_filings)
 
 
-    max_buy_amount = data['data']['maxBuyAmount']
+    max_buy_amount = float(data['data']['maxBuyAmount'])
     # buy_amount_per_filing = buy_amount / no_of_filings
-    buy_amount_per_filing = data['data']['buyAmountPerFiling']
+    buy_amount_per_filing = float(data['data']['buyAmountPerFiling'])
     amount_left = max_buy_amount
     total_percentage_of_stock = 0.0
 
     for i in range(no_of_filings):
         if (amount_left < buy_amount_per_filing):
             buy_amount_per_filing = amount_left
-        percentage_of_stock_on_filing = buy_amount_per_filing / float(data['data']['filings'][i]['file_price'])
-        amount_left -= buy_amount_per_filing
+        percentage_of_stock_on_filing = float(buy_amount_per_filing) / float(data['data']['filings'][i]['file_price'])
+        amount_left -= float(buy_amount_per_filing)
         total_percentage_of_stock += percentage_of_stock_on_filing
     
     print(total_percentage_of_stock)
