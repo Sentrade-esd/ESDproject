@@ -102,7 +102,10 @@ const TradeHistory = () => {
       const openTrades = allTransactions.slice(1).filter((transaction) => transaction.SellAmount === null);
       let filteredOpenTrades = [];
       openTrades.forEach((trade) => {
-        if (openTrades.companyName !== null){
+        console.log("TRADE", trade);
+        
+        if (trade.Company !== null){
+          console.log("TRADE getting pushed:", trade);
           filteredOpenTrades.push(trade);
         }
       })
