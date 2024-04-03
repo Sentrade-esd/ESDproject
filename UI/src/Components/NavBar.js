@@ -116,18 +116,6 @@ const NavBar = ({ transparent }) => {
             setModalShow(false);
             navigate("/");
             console.log("userId", userId);
-            let userId = response.data.data.UserID;
-
-            try {
-              const body = {
-                userID: userId,
-                email: username,
-              };
-
-              axios.post("http://20.2.233.161:8000/transaction/setup", body);
-            } catch (error) {
-              console.error(error);
-            }
           } else {
             console.error("Wrong password");
           }
@@ -229,6 +217,21 @@ const NavBar = ({ transparent }) => {
                 localStorage.setItem("userId", response.data.data.UserID);
                 // setIsLoggedIn(true);
                 // setUsername(Email);
+                let userId = response.data.data.UserID;
+
+                try {
+                  const body = {
+                    userID: userId,
+                    email: Email,
+                  };
+
+                  axios.post(
+                    "http://20.2.233.161:8000/transaction/setup",
+                    body
+                  );
+                } catch (error) {
+                  console.error(error);
+                }
               } else {
                 console.error("Fetch data after signup failed");
               }
