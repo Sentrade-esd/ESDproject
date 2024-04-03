@@ -198,6 +198,7 @@ function Trade() {
   const toggleBuyModal = () => {
     setBuyModal(!buyModal);
   };
+  const [purchaseStatus, setPurchaseStatus] = useState(null);
   useEffect(() => {
     console.log("comments", comments);
   }, [comments]);
@@ -262,7 +263,6 @@ function Trade() {
     setQuantity(quantity === 100 ? 100 : quantity + 1);
   };
 
-
   const handleBuyStock = async (event) => {
     // Should be calling Transaction here
     // Store company name, id, email, buy amount
@@ -272,21 +272,27 @@ function Trade() {
     let threshold = document.getElementById("stopLossAmount").value;
 
     console.log("INFO: ", companySymbol, tradeAmount, threshold);
-    
+
     let body = {
       UserID: userId,
       Email: username,
       Company: companyName,
-      buyAmount: tradeAmount,
-      currentPrice: price,
+      buyAmount: Number(tradeAmount),
+      currentPrice: Number(price),
       Threshold: null,
       Ticker: companySymbol,
     };
-
+    console.log("body", body);
     axios
       .post("http://20.2.233.161:8000/transaction/newTrade", body)
       .then((response) => {
         console.log(response.data);
+        setPurchaseStatus("success");
+        // Close the modal automatically after 2 seconds
+        setTimeout(() => {
+          setBuyModal(false);
+          setPurchaseStatus(null);
+        }, 2000);
       })
       .catch((error) => {
         console.error(error);
@@ -309,7 +315,6 @@ function Trade() {
     //     alert('Unable to process the transaction');
     // }
   };
-
 
   useEffect(() => {
     const fetchData = async () => {
@@ -429,8 +434,6 @@ function Trade() {
     fontSizes: [24, 96],
   };
 
-  
-
   // const { search, sentiment_score } = jsonData.result;
 
   const handleFollowTrade = async (event) => {
@@ -528,9 +531,6 @@ function Trade() {
       );
     }
   };
-  
-
-
 
   // const handleSellStock = async () => {
   //     // Should be calling FollowTrades here
@@ -645,7 +645,7 @@ function Trade() {
             backgroundColor="success"
           >
             <b>Transaction -</b>
-            <span dangerouslySetInnerHTML={alert}></span>
+            <span dangerouslySetInnerHTML={{ __html: alert }}></span>
           </UncontrolledAlert>
         )
       )}
@@ -1073,21 +1073,29 @@ function Trade() {
             </div>
         </div> */}
 
-      <Modal styles="buyModal" isOpen={buyModal} toggle={toggleBuyModal}>
+      <Modal
+        styles={purchaseStatus === "success" ? "buyModalSuccess" : "buyModal"}
+        isOpen={buyModal}
+        toggle={toggleBuyModal}
+      >
         <ModalBody>
-          <Form>
-            <FormGroup>
-              <Label for="buyAmount">Buy Amount</Label>
-              <Input type="number" id="buyAmount" />
-            </FormGroup>
-            <FormGroup>
-              <Label for="stopLossAmount">Stop Loss Amount (optional)</Label>
-              <Input type="number" id="stopLossAmount" />
-            </FormGroup>
-            <Button type="submit" onClick={handleBuyStock}>
-              Submit
-            </Button>
-          </Form>
+          {purchaseStatus === "success" ? (
+            "Successfully bought"
+          ) : (
+            <Form>
+              <FormGroup>
+                <Label for="buyAmount">Buy Amount</Label>
+                <Input type="number" id="buyAmount" />
+              </FormGroup>
+              <FormGroup>
+                <Label for="stopLossAmount">Stop Loss Amount (optional)</Label>
+                <Input type="number" id="stopLossAmount" />
+              </FormGroup>
+              <Button type="submit" onClick={handleBuyStock}>
+                Submit
+              </Button>
+            </Form>
+          )}
         </ModalBody>
       </Modal>
       <Modal

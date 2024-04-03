@@ -12,9 +12,9 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 // import Select from "react";
 import Slick from "react-slick";
-import "../Styles/global.css"
-import {AlertContext} from '../Components/AlertContext.js';
-import {LoadingContext} from '../Components/LoadingContext.js';
+import "../Styles/global.css";
+import { AlertContext } from "../Components/AlertContext.js";
+import { LoadingContext } from "../Components/LoadingContext.js";
 
 // import React from "react";
 // import ProgressBar from "@ramonak/react-progress-bar";
@@ -176,7 +176,7 @@ function Trade() {
   const [quantity, setQuantity] = React.useState(1);
   const [buyModal, setBuyModal] = React.useState(false);
   const [followModal, setFollowModal] = React.useState(false);
-  const {alert, setAlert} = useContext(AlertContext);
+  const { alert, setAlert } = useContext(AlertContext);
 
   const { isLoading, setIsLoading } = useContext(LoadingContext);
 
@@ -206,7 +206,7 @@ function Trade() {
     // const savedUsername = localStorage.getItem("username");
     // const savedUserID = localStorage.getItem('UserID');
     const savedUsername = "hello";
-    const savedUserID = '5';
+    const savedUserID = "5";
 
     if (savedUsername) {
       setIsLoggedIn(true);
@@ -348,14 +348,14 @@ function Trade() {
     );
 
     let body = {
-      "userId": UserID,
-      "email": username,
-      "ticker": companySymbol,
-      "targetDate": targetDate,
-      "buyAmountPerFiling": buyAmountPerFiling,
-      "maxBuyAmount": maxBuyAmount,
-      "company": companyName,
-    }
+      userId: UserID,
+      email: username,
+      ticker: companySymbol,
+      targetDate: targetDate,
+      buyAmountPerFiling: buyAmountPerFiling,
+      maxBuyAmount: maxBuyAmount,
+      company: companyName,
+    };
 
     console.log("Body:", body);
 
@@ -366,60 +366,60 @@ function Trade() {
       // const followTradeResponse = await axios.get(`http://kong:8000/followTrade/buy`, body)
       await sleep(10000);
       setIsLoading(false);
-      let followTradeResponse = 
-      {
-        "status": "success",
-        "buyAmount": 100,
-        "sellAmount": 148.05,
-        "totalAccountValue": 1143.98,
-        "data": {
-            "ticker": "NVDA",
-            "filings": [
-                {
-                    "file_date": "2024-01-26",
-                    "tx_date": "2024-01-02",
-                    "full_name": "Markwayne Mullin",
-                    "order_type": "Purchase",
-                    "ticker": "NVDA",
-                    "tx_estimate": 15001,
-                    "file_price": "610.3100",
-                    "tx_price": "481.6800"
-                }
-            ],
-            "userId": 1,
-            "currentPrice": "903.5600",
-            "maxBuyAmount": 500,
-            "buyAmountPerFiling": 100,
-            "company": "NVIDIA",
-            "email": "ProbablyPassedFromUI"
-        }
-      }    
-      if (!followTradeResponse.status){
-          // alert('Unable to process the transaction')
-        setAlert('Unsuccessful. Please try again later.');
-      } else{
+      let followTradeResponse = {
+        status: "success",
+        buyAmount: 100,
+        sellAmount: 148.05,
+        totalAccountValue: 1143.98,
+        data: {
+          ticker: "NVDA",
+          filings: [
+            {
+              file_date: "2024-01-26",
+              tx_date: "2024-01-02",
+              full_name: "Markwayne Mullin",
+              order_type: "Purchase",
+              ticker: "NVDA",
+              tx_estimate: 15001,
+              file_price: "610.3100",
+              tx_price: "481.6800",
+            },
+          ],
+          userId: 1,
+          currentPrice: "903.5600",
+          maxBuyAmount: 500,
+          buyAmountPerFiling: 100,
+          company: "NVIDIA",
+          email: "ProbablyPassedFromUI",
+        },
+      };
+      if (!followTradeResponse.status) {
+        // alert('Unable to process the transaction')
+        setAlert("Unsuccessful. Please try again later.");
+      } else {
         // alert('Transaction successful');
         setAlert({
           __html: `Successful...
           <div style="display: flex; justify-content: space-between; margin-top: 5px;">
-            <p style="margin-top: 3px">Company: ${followTradeResponse.data.company}</p>
+            <p style="margin-top: 3px">Company: ${
+              followTradeResponse.data.company
+            }</p>
             <p>Buy Amount: ${followTradeResponse.buyAmount}</p>
             <p>Sell Amount: ${followTradeResponse.sellAmount}</p>
             <p>Total Account Value: ${followTradeResponse.totalAccountValue}</p>
-            <p>Current PnL: ${(followTradeResponse.sellAmount-followTradeResponse.buyAmount).toFixed(2)}</p>
-          </div>`
-        }
-        );
+            <p>Current PnL: ${(
+              followTradeResponse.sellAmount - followTradeResponse.buyAmount
+            ).toFixed(2)}</p>
+          </div>`,
+        });
       }
-    } catch (error){
+    } catch (error) {
       setIsLoading(false);
       console.error(error);
-      setAlert('Unsuccessful... An error occured while fetching the data. Please try again later');
+      setAlert(
+        "Unsuccessful... An error occured while fetching the data. Please try again later"
+      );
     }
-
-
-
-    
   };
 
   const handleBuyStock = async (event) => {
@@ -544,20 +544,30 @@ function Trade() {
 
   return (
     <>
-        {isLoading ? (
-            <UncontrolledAlert className='alert-with-icon' id='noMargin' color='info' backgroundColor='info'>
-              <span>
-                <b>Loading -</b>
-                Following Trades...
-              </span>
-            </UncontrolledAlert>
-        ) : (
-            alert && (
-                <UncontrolledAlert className="alert-with-icon alert-success" id='noMargin' backgroundColor='success'>
-                  <b>Transaction -</b><span dangerouslySetInnerHTML={alert}></span>
-                </UncontrolledAlert>
-            )
-        )}
+      {isLoading ? (
+        <UncontrolledAlert
+          className="alert-with-icon"
+          id="noMargin"
+          color="info"
+          backgroundColor="info"
+        >
+          <span>
+            <b>Loading -</b>
+            Following Trades...
+          </span>
+        </UncontrolledAlert>
+      ) : (
+        alert && (
+          <UncontrolledAlert
+            className="alert-with-icon alert-success"
+            id="noMargin"
+            backgroundColor="success"
+          >
+            <b>Transaction -</b>
+            <span dangerouslySetInnerHTML={{ __html: alert }}></span>
+          </UncontrolledAlert>
+        )
+      )}
       <div
         className="wrapper"
         ref={wrapper}
@@ -985,7 +995,13 @@ function Trade() {
               <Label for="targetDate">Target Date</Label>
               <Input type="date" id="targetDate" />
             </FormGroup>
-            <Button type="submit" onClick={(e) => {  handleFollowTrade(e); setFollowModal(false); }}>
+            <Button
+              type="submit"
+              onClick={(e) => {
+                handleFollowTrade(e);
+                setFollowModal(false);
+              }}
+            >
               Submit
             </Button>
           </Form>

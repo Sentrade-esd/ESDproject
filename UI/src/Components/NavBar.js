@@ -130,6 +130,7 @@ const NavBar = ({ transparent }) => {
 
   const handleLogout = () => {
     localStorage.removeItem("username");
+    localStorage.clear();
     setIsLoggedIn(false);
     setUsername("");
   };
@@ -208,17 +209,21 @@ const NavBar = ({ transparent }) => {
         TeleID: TeleId,
       })
       .then((response) => {
-        if (response.data.code === 200) {
+        console.log("res", response);
+        if (response.data.code === 201) {
+          console.log("dwced");
           axios
-            .get(`http://20.2.233.161:8000/user/${Email}`)
+            .get(`http://20.2.233.161:8000/user/getUser?email=${Email}`)
             .then((response) => {
               if (response.data.code === 200) {
+                console.log("heyyy");
                 localStorage.setItem("username", Email);
                 localStorage.setItem("userId", response.data.data.UserID);
                 // setIsLoggedIn(true);
                 // setUsername(Email);
-                let userId = response.data.data.UserID;
 
+                let userId = response.data.data.UserID;
+                console.log("userIDLOL", userId);
                 try {
                   const body = {
                     userID: userId,
