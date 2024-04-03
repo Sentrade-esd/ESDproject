@@ -66,6 +66,9 @@ const NavBar = ({ transparent }) => {
     console.log("islogin", isLogin);
   }, [isLoggedIn, isLogin]);
   useEffect(() => {
+    console.log("userid", userId);
+  }, [userId]);
+  useEffect(() => {
     // Get userId from URL parameters
     // clear local storage
     // localStorage.clear();
@@ -112,6 +115,9 @@ const NavBar = ({ transparent }) => {
             setUserId(response.data.data.UserID);
             setModalShow(false);
             navigate("/");
+            console.log("userId", userId);
+            let userId = response.data.data.UserID;
+
             try {
               const body = {
                 userID: userId,
@@ -220,7 +226,7 @@ const NavBar = ({ transparent }) => {
             .then((response) => {
               if (response.data.code === 200) {
                 localStorage.setItem("username", Email);
-                localStorage.setItem("id", response.data.data.UserID);
+                localStorage.setItem("userId", response.data.data.UserID);
                 // setIsLoggedIn(true);
                 // setUsername(Email);
               } else {
