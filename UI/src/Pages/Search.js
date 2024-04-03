@@ -44,7 +44,7 @@ function Search() {
 
     const API_KEY_ARRAY = ["AJK35PO1E5WG7KDA", "M9KQQW85E7QXGIB0"]
     
-    const API_KEY = "AJK35PO1E5WG7KDA";
+    const API_KEY = "M9KQQW85E7QXGIB0";
     const searchUrl = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${query}&apikey=${API_KEY}`;
 
     try {

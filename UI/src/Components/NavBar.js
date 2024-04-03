@@ -103,7 +103,7 @@ const NavBar = ({ transparent }) => {
   }, []);
   const handleLogin = (username, password) => {
     axios
-      .get(`http://20.2.233.161:8000/user/getUser?email=${username}`)
+      .get(`/kong/user/getUser?email=${username}`)
       .then((response) => {
         if (response.data.code === 200) {
           if (password === response.data.data.Password) {
@@ -168,7 +168,7 @@ const NavBar = ({ transparent }) => {
       setPendingTeleID("true");
       try {
         const response = await axios.get(
-          "http://20.2.233.161:8000/teleBot/redirect",
+          "/kong/teleBot/redirect",
           {
             headers: {
               bro: window.location.href,
@@ -202,7 +202,7 @@ const NavBar = ({ transparent }) => {
     console.log("telegramhandle", TelegramHandle);
     console.log("lolol");
     axios
-      .post("http://20.2.233.161:8000/user", {
+      .post("/kong/user", {
         Email: Email,
         Password: Password,
         Telehandle: TelegramHandle,
@@ -213,7 +213,7 @@ const NavBar = ({ transparent }) => {
         if (response.data.code === 201) {
           console.log("dwced");
           axios
-            .get(`http://20.2.233.161:8000/user/getUser?email=${Email}`)
+            .get(`/kong/user/getUser?email=${Email}`)
             .then((response) => {
               if (response.data.code === 200) {
                 console.log("heyyy");
@@ -231,7 +231,7 @@ const NavBar = ({ transparent }) => {
                   };
 
                   axios.post(
-                    "http://20.2.233.161:8000/transaction/setup",
+                    "/kong/transaction/setup",
                     body
                   );
                 } catch (error) {

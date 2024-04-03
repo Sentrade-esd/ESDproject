@@ -282,7 +282,7 @@ function Trade() {
       Company: companyName,
       buyAmount: Number(tradeAmount),
       currentPrice: Number(price),
-      Threshold: null,
+      Threshold: threshold,
       Ticker: companySymbol,
     };
     console.log("body", body);
@@ -291,17 +291,7 @@ function Trade() {
       maxBuyAmount: Number(tradeAmount),
     };
     axios
-      .post("http://20.2.233.161:8000/checkBalance", body2)
-      .then((response) => {
-        if (response.data == "true") {
-          return axios.post(
-            "http://20.2.233.161:8000/transaction/newTrade",
-            body
-          );
-        } else {
-          setPurchaseStatus("insufficient");
-        }
-      })
+      .post("/kong/transaction/newTrade", body)
       .then((response) => {
         console.log(response.data);
         setPurchaseStatus("success");
@@ -333,67 +323,132 @@ function Trade() {
     // }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setComments([]);
-      localStorage.setItem("comments", JSON.stringify([]));
-      // fetches current price, market cap, and average volume
-      try {
-        const ScrapeResponse = await axios.get(
-          `http://20.2.233.161:8000/scraper/scrapeCurrentPrice?ticker=${encodeURIComponent(
-            companySymbol
-          )}`
-        );
-        setPrice(ScrapeResponse.data.price);
-        setFetchedData(true);
-        setMarketCap(ScrapeResponse.data.marketCap);
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     setComments([]);
+  //     localStorage.setItem("comments", JSON.stringify([]));
+  //     // fetches current price, market cap, and average volume
+  //     try {
+  //       const ScrapeResponse = await axios.get(
+  //         `/kong/scraper/scrapeCurrentPrice?ticker=${encodeURIComponent(
+  //           companySymbol
+  //         )}`
+  //       );
+  //       setPrice(ScrapeResponse.data.price);
+  //       setFetchedData(true);
+  //       setMarketCap(ScrapeResponse.data.marketCap);
 
-        setAvgVolume(ScrapeResponse.data.avgVolume);
-      } catch (error) {
-        console.error(
-          "Error fetching price, market cap, and average volume:",
-          error
-        );
-      }
-      // fetches latest 20 comments
-      try {
-        console.log("companyName", companyName);
-        console.log("companySymbol", companySymbol);
-        const CommentsResponse = await axios.get(
-          `http://20.2.233.161:8000/comments/${companyName}`
-        );
-        setComments(CommentsResponse.data);
-        localStorage.setItem("comments", JSON.stringify(CommentsResponse.data));
-      } catch (error) {
-        if (error.response && error.response.status === 404) {
-          setComments([]);
-          localStorage.setItem("comments", JSON.stringify([]));
-        } else {
-          throw error;
-        }
-      }
-      // fetches sentiment score and news
-      try {
-        const SentimentResponse = await axios.get(
-          `http://20.2.233.161:8000/sentimentAPI/sentiment_query?search_term=${companyName}&ticker=${companySymbol}`
-        );
-        // Rest of your code
-        // localStorage.setItem(
-        //   "sentiment_score",
-        //   SentimentResponse.data.sentiments.sentiment_score
-        // );
-        console.log("SentimentResponse", SentimentResponse);
-        setSentimentScore(SentimentResponse.data.sentiments.sentiment_score);
-        setEmotion(SentimentResponse.data.sentiments.emotion);
-        setKeyword(SentimentResponse.data.sentiments.keyword);
-        SetNews(SentimentResponse.data.newsArticles);
-      } catch (error) {
-        console.error("Error fetching sentiment:", error);
-      }
-    };
+  //       setAvgVolume(ScrapeResponse.data.avgVolume);
+  //     } catch (error) {
+  //       console.error(
+  //         "Error fetching price, market cap, and average volume:",
+  //         error
+  //       );
+  //     }
+  //     // fetches latest 20 comments
+  //     try {
+  //       console.log("companyName", companyName);
+  //       console.log("companySymbol", companySymbol);
+  //       const CommentsResponse = await axios.get(
+  //         `/kong/comments/${companyName}`
+  //       );
+  //       setComments(CommentsResponse.data);
+  //       localStorage.setItem("comments", JSON.stringify(CommentsResponse.data));
+  //     } catch (error) {
+  //       if (error.response && error.response.status === 404) {
+  //         setComments([]);
+  //         localStorage.setItem("comments", JSON.stringify([]));
+  //       } else {
+  //         throw error;
+  //       }
+  //     }
+  //     // fetches sentiment score and news
+  //     try {
+  //       const SentimentResponse = await axios.get(
+  //         `/kong/sentimentAPI/sentiment_query?search_term=${companyName}&ticker=${companySymbol}`
+  //       );
+  //       // Rest of your code
+  //       // localStorage.setItem(
+  //       //   "sentiment_score",
+  //       //   SentimentResponse.data.sentiments.sentiment_score
+  //       // );
+  //       console.log("SentimentResponse", SentimentResponse);
+  //       setSentimentScore(SentimentResponse.data.sentiments.sentiment_score);
+  //       setEmotion(SentimentResponse.data.sentiments.emotion);
+  //       setKeyword(SentimentResponse.data.sentiments.keyword);
+  //       SetNews(SentimentResponse.data.newsArticles);
+  //     } catch (error) {
+  //       console.error("Error fetching sentiment:", error);
+  //     }
+  //   };
 
-    fetchData();
-  }, []);
+  //   fetchData();
+  // }, []);
+
+  // First useEffect for fetching price, market cap, and average volume
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const ScrapeResponse = await axios.get(
+        `/kong/scraper/scrapeCurrentPrice?ticker=${encodeURIComponent(
+          companySymbol
+        )}`
+      );
+      setPrice(ScrapeResponse.data.price);
+      setFetchedData(true);
+      setMarketCap(ScrapeResponse.data.marketCap);
+      setAvgVolume(ScrapeResponse.data.avgVolume);
+    } catch (error) {
+      console.error(
+        "Error fetching price, market cap, and average volume:",
+        error
+      );
+    }
+  };
+
+  fetchData();
+}, []);
+
+// Second useEffect for fetching latest 20 comments
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const CommentsResponse = await axios.get(
+        `/kong/comments/${companyName}`
+      );
+      setComments(CommentsResponse.data);
+      localStorage.setItem("comments", JSON.stringify(CommentsResponse.data));
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        setComments([]);
+        localStorage.setItem("comments", JSON.stringify([]));
+      } else {
+        throw error;
+      }
+    }
+  };
+
+  fetchData();
+}, []);
+
+// Third useEffect for fetching sentiment score and news
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const SentimentResponse = await axios.get(
+        `/kong/sentimentAPI/sentiment_query?search_term=${companyName}&ticker=${companySymbol}`
+      );
+      setSentimentScore(SentimentResponse.data.sentiments.sentiment_score);
+      setEmotion(SentimentResponse.data.sentiments.emotion);
+      setKeyword(SentimentResponse.data.sentiments.keyword);
+      SetNews(SentimentResponse.data.newsArticles);
+    } catch (error) {
+      console.error("Error fetching sentiment:", error);
+    }
+  };
+
+  fetchData();
+}, []);
 
   // return (
   //     <div>
@@ -455,7 +510,7 @@ function Trade() {
   const handleWatchlist = async () => {
     try {
       const response = await axios.post(
-        `http://20.2.233.161:8000/watchlist/add`,
+        `/kong/watchlist/add`,
         {
           userID: userId,
           teleID: teleId,
@@ -504,8 +559,8 @@ function Trade() {
     setIsLoading(true);
 
     try {
-      const followTradeResponse = await axios.get(
-        `http://20.2.233.161:8000/followTrade/buy`,
+      const followTradeResponse = await axios.post(
+        `/kong/followTrade/buy`,
         body
       );
       //   await sleep(10000);
@@ -546,13 +601,13 @@ function Trade() {
           __html: `Successful...
           <div style="display: flex; justify-content: space-between; margin-top: 5px;">
             <p style="margin-top: 3px">Company: ${
-              followTradeResponse.data.company
+              followTradeResponse.data.data.company
             }</p>
-            <p>Buy Amount: ${followTradeResponse.buyAmount}</p>
-            <p>Sell Amount: ${followTradeResponse.sellAmount}</p>
-            <p>Total Account Value: ${followTradeResponse.totalAccountValue}</p>
+            <p>Buy Amount: ${followTradeResponse.data.buyAmount}</p>
+            <p>Sell Amount: ${followTradeResponse.data.sellAmount}</p>
+            <p>Total Account Value: ${followTradeResponse.data.totalAccountValue}</p>
             <p>Current PnL: ${(
-              followTradeResponse.sellAmount - followTradeResponse.buyAmount
+              followTradeResponse.data.sellAmount - followTradeResponse.data.buyAmount
             ).toFixed(2)}</p>
           </div>`,
         });

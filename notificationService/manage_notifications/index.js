@@ -86,7 +86,7 @@ async function start_amqp() {
 
         // Send message to Telegram bot
         const telegramIds = response.data; // Replace this with the actual array of Telegram IDs
-        const teleMessage = `The company: ${company} has a ${changeType} by ${change} %.`; // Replace this with the actual message
+        const teleMessage = `Sentiment for the company: ${company} has ${changeType} by ${change} %.`; // Replace this with the actual message
 
         await axios.post(`${telebut_url}teleBot/send_message`, {
           telegramIds,
@@ -96,8 +96,9 @@ async function start_amqp() {
         channel.ack(message);
 
       } catch (error) {
+        console.log(error.response);
 
-        if (error.response.status === 404) {
+        if (error.response.status == 404) {
           channel.ack(message);
         } else {
           console.error(`Error getting watchlist for company ${company}:`, error.response.data);

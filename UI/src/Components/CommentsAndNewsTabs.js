@@ -48,7 +48,7 @@ const CommentsAndNewsTabs = ({
       };
       console.log("commentData", commentData);
       const CommentsResponse = await axios.post(
-        `http://20.2.233.161:8000/comments/`,
+        `/kong/comments/`,
         commentData
       );
       if (CommentsResponse.status === 200) {

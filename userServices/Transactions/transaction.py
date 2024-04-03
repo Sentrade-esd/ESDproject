@@ -239,7 +239,7 @@ def update_transaction():
 
 
 
-@app.route("/checkBalance", methods=["POST"])
+@app.route("/transaction/checkBalance", methods=["POST"])
 def checkBalance():
     data = request.get_json()
     UserID = data["userId"]
@@ -259,7 +259,7 @@ def get_latest_transaction(UserID, buy_amt):
     # if latest_transaction:
     #     cur_total_value = latest_transaction.TotalAccountValue
     
-    if buy_amt < latest_transaction:
+    if float(buy_amt) < float(latest_transaction):
         return json.dumps(True)
     
     return json.dumps(False)

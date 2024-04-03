@@ -123,16 +123,17 @@ services:
           - /comments
         methods:
           - POST
-          - OPTIONS
-        strip_path: false
-
-      - name: get-company
-        paths:
-          - /comments/
-        methods:
           - GET
           - OPTIONS
         strip_path: false
+
+      # - name: get-company
+      #   paths:
+      #     - /comments
+      #   methods:
+      #     - GET
+      #     - OPTIONS
+      #   strip_path: false
 
   - name: transactions-service
     url: http://transactions:6002/
@@ -171,7 +172,7 @@ services:
 
       - name: transaction-checkBalance-route
         paths:
-        - /checkBalance
+        - /transaction/checkBalance
         methods:
         - GET
         - OPTIONS

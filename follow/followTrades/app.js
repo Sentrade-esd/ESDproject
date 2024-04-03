@@ -157,7 +157,7 @@ async function checkBalance(userId, maxBuyAmount){
         data['maxBuyAmount'] = maxBuyAmount;
         console.log(data);
         // const body =  data;
-        const response = await axios.post(`${TRANSACTION_URL}checkBalance`, data);
+        const response = await axios.post(`${TRANSACTION_URL}transaction/checkBalance`, data);
         // console.log(response.data);
         return response;
     } catch (error) {
