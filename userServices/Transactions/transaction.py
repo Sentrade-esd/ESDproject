@@ -431,29 +431,19 @@ def automated_selling():
     body = request.get_json()
 
     company = body["search"]
-    threshold = body["size"]
-    sellAmount = body["currentPrice"]
+    threshold = float(body["size"])
+    currentPrice = body["currentPrice"]
     
     # Checking where stoploss is met, is for that company, and that the transaction is open
-    transactions = db.session.query(Transaction).filter(Transaction.StopLossSentimentThreshold >= threshold, Transaction.Company==company, Transaction.SellAmount.is_(None)).all()
+    transactions = db.session.query(Transaction).filter(Transaction.StopLossSentimentThreshold <= threshold, Transaction.Company==company, Transaction.SellAmount.is_(None)).all()
 
-    # Get company ticker
-    # key = "YJ3Q75JEFR08G0VB"
-    
-    # url = f'https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords={company}&apikey={key}'
-    # r = requests.get(url)
-    # data = r.json()
-    # ticker = data['bestMatches'][0]["1. symbol"]
-    # # print(data['bestMatches'][0]["1. symbol"])
-    
-    
-    # # Get sell price
-    # # sellAmount = get_current_price(ticker)
 
+    print(transactions)
     
 
     transaction_list = []
     for transaction in transactions:
+        sellAmount = float(transaction.StocksHeld) * float(currentPrice)
         transaction_dict = {
             'TransactionID': transaction.TransactionID,
             'UserID': transaction.UserID,
@@ -473,6 +463,7 @@ def automated_selling():
 
     db.session.commit()  # commit the changes to the database
 
+    print(transaction_list)
 
     # if len(transaction_list) == 0: return 404
     if len(transaction_list) == 0:

@@ -99,6 +99,7 @@ cron.schedule("*/1 * * * *", async () => {
 
         // anybody with a stop loss of 5-25% (steps of 5), send to a endpoint with the search term and percentage change and current price
         if (pcntChange <= -0.05) {
+          console.log("stoploss triggered");
           let size = Math.abs(Math.floor(pcntChange / 0.05));
 
           sentiment_methods.getCurrentPrice(cron.search)
@@ -126,7 +127,7 @@ cron.schedule("*/1 * * * *", async () => {
             })
             .catch((error) => {
               console.log("error getting current price");
-              console.log(error);
+              console.log(error.response);
               sentiment_methods.stoplossRetryQueue({search: cron.search, size: size*5})
             });
 
@@ -146,7 +147,7 @@ cron.schedule("*/1 * * * *", async () => {
 
   } catch (error) {
     console.log("cron job failed");
-    console.log(error);
+    console.log(error.response);
   }
 
 
@@ -175,7 +176,7 @@ cron.schedule("*/1 * * * *", async () => {
 
   } catch (error) {
     console.log("cron db reset failed");
-    console.log(error);
+    console.log(error.response);
   }  
 });
 

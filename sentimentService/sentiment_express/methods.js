@@ -481,7 +481,7 @@ const sentiment_methods = {
         const url = `${sentiment_methods.transactions_url}/transaction/trigger`;
 
         console.log("triggering stop loss: " + url);
-        axios.post(url, { search, size, currentPrice });
+        axios.post(url, { search:search, size:size, currentPrice:currentPrice });
 
     },
 
