@@ -35,17 +35,7 @@ bot.start((ctx) => {
 });
 bot.command("send_Drago", async (ctx) => {
 
-  // const userId = ctx.from.id;
-  // // if (!referer) {
-  // //   console.error("Referer is not defined");
-  // //   return;
-  // // }
-  // const redirectUrl = `${referer}?teleId=${userId}`;
-  // console.log(`User ID: ${userId}`);
-  // console.log(`Redirect URL: ${redirectUrl}`);
-  // ctx.reply(`[Click here to go back to the website](${redirectUrl})`, {
-  //   parse_mode: "Markdown",
-  // });
+
 
   let url = "http://localhost:5001/";
 

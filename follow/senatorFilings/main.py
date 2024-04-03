@@ -320,13 +320,7 @@ def handle_get(ticker, targetDate):
     print(f'ticker: {ticker}, targetDate: {targetDate}')
     # execute the get senator trades;
     raw_senators_tx = main(targetDate)
-    # LOGGER.info('Dumping to .pickle')
-    # with open('senators.pickle', 'wb') as f:
-    #     pickle.dump(senator_txs, f)
-    # # print("senatorTrades: ", senator_txs)
-    
-    # with open('senators.pickle', 'rb') as f:
-    #     raw_senators_tx = pickle.load(f)
+
 
     output_senator_trade = clean_data(raw_senators_tx)
 

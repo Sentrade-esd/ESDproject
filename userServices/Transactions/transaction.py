@@ -21,33 +21,6 @@ db = SQLAlchemy(app)
 # CORS(app)
 
 class Transaction(db.Model):
-    # __tablename__ = 'transaction'
-
-    # TransactionID = db.Column(db.Integer, primary_key=True)
-    # UserID = db.Column(db.Integer, nullable=False)
-    # Email = db.Column(db.String(255), nullable=False)
-    # Company = db.Column(db.String(255), nullable=False)
-    # DateTimestamp = db.Column(db.DateTime, nullable=False)
-    # BuyAmount = db.Column(db.Float(precision=2), nullable=False)
-    # SellAmount = db.Column(db.Float(precision=2), nullable=True)
-    # StopLossSentimentThreshold = db.Column(db.Float(precision=2), nullable=False)
-    # TotalAccountValue = db.Column(db.Float(precision=2), nullable=False)
-
-    # def __init__(self, UserID, Company, DateTimestamp, BuyAmount, SellAmount, StopLossSentimentThreshold, TotalAccountValue):
-    #     self.UserID = UserID
-    #     self.Company = Company
-    #     self.DateTimestamp = DateTimestamp
-    #     self.BuyAmount = BuyAmount
-    #     self.SellAmount = SellAmount
-    #     self.StopLossSentimentThreshold = StopLossSentimentThreshold
-    #     self.TotalAccountValue = TotalAccountValue
-
-    # def json(self):
-    #     return {"UserID": self.UserID, "Company": self.Company, "DateTimestamp": self.DateTimestamp,
-    #             "BuyAmount": self.BuyAmount, "SellAmount": self.SellAmount,
-    #             "StopLossSentimentThreshold": self.StopLossSentimentThreshold,
-    #             "TotalAccountValue": self.TotalAccountValue}
-
     __tablename__ = 'transaction'
 
     TransactionID = db.Column('transactionid', db.Integer, primary_key=True, autoincrement=True)
@@ -98,26 +71,6 @@ def get_all():
             "message": "There are no Transaction."
         }
     ), 404
-
-
-# Get all the trasactions of a user
-# @app.route("/transaction/<string:email>")
-# def find_by_email(Email):
-#     transaction = db.session.query(Transaction).filter_by(UserID=Email).first()
-
-#     if transaction:
-#         return jsonify(
-#             {
-#                 "code": 200,
-#                 "data": transaction.json()
-#             }
-#         )
-#     return jsonify(
-#         {
-#             "code": 404,
-#             "message": "Email not found."
-#         }
-#     ), 404
 
 # Get the latest transaction for a user
 @app.route("/transaction/<int:UserID>")

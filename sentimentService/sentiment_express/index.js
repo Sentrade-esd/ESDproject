@@ -18,9 +18,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 try {
-  // console.log("dropping cron");
-  // CronJob.collection.drop();
-  // CronJob.createCollection();
+
 
   // insert test document
   let newCron = {
@@ -59,10 +57,6 @@ cron.schedule("*/1 * * * *", async () => {
     let all_comments = await Comment.find({});
   
     let all_cron = await CronJob.find({});
-  
-    // console.log("all sentiments: " + all_sentiments);
-    // console.log("all comments: " + all_comments);
-  
   
     // stage 1: compare the sentiment + comment vs cron
     // combine all_sentiments and all_comments into one object

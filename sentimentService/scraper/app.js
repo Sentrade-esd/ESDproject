@@ -99,75 +99,6 @@ app.get("/scraper/getNews/:query/:ticker", async (req, res) => {
   }
 });
 
-
-// async function scrape(query) {
-//   let url = `https://news.google.com/rss/search?q=${query}&hl=en-SG&gl=SG&ceid=SG:en`;
-//   let response = await axios.get(url);
-//   let content = response.data;
-//   // console.log(content);
-
-//   // Convert xml2js.parseString to return a Promise
-//   let result = await new Promise((resolve, reject) => {
-//     xml2js.parseString(content, function (err, result) {
-//       if (err) reject(err);
-//       else resolve(result);
-//     });
-//   });
-
-//   let items = result.rss.channel[0].item;
-
-//   let results = [];
-
-//   for (let i = 0; i < 80; i++) {
-//     let item = items[i];
-//     let title = item.title[0].split(" - ")[0];
-//     let pubDate = item.pubDate[0];
-//     // Change pubDate to sgt
-//     let date = new Date(pubDate);
-//     let sgtDate = new Date(date.getTime() + 8 * 60 * 60 * 1000); // SGT => UTC+8
-//     let datetime = sgtDate.toISOString();
-
-//     // Parse the HTML in the description to extract the text
-//     // let dom = new JSDOM(item.description[0]);
-//     // let description = dom.window.document.querySelector('a').textContent;
-
-//     // include obj in results only if the result is less than a week old
-//     if (date > new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000)) {
-//       let link = item.link[0];
-//       let obj = {
-//         i,
-//         title,
-//         // description,
-//         link,
-//         datetime,
-//       };
-//       // console.log(obj);
-//       results.push(obj);
-//     }
-//   }
-
-//   // Now you can return items or use it elsewhere in your code
-//   // return items;
-//   // console.log('results: ', results);
-//   return results;
-// }
-
-// async function addToDB(ticker, query, news) {
-//   let response;
-//   try {
-//     // const {email, ticker, targetDate, buyAmountPerFiling, maxBuyAmount} = req.body;
-//     let body = {
-//       ticker: ticker,
-//       companyName: query,
-//       news: news,
-//     };
-//     response = await scraperDBMethods.add();
-//   } catch (error) {
-//     console.log(error);
-//   }
-//   return response.data;
-// }
-
 // Handling GET query scraper to scrape for the stock price using the Alpha Vantage API
 app.get("/scraper/pullPrice/:ticker/:targetDate", async (req, res) => {
   const { ticker, targetDate } = req.params;
@@ -228,63 +159,11 @@ async function stockPrice(query, targetDate) {
       n += 1;
     }
 
-    // console.log("return List:" ,returnList);
-
-    // let timeSeries = data['Time Series (5min)'];
-    // let firstKey = Object.keys(timeSeries)[0];
-
-    // parsedData =
-    // {
-    //     "symbol": data["Meta Data"]["2. Symbol"],
-    //     "lastRefreshed": data["Meta Data"]["3. Last Refreshed"],
-    //     "interval": data["Meta Data"]["4. Interval"],
-    //     "price":{
-    //         "open": timeSeries[firstKey]['1. open'],
-    //         "high": timeSeries[firstKey]['2. high'],
-    //         "low": timeSeries[firstKey]['3. low'],
-    //         "close": timeSeries[firstKey]['4. close'],
-    //         "volume": timeSeries[firstKey]['5. volume']
-    //     }
-    // }
-    // console.log("cleaned data: ", parsedData);
-
     return { prices: returnList, refreshDate: refreshDate };
     // return returnList;
   }
 
-  // let parsedData = {};
-  // let response = axios.get({
-  //     url: url,
-  //     json: true,
-  //     headers: {'User-Agent': 'request'}
-  // }, (err, res, data) => {
-  //     if (err) {
-  //     console.log('Error:', err);
-  //     } else if (res.statusCode !== 200) {
-  //     console.log('Status:', res.statusCode);
-  //     } else {
-  //     // data is successfully parsed as a JSON object:
-  //     console.log('data', data);
-  //     let timeSeries = data['Time Series (5min)'];
-  //     let firstKey = Object.keys(timeSeries)[0];
-
-  //     parsedData =
-  //     {
-  //         "symbol": data["Meta Data"]["2. Symbol"],
-  //         "lastRefreshed": data["Meta Data"]["3. Last Refreshed"],
-  //         "interval": data["Meta Data"]["4. Interval"],
-  //         "price":{
-  //             "open": timeSeries[firstKey]['1. open'],
-  //             "high": timeSeries[firstKey]['2. high'],
-  //             "low": timeSeries[firstKey]['3. low'],
-  //             "close": timeSeries[firstKey]['4. close'],
-  //             "volume": timeSeries[firstKey]['5. volume']
-  //         }
-  //     }
-  //     console.log("cleaned data: ", parsedData);
-  //     return parsedData;
-  //     }
-  // });
+  
   return response;
 }
 
@@ -302,9 +181,7 @@ app.get("/scraper/scrapeCurrentPrice", async (req, res) => {
   console.log("Ticker: ", ticker);
 
   try {
-    // let response = await scrapePrice(ticker);
-    // console.log("Current Price: ", response);
-    // res.send(response);
+
 
     const worker = new Worker('./methodsGetCurrentPrice.js');
     
@@ -327,7 +204,8 @@ app.get("/scraper/scrapeCurrentPrice", async (req, res) => {
 
 async function convertCompanyToTicker(company) {
   // Get company ticker
-  let keys = ["GIEADKJM8OSQN0AR", "TQXOA5D8XQ2ATY3J", "GIC3VJ1I8N8DXJAO"];
+  // let keys = ["GIEADKJM8OSQN0AR", "TQXOA5D8XQ2ATY3J", "GIC3VJ1I8N8DXJAO"];
+  let keys = ["5BUS8YPR47FLW0EI","UQU1R3C26QP6KHZN", "YLGQRGQIJKRT0AWI", "GIEADKJM8OSQN0AR", "TQXOA5D8XQ2ATY3J", "GIC3VJ1I8N8DXJAO"]
   
   let key = keys[Math.floor(Math.random() * keys.length)];
 

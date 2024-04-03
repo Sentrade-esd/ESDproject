@@ -41,7 +41,10 @@ function Search() {
     // FIYS7MOLA3SBBAK0
     // GIEADKJM8OSQN0AR Using in Transaction right now
     // D0I97I0VKG0GRK4O Using in UI search right now
-    const API_KEY = "D0I97I0VKG0GRK4O";
+
+    const API_KEY_ARRAY = ["AJK35PO1E5WG7KDA", "M9KQQW85E7QXGIB0"]
+    
+    const API_KEY = "AJK35PO1E5WG7KDA";
     const searchUrl = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${query}&apikey=${API_KEY}`;
 
     try {

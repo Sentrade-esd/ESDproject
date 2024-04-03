@@ -19,13 +19,7 @@ db = SQLAlchemy(app)
 print("Database connected successfully")
 
 class User(db.Model):
-    # __tablename__ = 'user'
 
-    # UserID = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    # Email = db.Column(db.String(255), nullable=False)
-    # Password = db.Column(db.String(255), nullable=False)
-    # Telehandle = db.Column(db.String(255))
-    # TeleID = db.Column(db.Integer, nullable=True)
 
     __tablename__ = 'user'
 
@@ -91,23 +85,6 @@ def users():
             }
         ), 201
 
-# @app.route("/user/<int:UserID>")
-# def find_by_UserID(UserID):
-#     user = db.session.query(User).filter_by(UserID=UserID).first()
-
-#     if user:
-#         return jsonify(
-#             {
-#                 "code": 200,
-#                 "data": user.json()
-#             }
-#         )
-#     return jsonify(
-#         {
-#             "code": 404,
-#             "message": "User not found."
-#         }
-#     ), 404
 
 @app.route("/user/getUser")
 def find_by_email():

@@ -96,10 +96,7 @@ async function start_amqp() {
         channel.ack(message);
 
       } catch (error) {
-        // console.error(error);
-        // console.error(`Error getting watchlist for company ${company}:`, error.response.data);
 
-        // if error code is 404, it means no body has sbuscribed to the company. ack the message
         if (error.response.status === 404) {
           channel.ack(message);
         } else {
@@ -109,32 +106,6 @@ async function start_amqp() {
         }
       }
     }
-    
-    // console.log(content);
-    // const company = content.search;
-    // const change = content.change;
-
-    // console.log(`Received message for company ${company} with change ${change}`);
-
-    // try {
-    //   const response = await axios.get(
-    //     `${watchlist_url}watchlist/company/${company}`
-    //   );
-    //   console.log(response.data);
-
-    //   // Send message to Telegram bot
-    //   const telegramIds = response.data; // Replace this with the actual array of Telegram IDs
-    //   const teleMessage = `The company ${company} has a change of ${change}.`; // Replace this with the actual message
-
-    //   await axios.post(`${telebut_url}teleBot/send_message`, {
-    //     telegramIds,
-    //     teleMessage,
-    //   });
-    //   channel.ack(message);
-
-    // } catch (error) {
-    //   console.error(`Error getting watchlist for company ${company}:`, error);
-    // }
   });
 })();
 

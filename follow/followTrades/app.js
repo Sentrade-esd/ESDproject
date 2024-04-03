@@ -135,11 +135,7 @@ async function followTrade(userId, email, ticker, targetDate, buyAmountPerFiling
             let buyAmount = response.data.data['buyAmount'];
             let sellAmount = response.data.data['sellAmount'];
             let totalAccountValue = response.data.data['totalAccountValue'];
-            // let fractionalSharesBought = response.data['fractionalSharesBought'];
-            // let PnL = response.data['PnL'];
 
-            // return {status: 'success', data, boughtAmount: boughtAmount, fractionalSharesBought: fractionalSharesBought, PnL: PnL, sellAmount: sellAmount, company: company};
-            // return {status: 'success', data, boughtAmount: boughtAmount, fractionalSharesBought: fractionalSharesBought, PnL: PnL, sellAmount: sellAmount};
             return {status: 'success', buyAmount: buyAmount, sellAmount: sellAmount, totalAccountValue: totalAccountValue, data};
         } catch (error){
             console.log(error);
@@ -153,11 +149,6 @@ async function followTrade(userId, email, ticker, targetDate, buyAmountPerFiling
 
 
 async function checkBalance(userId, maxBuyAmount){
-    // Get account balance
-    // return account balance
-    // let action = 'deduct';
-    // let accountBalance = 5000;
-    // console.log("Amount:", amount);
 
     try {
         let data = {};
@@ -173,31 +164,10 @@ async function checkBalance(userId, maxBuyAmount){
         console.error(`HTTP error! status: ${error.response.status}`);
         throw error;
     }
-
-    // if (action === "deduct") {
-    //     // Add amount to account balance
-    //     console.log('deducting')
-    //     console.log("Acount Balance:", accountBalance);
-    //     if (accountBalance < amount){
-    //         return false;
-    //     }else {
-    //         accountBalance -= amount;
-    //         return true;
-    //     }
-    // }
-
-
 }
 
 async function getStockPrice(ticker, targetDate){
-    // try {
-    //     const response = await axios.get(`${SCRAPER_URL}/scraper/pullPrice/${ticker}/${targetDate}`);
-    //     // console.log(response.data);
-    //     return response.data;
-    // } catch (error) {
-    //     console.error(`HTTP error! status: ${error.response.status}`);
-    //     throw error;
-    // }
+
     try {
         const response = await axios.get(`${SCRAPER_URL}scraper/pullPrice/${ticker}/${targetDate}`);
         if (!response) {
