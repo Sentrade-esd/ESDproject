@@ -273,7 +273,7 @@ function Trade() {
 
     let tradeAmount = document.getElementById("buyAmount").value;
     let threshold = document.getElementById("stopLossAmount").value;
-    if (threshold === '') {
+    if (threshold == "") {
       threshold = null;
     }
 
