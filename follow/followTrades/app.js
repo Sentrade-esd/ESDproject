@@ -95,6 +95,10 @@ async function followTrade(userId, email, ticker, targetDate, buyAmountPerFiling
                     filing.tx_date = `${year}-${month}-${day}`;
     
                     console.log(filing.file_date , filing.tx_date);
+
+                    if (!stockPrice[filing.file_date] || !stockPrice[filing.tx_date]){
+                        continue;
+                    }
     
                     filing.file_price = stockPrice[filing.file_date]['4. close'];
                     filing.tx_price = stockPrice[filing.tx_date]['4. close'];
