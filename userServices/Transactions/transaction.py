@@ -469,12 +469,27 @@ def automated_selling():
         transaction.TotalAccountValue = transaction.TotalAccountValue + sellAmount
         db.session.merge(transaction)
 
+        transaction_list.append(transaction_dict)
+
     db.session.commit()  # commit the changes to the database
 
 
-    transaction_list.append(transaction_dict)
-
-    return jsonify(transaction_list)
+    # if len(transaction_list) == 0: return 404
+    if len(transaction_list) == 0:
+        return jsonify(
+            {
+                "code": 405,
+                "message": "No transactions to sell."
+            }
+        ), 404
+    else:
+        return jsonify(
+            {
+                "code": 200,
+                "data": transaction_list,
+                "message": "Transactions successfully sold."
+            }
+        )
 
 
 # def get_current_price(ticker):

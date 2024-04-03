@@ -353,8 +353,13 @@ const sentiment_methods = {
                         sentiment_methods.channel.ack(message);
                     } catch (error) {
                         console.error('error triggering stoploss', error);
-                        sentiment_methods.channel.nack(message, false, false);
-                        sentiment_methods.channel.publish(waitingExchange, routingKey, message.content);
+                        // if 404, ack
+                        if (error.response.status == 405) {
+                            sentiment_methods.channel.ack(message);
+                        } else {
+                            sentiment_methods.channel.nack(message, false, false);
+                            sentiment_methods.channel.publish(waitingExchange, routingKey, message.content);
+                        }
                     }
                 })
                 .catch(error => {

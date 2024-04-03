@@ -327,7 +327,10 @@ app.get("/scraper/scrapeCurrentPrice", async (req, res) => {
 
 async function convertCompanyToTicker(company) {
   // Get company ticker
-  key = "YJ3Q75JEFR08G0VB";
+  let keys = ["GIEADKJM8OSQN0AR", "TQXOA5D8XQ2ATY3J", "GIC3VJ1I8N8DXJAO"];
+  
+  let key = keys[Math.floor(Math.random() * keys.length)];
+
   // let company = company
   let url = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${company}&apikey=${key}`;
 
