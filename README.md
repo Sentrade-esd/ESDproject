@@ -5,7 +5,7 @@ Run Docker Desktop
 In your Visual Studio Code Terminal, run the following commands in order:
 
 docker compose -f docker-compose-all.yml build
-Then
+<br>
 docker compose -f docker-compose-all.yml up -d
 
 
