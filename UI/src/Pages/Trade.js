@@ -15,6 +15,10 @@ import Slick from "react-slick";
 import "../Styles/global.css";
 import { AlertContext } from "../Components/AlertContext.js";
 import { LoadingContext } from "../Components/LoadingContext.js";
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBell } from '@fortawesome/free-solid-svg-icons';
+
 // import React from "react";
 // import ProgressBar from "@ramonak/react-progress-bar";
 
@@ -258,6 +262,55 @@ function Trade() {
     setQuantity(quantity === 100 ? 100 : quantity + 1);
   };
 
+
+  const handleBuyStock = async (event) => {
+    // Should be calling Transaction here
+    // Store company name, id, email, buy amount
+    event.preventDefault();
+
+    let tradeAmount = document.getElementById("buyAmount").value;
+    let threshold = document.getElementById("stopLossAmount").value;
+
+    console.log("INFO: ", companySymbol, tradeAmount, threshold);
+    
+    let body = {
+      UserID: userId,
+      Email: username,
+      Company: companyName,
+      buyAmount: tradeAmount,
+      currentPrice: price,
+      Threshold: null,
+      Ticker: companySymbol,
+    };
+
+    axios
+      .post("http://20.78.38.247:8000/transaction/newTrade", body)
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+
+    // let data = {
+    //     UserID: localStorage.getItem("id"),
+    //     Email: localStorage.getItem("username"),
+    //     Company: localStorage.getItem("companyName"),
+    //     buyAmount: tradeAmount,
+    //     Threshold: threshold
+    // }
+
+    // try {
+    //     let response = await axios.post(url, data);
+    //     console.log(response.data);
+    //     alert('Transaction successful');
+    // } catch (error) {
+    //     console.error(error);
+    //     alert('Unable to process the transaction');
+    // }
+  };
+
+
   useEffect(() => {
     const fetchData = async () => {
       setComments([]);
@@ -376,6 +429,8 @@ function Trade() {
     fontSizes: [24, 96],
   };
 
+  
+
   // const { search, sentiment_score } = jsonData.result;
 
   const handleFollowTrade = async (event) => {
@@ -473,52 +528,9 @@ function Trade() {
       );
     }
   };
+  
 
-  const handleBuyStock = async (event) => {
-    // Should be calling Transaction here
-    // Store company name, id, email, buy amount
-    event.preventDefault();
 
-    let body = {
-      UserID: userId,
-      Email: username,
-      Company: companyName,
-      buyAmount: tradeAmount,
-      currentPrice: price,
-      Threshold: null,
-      Ticker: companySymbol,
-    };
-
-    axios
-      .post("http://20.78.38.247:8000/transaction/newTrade", body)
-      .then((response) => {
-        console.log(response.data);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-    let tradeAmount = document.getElementById("buyAmount").value;
-    let threshold = document.getElementById("stopLossAmount").value;
-
-    console.log("INFO: ", companySymbol, tradeAmount, threshold);
-
-    // let data = {
-    //     UserID: localStorage.getItem("id"),
-    //     Email: localStorage.getItem("username"),
-    //     Company: localStorage.getItem("companyName"),
-    //     buyAmount: tradeAmount,
-    //     Threshold: threshold
-    // }
-
-    // try {
-    //     let response = await axios.post(url, data);
-    //     console.log(response.data);
-    //     alert('Transaction successful');
-    // } catch (error) {
-    //     console.error(error);
-    //     alert('Unable to process the transaction');
-    // }
-  };
 
   // const handleSellStock = async () => {
   //     // Should be calling FollowTrades here
@@ -669,6 +681,7 @@ function Trade() {
                     <i className="text-warning" style={{ fontSize: "20px" }}>
                       {companySymbol}
                     </i>
+                    <FontAwesomeIcon icon={faBell} className="mx-3" style={{ fontSize: '20px' }}/>
                   </span>
                 </h1>
                 <div

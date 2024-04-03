@@ -102,8 +102,7 @@ const TradeHistory = () => {
       const openTrades = allTransactions.slice(1).filter((transaction) => transaction.SellAmount === null);
       let filteredOpenTrades = [];
       openTrades.forEach((trade) => {
-        console.log("TRADE", trade);
-        
+        // console.log("TRADE", trade);
         if (trade.Company !== null){
           console.log("TRADE getting pushed:", trade);
           filteredOpenTrades.push(trade);
@@ -270,23 +269,24 @@ const TradeHistory = () => {
 
       async function fetchSellAmount() {
         try {
-          let matchingTicker = {
-            "Nvidia": "NVDA",
-            "Apple Inc": "AAPL",
-            "Microsoft": "MSFT",
-            "Tesla": "TSLA",
-            "Amazon": "AMZN",
-          }
-          let ticker;
-          if (matchingTicker[item.Company]){
-            ticker = matchingTicker[item.Company];
-          }
-          const stockData = await axios.get(`http://20.78.38.247:8000/scraper/scrapeCurrentPrice?ticker=${ticker}`);
-          // const stockData = await axios.get(`http://20.78.38.247:8000/scraper/scrapeCurrentPrice?company=${encodeURIComponent(item.Company)}`);
+          // let matchingTicker = {
+          //   "Nvidia": "NVDA",
+          //   "Apple Inc": "AAPL",
+          //   "Microsoft": "MSFT",
+          //   "Tesla": "TSLA",
+          //   "Amazon": "AMZN",
+          // }
+          // let ticker;
+          // if (matchingTicker[item.Company]){
+          //   ticker = matchingTicker[item.Company];
+          // }
+          // const stockData = await axios.get(`http://20.78.38.247:8000/scraper/scrapeCurrentPrice?ticker=${ticker}`);
+          const stockData = await axios.get(`http://20.78.38.247:8000/scraper/scrapeCurrentPrice?company=${encodeURIComponent(item.Company)}`);
           console.log(stockData.data.price);
           const currentPrice = stockData.data.price;
+          const ticker = stockData.data.ticker;
           const sellAmount = currentPrice * item.StocksHeld;
-          return sellAmount;
+          return {sellAmount: sellAmount, ticker: ticker};
         }
         
         catch(error){
@@ -295,7 +295,10 @@ const TradeHistory = () => {
       }
 
       // sell stock
-      const currentPrice = await fetchSellAmount();
+      const responseSellAmount = await fetchSellAmount();
+      const currentPrice = responseSellAmount.sellAmount;
+      const ticker = responseSellAmount.ticker;
+
       console.log("SELL AMOUNT", currentPrice);
 
       async function sellStock() {
@@ -303,20 +306,23 @@ const TradeHistory = () => {
           let body = {
             "UserID": userId,
             "Company": item.Company,
-            "Ticker": item.Ticker,
+            "Ticker": ticker,
             // "Email": username,
             // "BuyAmount": item.BuyAmount,
             "currentPrice": currentPrice,
             // "StocksHeld": 0,
             "TransactionID": item.TransactionID,
           }
+
+          console.log("BODY", body)
+          console.log("Current Price type:", typeof(currentPrice));
           const sellResponse = await axios.post('http://20.78.38.247:8000/transaction/updateTrade', body);
           if (sellResponse.status === 200){
             console.log("Successfully sold stock");
-            setAlert({color: 'success', message: 'Successfully sold stock'});
+            // setAlert({color: 'success', message: 'Successfully sold stock'});
           } else {
             console.log("Error selling stock");
-            setAlert({color: 'danger', message: 'Error selling stock'});
+            // setAlert({color: 'danger', message: 'Error selling stock'});
           }
         }
         catch(error){
@@ -554,7 +560,7 @@ const TradeHistory = () => {
                                       {/* <i className="tim-icons icon-user-run" /> */}
                                       Profit / Loss
                                     </td>
-                                    <td className="text-right" style={{backgroundColor: '#1D304f'}}>${pnL}</td>
+                                    <td className="text-right" style={{backgroundColor: '#1D304f'}}>${pnL.toFixed(2)}</td>
                                   </tr>
                                   <tr>
                                     <td className="text-left" style={{backgroundColor: '#1D304f'}}>
@@ -699,7 +705,7 @@ const TradeHistory = () => {
                                 {closedTrades.map((item) => {
                                     return (
                                       <tr>
-                                        <td>{item.TransactionID}</td>
+                                        <td>Transaction No: {item.TransactionID}</td>
                                         <td>{item.Company}</td>
                                         <td>{item.BuyAmount}</td>
                                         <td>{item.SellAmount}</td>
