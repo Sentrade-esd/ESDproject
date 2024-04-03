@@ -39,12 +39,12 @@ function Search() {
 
 
     const performSearch = async(query) => {
-        // TQXOA5D8XQ2ATY3J
-        // GIC3VJ1I8N8DXJAO
-        // YJ3Q75JEFR08G0VB Using in Transaction right now
+        // TQXOA5D8XQ2ATY3J Using in Transaction right now
+        // GIC3VJ1I8N8DXJAO Using in Transaction right now
+        // YJ3Q75JEFR08G0VB 
         // FIYS7MOLA3SBBAK0
-        // GIEADKJM8OSQN0AR
-        // D0I97I0VKG0GRK4O
+        // GIEADKJM8OSQN0AR Using in Transaction right now
+        // D0I97I0VKG0GRK4O Using in UI search right now
         const API_KEY = 'D0I97I0VKG0GRK4O';
         const searchUrl = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${query}&apikey=${API_KEY}`;
     

@@ -116,7 +116,12 @@ cron.schedule("*/1 * * * *", async () => {
               try {
                 sentiment_methods.triggerStoploss(cron.search, size*5, currPrice);
               } catch (error) {
-                sentiment_methods.stoplossRetryQueue({search: cron.search, size: size*5})
+                // if error != 404 requeue
+                if (error.response.status != 405) {
+                  console.log("error triggering stoploss");
+                  console.log(error.response);
+                  sentiment_methods.stoplossRetryQueue({search: cron.search, size: size*5})
+                }
               }
             })
             .catch((error) => {

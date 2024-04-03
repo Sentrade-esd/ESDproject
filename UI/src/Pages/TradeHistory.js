@@ -26,49 +26,37 @@ const TradeHistory = () => {
     const [closedTrades, setClosedTrades] = useState([]);
     const [pnL , setPnL] = useState(0);
     const [totalAssetsValue, setTotalAssetsValue] = useState(0);
+    const [sellTrigger, setSellTrigger] = useState(false);
 
 
     const {alert, setAlert} = useContext(AlertContext);
     const { isLoading, setIsLoading } = useContext(LoadingContext);
     // Uncomment this below when the microservice is ready
     const [allTransactions, setAllTransactions] = useState([]);
-    const [UserID, setUserID] = useState(0);
-    const [username, setUsername] = useState("");
+    const [userId, setUserId] = useState(parseInt(localStorage.getItem("UserId")) || null);
+    const [username, setUsername] = useState(
+      localStorage.getItem("username") || ""
+    );
 
-  
-    // useEffect(() => {
-    //     const UserID = sessionStorage.getItem('id'); 
-    //     if (UserID) { // check if email is present
-    //         axios.get(`http://127.0.0.1:5004/transaction/total/${UserID}`)
-    //     .then(response => {
-    //         // setTransactions(response.data);
-    //         setTransactions(response.data.data.Transaction);
-    //     })
-    //     .catch(error => {
-    //         console.error('There was an error!', error);
-    //     });
-    //     }
-    // }, []);
-
-    useEffect(()=> {
-      // const savedUserID = localStorage.getItem('UserID');
-      // const userName = lcoalStorage.getItem('UserName');
-      const savedUserID = 1;
-      const savedUsername= "usertest@email.com"
-      
-      setUserID(savedUserID);
-      setUsername(savedUsername);
-    })
-
-    // Uncomment this below when the microservice is ready (Fetch for all transactions with UserId)
     useEffect(() => {
+      console.log("UseEffect 1 is happening")
+      console.log('UserId: ', userId);
+      console.log("TypeOf", typeof(userId));
+
       const fetchData = async () => {
         try {
+          // let fakeId = 1;
+          // const TransactionsResponse = await axios.get(
+          //   `http://20.78.38.247:8000/transaction/total/${fakeId}`
+          // ); 
+          // const LatestTransactionResponse = await axios.get(
+          //   `http://20.78.38.247:8000/transaction/${fakeId}`
+          // );
           const TransactionsResponse = await axios.get(
-            `http://20.78.38.247:8000/transaction/total/1`
+            `http://20.78.38.247:8000/transaction/total/${userId}`
           ); 
           const LatestTransactionResponse = await axios.get(
-            `http://20.78.38.247:8000/transaction/1`
+            `http://20.78.38.247:8000/transaction/${userId}`
           );
 
           console.log("ALL TRANSACTIONS:", TransactionsResponse.data);
@@ -83,12 +71,42 @@ const TradeHistory = () => {
         }
       };
       fetchData();
-    }, []);
+    }, [sellTrigger]);
+
+    // useEffect(() => {
+    //   const fetchData = async () => {
+    //     try {
+    //       const TransactionsResponse = await axios.get(
+    //         `http://20.78.38.247:8000/transaction/total?UserID=${userId}`
+    //       ); 
+    //       const LatestTransactionResponse = await axios.get(
+    //         `http://20.78.38.247:8000/transaction?UserID=${userId}`
+    //       );
+
+    //       console.log("ALL TRANSACTIONS:", TransactionsResponse.data);
+    //       console.log("LATEST TRANSACTION:", LatestTransactionResponse.data);
+
+    //       setAllTransactions(TransactionsResponse.data.data.Transaction);
+    //       setCurrentBalance(LatestTransactionResponse.data.data.TotalAccountValue);
+
+        
+    //     } catch (error) {
+    //       console.error("Error fetching data:", error);
+    //     }
+    //   };
+    //   fetchData();
+    // }, []);
 
     useEffect(() => {
       console.log('UseEffect 2 is happening');
       const openTrades = allTransactions.slice(1).filter((transaction) => transaction.SellAmount === null);
-      setOpenTrades(openTrades);
+      let filteredOpenTrades = [];
+      openTrades.forEach((trade) => {
+        if (openTrades.companyName !== null){
+          filteredOpenTrades.push(trade);
+        }
+      })
+      setOpenTrades(filteredOpenTrades);
       const closedTrades = allTransactions.filter((transaction) => transaction.SellAmount !== null);
       setClosedTrades(closedTrades);
       
@@ -145,6 +163,7 @@ const TradeHistory = () => {
       // })
 
     }, [allTransactions]);
+
 
   
     // async function fetchPrices(openTrades){
@@ -248,48 +267,64 @@ const TradeHistory = () => {
 
       async function fetchSellAmount() {
         try {
-          const stockData = await axios.get(`http://20.78.38.247:8000/scraper/scrapeCurrentPrice?company=${item.Company}`);
+          let matchingTicker = {
+            "Nvidia": "NVDA",
+            "Apple Inc": "AAPL",
+            "Microsoft": "MSFT",
+            "Tesla": "TSLA",
+            "Amazon": "AMZN",
+          }
+          let ticker;
+          if (matchingTicker[item.Company]){
+            ticker = matchingTicker[item.Company];
+          }
+          const stockData = await axios.get(`http://20.78.38.247:8000/scraper/scrapeCurrentPrice?ticker=${ticker}`);
+          // const stockData = await axios.get(`http://20.78.38.247:8000/scraper/scrapeCurrentPrice?company=${encodeURIComponent(item.Company)}`);
           console.log(stockData.data.price);
           const currentPrice = stockData.data.price;
           const sellAmount = currentPrice * item.StocksHeld;
           return sellAmount;
         }
+        
         catch(error){
           console.error("Error fetching data:", error);
         }
       }
 
       // sell stock
-      const sellAmount = await fetchSellAmount();
-      console.log("SELL AMOUNT", sellAmount);
+      const currentPrice = await fetchSellAmount();
+      console.log("SELL AMOUNT", currentPrice);
 
-      // async function sellStock() {
-      //   try {
-      //     let body = {
-      //       "UserID": UserID,
-      //       "Email": username,
-      //       "Company": item.Company,
-      //       // "BuyAmount": item.BuyAmount,
-      //       "SellAmount": sellAmount,
-      //       // "StocksHeld": 0,
-      //       "Ticker": item.Ticker,
-      //       "Transaction": item.TransactionID,
-      //     }
-      //     const sellResponse = await axios.post('http://20.78.38.247:8000/transaction/sell', body);
-      //   }
-      //   catch(error){
-      //     console.error('Error selling stock:', error);
-      //   }
-      // }
+      async function sellStock() {
+        try {
+          let body = {
+            "UserID": userId,
+            "Company": item.Company,
+            "Ticker": item.Ticker,
+            // "Email": username,
+            // "BuyAmount": item.BuyAmount,
+            "currentPrice": currentPrice,
+            // "StocksHeld": 0,
+            "TransactionID": item.TransactionID,
+          }
+          const sellResponse = await axios.post('http://20.78.38.247:8000/transaction/updateTrade', body);
+          if (sellResponse.status === 200){
+            console.log("Successfully sold stock");
+            setAlert({color: 'success', message: 'Successfully sold stock'});
+          } else {
+            console.log("Error selling stock");
+            setAlert({color: 'danger', message: 'Error selling stock'});
+          }
+        }
+        catch(error){
+          console.error('Error selling stock:', error);
+        }
+      }
 
-
-      
-
+      await sellStock();
+      setSellTrigger(prev => !prev);
       // fetch price of stock using scraper
-
     }
-
-
 
     return (
         <>
@@ -311,10 +346,14 @@ const TradeHistory = () => {
             <div className='testimonials-4' style={{backgroundColor: '#1D304f'}}>
             <Container className='pt-5 pb-5'>
                 <Row>
-                  <Col md="6" className="d-flex justify-content-center align-items-center">
-                    {openTrades.length === 0 ? (
-                      <h6 style={{color:"white"}}>No Opening Trades</h6>
+                  {openTrades.length === 0 ? (
+                    <Col md="6" className="d-flex justify-content-center align-items-center">
+                      <div>
+                        <h6 style={{color:"white"}}>No Opening Trades</h6>
+                      </div>
+                    </Col>
                     ) : (
+                    <Col md="6">
                       <Carousel
                       activeIndex={carousel2Index}
                       // next={() => next(2, items2)}
@@ -365,8 +404,7 @@ const TradeHistory = () => {
                                               className="mt-4"
                                               color="info"
                                               href="#pablo"
-                                              // onClick={(e) => {e.preventDefault(), 
-                                              //   handleSell(item)}}
+                                              onClick={(e) => {e.preventDefault(); handleSell(item);}}
                                               >
                                               Sell Now
                                               </Button>
@@ -445,8 +483,8 @@ const TradeHistory = () => {
                           <i className="tim-icons icon-minimal-right" />
                       </a>
                       </Carousel>
+                    </Col>
                     )}
-                  </Col>
                   <Col md='6'>
                     <Col md='10'>
                       <Card className="card-coin card-plain">
