@@ -478,7 +478,7 @@ def automated_selling():
     if len(transaction_list) == 0:
         return jsonify(
             {
-                "code": 405,
+                "code": 404,
                 "message": "No transactions to sell."
             }
         ), 404
