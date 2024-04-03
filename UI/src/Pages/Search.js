@@ -117,11 +117,11 @@ function Search() {
   const selectCompany = (companyName, companySymbol) => {
     console.log(companyName + " - " + companySymbol);
 
-    // localStorage.setItem('companyName', companyName);
-    // localStorage.setItem('companySymbol', companySymbol);
+    localStorage.setItem("companyName", companyName);
+    localStorage.setItem("companySymbol", companySymbol);
 
-    companyName = "Apple Inc.";
-    companySymbol = "AAPL";
+    // companyName = "Apple Inc.";
+    // companySymbol = "AAPL";
     // Navigate to the Trade page using state
     navigate("/trade", {
       state: { companyName, companySymbol },
@@ -204,8 +204,8 @@ function Search() {
                     <Button
                       color="warning"
                       onClick={
-                        // handleSearchButtonClick
-                        selectCompany
+                        handleSearchButtonClick
+                        // selectCompany
                       }
                     >
                       Search

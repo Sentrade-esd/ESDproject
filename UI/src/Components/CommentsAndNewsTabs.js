@@ -83,6 +83,7 @@ const CommentsAndNewsTabs = ({
                 <NavLink
                   className={`${activeTab === "comments" ? "active" : ""}`}
                   onClick={() => toggleTab("comments")}
+                  style={{ cursor: "pointer" }}
                 >
                   Comments
                 </NavLink>
@@ -91,6 +92,7 @@ const CommentsAndNewsTabs = ({
                 <NavLink
                   className={`${activeTab === "news" ? "active" : ""}`}
                   onClick={() => toggleTab("news")}
+                  style={{ cursor: "pointer" }}
                 >
                   News
                 </NavLink>

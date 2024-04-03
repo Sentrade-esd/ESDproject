@@ -303,17 +303,26 @@ const NavBar = ({ transparent }) => {
               </div>
               <Nav className="mx-auto" navbar>
                 <NavItem>
-                  <NavLink href="landing">Home</NavLink>
+                  <NavLink href="landing" style={{ cursor: "pointer" }}>
+                    Home
+                  </NavLink>
                 </NavItem>
                 <NavItem>
-                  <NavLink href="search" onClick={handleSearchClick}>
+                  <NavLink
+                    href="search"
+                    onClick={handleSearchClick}
+                    style={{ cursor: "pointer" }}
+                  >
                     Search
                   </NavLink>
                 </NavItem>
                 {isLoggedIn ? (
                   <>
                     <NavItem>
-                      <NavLink onClick={handleTradeHistoryClick}>
+                      <NavLink
+                        onClick={handleTradeHistoryClick}
+                        style={{ cursor: "pointer" }}
+                      >
                         Trades
                       </NavLink>
                     </NavItem>
@@ -412,9 +421,27 @@ const NavBar = ({ transparent }) => {
 };
 const LoadingModal = () => {
   return (
-    <div class="loader-container">
-      <div class="loader"></div>
-      <div class="loader-text">Redirecting you to our TeleBot...</div>
+    <div
+      className="loader-container"
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        zIndex: 9999,
+        backgroundColor: "#1d314f",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        flexDirection: "column",
+      }}
+    >
+      {/* <img src={require(`Assests/img/loading.mp4`)} /> */}
+      <div className="loader"></div>
+      <div className="loader-text" style={{ color: "white" }}>
+        Redirecting you to our TeleBot...
+      </div>
     </div>
   );
 };

@@ -207,6 +207,7 @@ function Trade() {
   const [username, setUsername] = useState(
     localStorage.getItem("username") || ""
   );
+  const [teleId, setTeleId] = useState(localStorage.getItem("teleID") || "");
   // Use effect to check if userisLogged in
   useEffect(() => {
     const savedUsername = localStorage.getItem("username");
@@ -436,7 +437,23 @@ function Trade() {
   };
 
   // const { search, sentiment_score } = jsonData.result;
-
+  const handleWatchlist = async () => {
+    try {
+      const response = await axios.post(
+        `http://20.2.233.161:8000/watchlist/add`,
+        {
+          userID: userId,
+          teleID: teleId,
+          watchlistedCompany: companyName,
+        }
+      );
+      console.log("watvhlist", response.data);
+      setAlert("Added to watchlist successfully");
+    } catch (error) {
+      console.error(error);
+      setAlert("Failed to add to watchlist");
+    }
+  };
   const handleFollowTrade = async (event) => {
     // Should be calling FollowTrades here
     // Store this email, ticker, targetDate, buyAmountPerFiling, maxBuyAmount and send
@@ -753,6 +770,17 @@ function Trade() {
                       disabled={!isLoggedIn || !fetchedData}
                     >
                       Follow Trade
+                    </Button>
+                  </Col>
+                  <Col>
+                    <Button
+                      color="info"
+                      onClick={handleWatchlist}
+                      size="lg"
+                      style={{ color: "white" }}
+                      disabled={!isLoggedIn || !fetchedData}
+                    >
+                      Watchlist
                     </Button>
                   </Col>
                 </Row>
