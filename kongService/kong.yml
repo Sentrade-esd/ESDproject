@@ -184,6 +184,32 @@ services:
         - POST
         - OPTIONS
         strip_path: false
+      
+      - name: transaction-getLatestByUser-route
+        paths:
+        - /transaction
+        methods:
+        - GET
+        - OPTIONS
+        strip_path: false
+
+      # - name: transaction-checkBalance
+      #   paths:
+      #   - /checkBalance
+      #   methods:
+      #   - POST
+      #   - OPTIONS
+      #   strip_path: false
+
+      # - name: transaction-followTrade
+      #   paths:
+      #   - /followTradeTransaction
+      #   methods:
+      #   - POST
+      #   - OPTIONS
+      #   strip_path: false
+
+      
 
   - name: follow-trade-service
     url: http://follow_trades:4001/
