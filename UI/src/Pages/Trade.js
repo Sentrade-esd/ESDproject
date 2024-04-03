@@ -200,6 +200,7 @@ function Trade() {
   };
   const [purchaseStatus, setPurchaseStatus] = useState(null);
   const [fetchedData, setFetchedData] = useState(false);
+  const [watchlisted, setWatchlisted] = useState(false);
   useEffect(() => {
     console.log("comments", comments);
   }, [comments]);
@@ -285,8 +286,22 @@ function Trade() {
       Ticker: companySymbol,
     };
     console.log("body", body);
+    let body2 = {
+      userId: userId,
+      maxBuyAmount: Number(tradeAmount),
+    };
     axios
-      .post("http://20.2.233.161:8000/transaction/newTrade", body)
+      .post("http://20.2.233.161:8000/checkBalance", body2)
+      .then((response) => {
+        if (response.data == "true") {
+          return axios.post(
+            "http://20.2.233.161:8000/transaction/newTrade",
+            body
+          );
+        } else {
+          setPurchaseStatus("insufficient");
+        }
+      })
       .then((response) => {
         console.log(response.data);
         setPurchaseStatus("success");
@@ -449,6 +464,7 @@ function Trade() {
       );
       console.log("watvhlist", response.data);
       setAlert("Added to watchlist successfully");
+      setWatchlisted(true);
     } catch (error) {
       console.error(error);
       setAlert("Failed to add to watchlist");
@@ -1110,6 +1126,8 @@ function Trade() {
         <ModalBody>
           {purchaseStatus === "success" ? (
             "Successfully bought"
+          ) : purchaseStatus === "insufficient" ? (
+            "Insufficient"
           ) : (
             <Form>
               <FormGroup>

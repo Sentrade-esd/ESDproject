@@ -47,7 +47,7 @@ const TradeHistory = () => {
   const [pnL, setPnL] = useState(0);
   const [totalAssetsValue, setTotalAssetsValue] = useState(0);
   const [sellTrigger, setSellTrigger] = useState(false);
-
+  const [selling, setSelling] = useState(false);
   const { alert, setAlert } = useContext(AlertContext);
   const { isLoading, setIsLoading } = useContext(LoadingContext);
   // Uncomment this below when the microservice is ready
@@ -58,7 +58,32 @@ const TradeHistory = () => {
   const [username, setUsername] = useState(
     localStorage.getItem("username") || ""
   );
-
+  const LoadingModal = () => {
+    return (
+      <div
+        className="loader-container"
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          zIndex: 9999,
+          backgroundColor: "#1d314f",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          flexDirection: "column",
+        }}
+      >
+        {/* <img src={require(`Assests/img/loading.mp4`)} /> */}
+        <div className="loader"></div>
+        <div className="loader-text" style={{ color: "white" }}>
+          Selling...
+        </div>
+      </div>
+    );
+  };
   useEffect(() => {
     console.log("UseEffect 1 is happening");
     console.log("UserId: ", userId);
@@ -301,16 +326,20 @@ const TradeHistory = () => {
         //   ticker = matchingTicker[item.Company];
         // }
         // const stockData = await axios.get(`http://20.2.233.161:8000/scraper/scrapeCurrentPrice?ticker=${ticker}`);
+        setSelling(true);
         const stockData = await axios.get(
           `http://20.2.233.161:8000/scraper/scrapeCurrentPrice?company=${encodeURIComponent(
             item.Company
           )}`
         );
         console.log(stockData.data.price);
-        const currentPrice = stockData.data.price;
-        const ticker = stockData.data.ticker;
-        const sellAmount = currentPrice * item.StocksHeld;
-        return { sellAmount: sellAmount, ticker: ticker };
+        if (stockData.status === 200) {
+          const currentPrice = stockData.data.price;
+          const ticker = stockData.data.ticker;
+          const sellAmount = currentPrice * item.StocksHeld;
+          setSelling(false);
+          return { sellAmount: sellAmount, ticker: ticker };
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -385,6 +414,7 @@ const TradeHistory = () => {
           </UncontrolledAlert>
         )
       )}
+      {selling && <LoadingModal />}
       <div className="wrapper" ref={wrapper}>
         <div className="testimonials-4" style={{ backgroundColor: "#1D304f" }}>
           <Container className="pt-5 pb-5">
