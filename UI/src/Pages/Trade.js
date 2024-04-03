@@ -16,8 +16,8 @@ import "../Styles/global.css";
 import { AlertContext } from "../Components/AlertContext.js";
 import { LoadingContext } from "../Components/LoadingContext.js";
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBell } from '@fortawesome/free-solid-svg-icons';
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+// import { faBell } from '@fortawesome/free-solid-svg-icons';
 
 // import React from "react";
 // import ProgressBar from "@ramonak/react-progress-bar";
@@ -681,7 +681,7 @@ function Trade() {
                     <i className="text-warning" style={{ fontSize: "20px" }}>
                       {companySymbol}
                     </i>
-                    <FontAwesomeIcon icon={faBell} className="mx-3" style={{ fontSize: '20px' }}/>
+                    {/* <FontAwesomeIcon icon={faBell} className="mx-3" style={{ fontSize: '20px' }}/> */}
                   </span>
                 </h1>
                 <div
