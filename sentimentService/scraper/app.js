@@ -332,7 +332,8 @@ async function convertCompanyToTicker(company) {
   let url = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${company}&apikey=${key}`;
 
   const response = await axios.get(url);
-  ticker = response.data.bestMatches[0]["1. symbol"];
+  console.log(response.data)
+  ticker = response.data["bestMatches"][0]["1. symbol"];
 
   return ticker;
 }
