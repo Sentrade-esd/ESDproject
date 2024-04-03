@@ -334,6 +334,7 @@ async function convertCompanyToTicker(company) {
   const response = await axios.get(url);
   console.log(response.data)
   ticker = response.data["bestMatches"][0]["1. symbol"];
+  // ticker = response.data.bestMatches[0]["1. symbol"];
 
   return ticker;
 }
