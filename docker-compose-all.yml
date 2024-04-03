@@ -17,6 +17,9 @@ services:
     networks:
       - kong_network
     restart: unless-stopped
+    environment:
+      - KONG_NGINX_WORKER_PROCESSES=4
+      - KONG_LUA_GC_THRESHOLD=60
 
   prometheus:
     build: 
