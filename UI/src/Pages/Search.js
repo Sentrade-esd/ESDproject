@@ -204,8 +204,8 @@ function Search() {
                     <Button
                       color="warning"
                       onClick={
-                        handleSearchButtonClick
-                        // selectCompany
+                        // handleSearchButtonClick
+                        selectCompany
                       }
                     >
                       Search

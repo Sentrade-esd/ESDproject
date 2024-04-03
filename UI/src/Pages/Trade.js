@@ -199,6 +199,7 @@ function Trade() {
     setBuyModal(!buyModal);
   };
   const [purchaseStatus, setPurchaseStatus] = useState(null);
+  const [fetchedData, setFetchedData] = useState(false);
   useEffect(() => {
     console.log("comments", comments);
   }, [comments]);
@@ -328,7 +329,7 @@ function Trade() {
           )}`
         );
         setPrice(ScrapeResponse.data.price);
-
+        setFetchedData(true);
         setMarketCap(ScrapeResponse.data.marketCap);
 
         setAvgVolume(ScrapeResponse.data.avgVolume);
@@ -738,7 +739,7 @@ function Trade() {
                       onClick={toggleBuyModal}
                       size="lg"
                       style={{ color: "white" }}
-                      disabled={!isLoggedIn}
+                      disabled={!isLoggedIn || !fetchedData}
                     >
                       Buy Now
                     </Button>
@@ -749,7 +750,7 @@ function Trade() {
                       onClick={toggleFollowModal}
                       size="lg"
                       style={{ color: "white" }}
-                      //   disabled={!isLoggedIn}
+                      disabled={!isLoggedIn || !fetchedData}
                     >
                       Follow Trade
                     </Button>
