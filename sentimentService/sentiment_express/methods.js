@@ -354,7 +354,7 @@ const sentiment_methods = {
                     } catch (error) {
                         console.error('error triggering stoploss', error);
                         // if 404, ack
-                        if (error.response.status == 405) {
+                        if (error.response.status == 404) {
                             sentiment_methods.channel.ack(message);
                         } else {
                             sentiment_methods.channel.nack(message, false, false);
