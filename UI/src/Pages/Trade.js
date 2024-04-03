@@ -425,13 +425,13 @@ function Trade() {
     if (keyword !== null && emotion !== null) {
       const keywords = Object.entries(keyword).map(([text, size]) => ({
         text,
-        size,
+        size: size * 10,
       }));
       console.log("keywords", keywords);
       setKeyWords(keywords);
       const emotions = Object.entries(emotion).map(([text, size]) => ({
         text,
-        size,
+        size: size * 10,
       }));
       console.log("emotions", emotions);
       setEmotions(emotions);
@@ -715,9 +715,12 @@ function Trade() {
                     <i className="text-warning" style={{ fontSize: "20px" }}>
                       {companySymbol}
                     </i>
-                    {watchlisted && 
-    <span style={{ fontSize: '18px', paddingLeft:'20px' }}>&#x1F514; <i style={{fontSize: '15px'}}>WatchedListed</i></span>
-}
+                    {watchlisted && (
+                      <span style={{ fontSize: "18px", paddingLeft: "20px" }}>
+                        &#x1F514;{" "}
+                        <i style={{ fontSize: "15px" }}>WatchedListed</i>
+                      </span>
+                    )}
                     {/* <FontAwesomeIcon icon={faBell} className="mx-3" style={{ fontSize: '20px' }}/> */}
                   </span>
                 </h1>
@@ -792,17 +795,17 @@ function Trade() {
                     </Button>
                   </Col>
                   <Col>
-                  {!watchlisted && 
-                    <Button
+                    {!watchlisted && (
+                      <Button
                         color="info"
                         onClick={handleWatchlist}
                         size="lg"
                         style={{ color: "white" }}
                         disabled={!isLoggedIn || !fetchedData}
-                    >
+                      >
                         Watchlist
-                    </Button>
-                  }
+                      </Button>
+                    )}
                   </Col>
                 </Row>
               </Col>
