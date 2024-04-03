@@ -715,6 +715,9 @@ function Trade() {
                     <i className="text-warning" style={{ fontSize: "20px" }}>
                       {companySymbol}
                     </i>
+                    {watchlisted && 
+    <span style={{ fontSize: '18px', paddingLeft:'20px' }}>&#x1F514; <i style={{fontSize: '15px'}}>WatchedListed</i></span>
+}
                     {/* <FontAwesomeIcon icon={faBell} className="mx-3" style={{ fontSize: '20px' }}/> */}
                   </span>
                 </h1>
@@ -789,15 +792,17 @@ function Trade() {
                     </Button>
                   </Col>
                   <Col>
+                  {!watchlisted && 
                     <Button
-                      color="info"
-                      onClick={handleWatchlist}
-                      size="lg"
-                      style={{ color: "white" }}
-                      disabled={!isLoggedIn || !fetchedData}
+                        color="info"
+                        onClick={handleWatchlist}
+                        size="lg"
+                        style={{ color: "white" }}
+                        disabled={!isLoggedIn || !fetchedData}
                     >
-                      Watchlist
+                        Watchlist
                     </Button>
+                  }
                   </Col>
                 </Row>
               </Col>
