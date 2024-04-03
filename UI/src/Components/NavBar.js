@@ -103,7 +103,7 @@ const NavBar = ({ transparent }) => {
   }, []);
   const handleLogin = (username, password) => {
     axios
-      .get(`http://20.78.38.247:8000/user/getUser?email=${username}`)
+      .get(`http://20.2.233.161:8000/user/getUser?email=${username}`)
       .then((response) => {
         if (response.data.code === 200) {
           if (password === response.data.data.Password) {
@@ -124,7 +124,7 @@ const NavBar = ({ transparent }) => {
                 email: username,
               };
 
-              axios.post("http://20.78.38.247:8000/transaction/setup", body);
+              axios.post("http://20.2.233.161:8000/transaction/setup", body);
             } catch (error) {
               console.error(error);
             }
@@ -179,7 +179,7 @@ const NavBar = ({ transparent }) => {
       setPendingTeleID("true");
       try {
         const response = await axios.get(
-          "http://20.78.38.247:8000/teleBot/redirect",
+          "http://20.2.233.161:8000/teleBot/redirect",
           {
             headers: {
               bro: window.location.href,
@@ -213,7 +213,7 @@ const NavBar = ({ transparent }) => {
     console.log("telegramhandle", TelegramHandle);
     console.log("lolol");
     axios
-      .post("http://20.78.38.247:8000/user", {
+      .post("http://20.2.233.161:8000/user", {
         Email: Email,
         Password: Password,
         Telehandle: TelegramHandle,
@@ -222,7 +222,7 @@ const NavBar = ({ transparent }) => {
       .then((response) => {
         if (response.data.code === 200) {
           axios
-            .get(`http://20.78.38.247:8000/user/${Email}`)
+            .get(`http://20.2.233.161:8000/user/${Email}`)
             .then((response) => {
               if (response.data.code === 200) {
                 localStorage.setItem("username", Email);

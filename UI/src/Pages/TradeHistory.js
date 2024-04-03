@@ -47,16 +47,16 @@ const TradeHistory = () => {
         try {
           // let fakeId = 1;
           // const TransactionsResponse = await axios.get(
-          //   `http://20.78.38.247:8000/transaction/total/${fakeId}`
+          //   `http://20.2.233.161:8000/transaction/total/${fakeId}`
           // ); 
           // const LatestTransactionResponse = await axios.get(
-          //   `http://20.78.38.247:8000/transaction/${fakeId}`
+          //   `http://20.2.233.161:8000/transaction/${fakeId}`
           // );
           const TransactionsResponse = await axios.get(
-            `http://20.78.38.247:8000/transaction/total/${userId}`
+            `http://20.2.233.161:8000/transaction/total/${userId}`
           ); 
           const LatestTransactionResponse = await axios.get(
-            `http://20.78.38.247:8000/transaction/${userId}`
+            `http://20.2.233.161:8000/transaction/${userId}`
           );
 
           console.log("ALL TRANSACTIONS:", TransactionsResponse.data);
@@ -77,10 +77,10 @@ const TradeHistory = () => {
     //   const fetchData = async () => {
     //     try {
     //       const TransactionsResponse = await axios.get(
-    //         `http://20.78.38.247:8000/transaction/total?UserID=${userId}`
+    //         `http://20.2.233.161:8000/transaction/total?UserID=${userId}`
     //       ); 
     //       const LatestTransactionResponse = await axios.get(
-    //         `http://20.78.38.247:8000/transaction?UserID=${userId}`
+    //         `http://20.2.233.161:8000/transaction?UserID=${userId}`
     //       );
 
     //       console.log("ALL TRANSACTIONS:", TransactionsResponse.data);
@@ -150,7 +150,7 @@ const TradeHistory = () => {
       //   async function fetchData() {
       //     try {
       //       console.log("Fetching stock data");
-      //       const stockData = await axios.get(`http://20.78.38.247:8000/scraper/scrapeCurrentPrice?company=${stock.Company}`);
+      //       const stockData = await axios.get(`http://20.2.233.161:8000/scraper/scrapeCurrentPrice?company=${stock.Company}`);
       //       console.log(stockData.data.price);
       //       const currentPrice = stockData.data.price;
       //       const totalValue = currentPrice * stock.StocksHeld;
@@ -280,8 +280,8 @@ const TradeHistory = () => {
           // if (matchingTicker[item.Company]){
           //   ticker = matchingTicker[item.Company];
           // }
-          // const stockData = await axios.get(`http://20.78.38.247:8000/scraper/scrapeCurrentPrice?ticker=${ticker}`);
-          const stockData = await axios.get(`http://20.78.38.247:8000/scraper/scrapeCurrentPrice?company=${encodeURIComponent(item.Company)}`);
+          // const stockData = await axios.get(`http://20.2.233.161:8000/scraper/scrapeCurrentPrice?ticker=${ticker}`);
+          const stockData = await axios.get(`http://20.2.233.161:8000/scraper/scrapeCurrentPrice?company=${encodeURIComponent(item.Company)}`);
           console.log(stockData.data.price);
           const currentPrice = stockData.data.price;
           const ticker = stockData.data.ticker;
@@ -316,7 +316,7 @@ const TradeHistory = () => {
 
           console.log("BODY", body)
           console.log("Current Price type:", typeof(currentPrice));
-          const sellResponse = await axios.post('http://20.78.38.247:8000/transaction/updateTrade', body);
+          const sellResponse = await axios.post('http://20.2.233.161:8000/transaction/updateTrade', body);
           if (sellResponse.status === 200){
             console.log("Successfully sold stock");
             // setAlert({color: 'success', message: 'Successfully sold stock'});

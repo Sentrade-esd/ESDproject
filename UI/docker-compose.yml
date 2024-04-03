@@ -14,4 +14,4 @@ services:
     #   - kong_network
     environment:
       # - KONG_URL=http://kong:8000/
-      - KONG_URL=http://20.78.38.247:8000/
+      - KONG_URL=http://20.2.233.161:8000/

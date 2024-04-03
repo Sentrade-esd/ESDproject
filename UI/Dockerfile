@@ -16,5 +16,5 @@ COPY .ssl/private.key /etc/nginx/ssl/
 
 # Copy the default nginx.conf provided by tiangolo/node-frontend
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 443
+EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

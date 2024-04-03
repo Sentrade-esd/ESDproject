@@ -284,7 +284,7 @@ function Trade() {
     };
 
     axios
-      .post("http://20.78.38.247:8000/transaction/newTrade", body)
+      .post("http://20.2.233.161:8000/transaction/newTrade", body)
       .then((response) => {
         console.log(response.data);
       })
@@ -318,7 +318,7 @@ function Trade() {
       // fetches current price, market cap, and average volume
       try {
         const ScrapeResponse = await axios.get(
-          `http://20.78.38.247:8000/scraper/scrapeCurrentPrice?ticker=${encodeURIComponent(
+          `http://20.2.233.161:8000/scraper/scrapeCurrentPrice?ticker=${encodeURIComponent(
             companySymbol
           )}`
         );
@@ -338,7 +338,7 @@ function Trade() {
         console.log("companyName", companyName);
         console.log("companySymbol", companySymbol);
         const CommentsResponse = await axios.get(
-          `http://20.78.38.247:8000/comments/${companyName}`
+          `http://20.2.233.161:8000/comments/${companyName}`
         );
         setComments(CommentsResponse.data);
         localStorage.setItem("comments", JSON.stringify(CommentsResponse.data));
@@ -353,7 +353,7 @@ function Trade() {
       // fetches sentiment score and news
       try {
         const SentimentResponse = await axios.get(
-          `http://20.78.38.247:8000/sentimentAPI/sentiment_query?search_term=${companyName}&ticker=${companySymbol}`
+          `http://20.2.233.161:8000/sentimentAPI/sentiment_query?search_term=${companyName}&ticker=${companySymbol}`
         );
         // Rest of your code
         // localStorage.setItem(
@@ -468,7 +468,7 @@ function Trade() {
 
     try {
       const followTradeResponse = await axios.get(
-        `http://20.78.38.247:8000/followTrade/buy`,
+        `http://20.2.233.161:8000/followTrade/buy`,
         body
       );
       //   await sleep(10000);
