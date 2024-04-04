@@ -313,58 +313,12 @@ function Search() {
           </Container>
         </div>
       </div>
-      {/* <Container>
-            <Row className="justify-content-center">
-                <Col md={10} lg={10}>
-                    <h1>Search for company information</h1>
-                    <div className="input-group rounded" role="search">
-                        <input id="companySearch" type="search" className="form-control rounded" placeholder="Search for a Company here to find out more about it!"
-                        value={search} onChange={handleInputChange} onKeyDown={handleInputKeyDown} ref={searchInputRef}/>
-                        <button onClick={clearSearch} className="input-group-text border-0" id="search-addon">
-                            <i className="fas fa-search" aria-hidden="true"></i>
-                        </button>
-                    </div>
 
-                    {results.map((result, index) => 
-                        <Row key={index}>
-                            <Col>        
-                                <Button 
-                                    onClick={() => selectCompany(result.name, result.symbol)} 
-                                    className="companyResultButton">
-                                    {result.name} - {result.symbol}
-                                </Button>
-                            </Col>
-                        </Row>
-                    )}
-
-                </Col>
-            </Row>
-        </Container> */}
     </>
   );
 }
 
-// Call scraper pass the ticker ONLY (Price and Newsheadline returning).
-// For Sentiment, send company name and ticker
-// Call comments, sennd company, get last 5 comments store in local storage. Is fetched as array.
+
 
 export default Search;
 
-// This was old code that would dynamically udpate the companies listed as you typed
-// But since each letter was basically 1 API call, not using
-// Just in case we want to reuse it, alson need to modify the input
-// const handleSearchChange = async(e) => {
-//     const value = e.target.value;  // 1
-//     setSearch(value);  // 2
-//     if (value) {  // 3
-//         const res = await performSearch(value);  // 4
-//         setResults(res || ['No results found']);  // 5
-//     } else {
-//         setResults([]);  // 6
-//     }
-// };
-
-{
-  /* <input type="search" className="form-control rounded" placeholder="Search for a Company here to find out more about it!"
-value={search} onChange={handleSearchChange} ref={searchInputRef} /> */
-}
