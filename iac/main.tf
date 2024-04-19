@@ -34,7 +34,8 @@ resource "google_container_node_pool" "primary_nodes" {
   node_count = 1
 
   node_config {
-    machine_type = "e2-medium"
+    # machine_type = "e2-medium"
+    machine_type = "c2-standard-4"
 
     # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
     service_account = data.google_service_account.default.email
@@ -59,44 +60,4 @@ resource "null_resource" "deploy_app" {
   ]
 }
 
-# resource "null_resource" "get_access_token" {
-#   provisioner "local-exec" {
-#     command = "gcloud auth print-access-token $(gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS) > access_token.txt"
-#   }
-# }
-
-# data "local_file" "access_token" {
-#   depends_on = [null_resource.get_access_token]
-#   filename = "${path.module}/access_token.txt"
-# }
-
-# resource "local_file" "kubeconfig" {
-#   content = <<EOF
-#   apiVersion: v1
-#   clusters:
-#   - cluster:
-#       certificate-authority-data: ${google_container_cluster.primary.master_auth.0.cluster_ca_certificate}
-#       server: https://${google_container_cluster.primary.endpoint}
-#     name: cluster
-#   contexts:
-#   - context:
-#       cluster: cluster
-#       user: user
-#     name: context
-#   current-context: context
-#   kind: Config
-#   preferences: {}
-#   users:
-#   - name: user
-#     user:
-#       auth-provider:
-#         config:
-#           cmd-args: config config-helper --format=json
-#           cmd-path: gcloud
-#           expiry-key: '{.credential.token_expiry}'
-#           token-key: '{.credential.access_token}'
-#         name: gcp
-#   EOF
-#   filename = "${path.module}/kubeconfig.yaml"
-# }
 

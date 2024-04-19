@@ -11,6 +11,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: allow-port-80
+  namespace: esd-project
 spec:
   podSelector:
     matchLabels:
@@ -22,16 +23,23 @@ spec:
     ports:
     - protocol: TCP
       port: 80
-    # - protocol: TCP
-    #   port: 15672
 ---
 
-# Define a ClusterRole that allows accessing pods in the ingress-nginx namespace
+# Define a ClusterRole that allows accessing pods, services and deployments in the esd-project namespace
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: ingress-nginx-role
 rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - services
+  - deployments
+  verbs:
+  - get
+  - list
 - apiGroups:
   - networking.k8s.io
   resources:
@@ -52,25 +60,20 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: default
-  namespace: ingress-nginx
+  namespace: esd-project
 
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: ingress-nginx
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: nginx-configuration
-  namespace: ingress-nginx
+  namespace: esd-project
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nginx-ingress-controller
-  namespace: ingress-nginx
+  namespace: esd-project
 spec:
   replicas: 1
   selector:
@@ -106,7 +109,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: ingress-nginx
-  namespace: ingress-nginx
+  namespace: esd-project
 spec:
   type: LoadBalancer
   selector:
@@ -123,6 +126,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: app-ingress
+  namespace: esd-project
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
@@ -188,11 +192,6 @@ spec:
           persistentVolumeClaim:
             claimName: app-volume-claim
 
-      # hostAliases:
-      #   - ip: "127.0.0.1"
-      #     hostnames:
-      #     - "kong"
-
 ---
 apiVersion: v1
 kind: Service
@@ -208,4 +207,3 @@ spec:
       protocol: TCP
       port: 80
       targetPort: 80
-    

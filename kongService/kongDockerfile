@@ -5,7 +5,7 @@ FROM kong:latest
 USER root
 RUN luarocks install kong-prometheus-plugin
 RUN apt-get update && apt-get install -y gettext-base
-# RUN apt install curl -y
+RUN apt-get install -y gettext
 
 # Switch back to the Kong user
 USER kong

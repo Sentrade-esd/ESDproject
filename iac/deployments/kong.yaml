@@ -21,6 +21,10 @@ spec:
       port: 8000
     - protocol: TCP
       port: 8001
+    - protocol: TCP
+      port: 8443
+    - protocol: TCP
+      port: 8444
 
 ---
 apiVersion: apps/v1
@@ -44,6 +48,8 @@ spec:
         ports:
         - containerPort: 8000
         - containerPort: 8001
+        - containerPort: 8443
+        - containerPort: 8444
         env:
         - name: SENTIMENT_SERVICE_URL
           value: "http://sentiment-app:5001/"
@@ -61,6 +67,9 @@ spec:
           value: "http://follow-trades:4001/"
         - name: TELEBOT_SERVICE_URL
           value: "http://telebot:3002/"
+        - name: KONG_DECLARATIVE_CONFIG
+          value: /etc/kong/kong_ready.yml
+        
         command: ["/bin/sh", "-c"]
         args: ["envsubst < /etc/kong/kong.yml > /etc/kong/kong_ready.yml && exec /docker-entrypoint.sh kong docker-start"]
 
