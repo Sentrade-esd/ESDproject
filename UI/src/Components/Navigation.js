@@ -53,21 +53,25 @@ const Navigation = () => {
       .post("http://127.0.0.1:5000/user", {
         Email: Email,
         Password: Password,
-        telegram_handle: TelegramHandle,
+        Telehandle: TelegramHandle, // changed from 'telegram_handle'
+        CreationDate: unixTimestamp, // changed from 'created_at'
+        // You might also need to add 'TeleID' if it's required in your backend
       })
       .then((response) => {
         if (response.data.code === 200) {
-          axios.get(`http://localhost:5000/user/${Email}`).then((response) => {
-            if (response.data.code === 200) {
-              localStorage.setItem("username", Email);
-              localStorage.setItem("id", response.data.data.UserID);
-              setIsLoggedIn(true);
-              setUsername(Email);
-              handleNewUser();
-            } else {
-              console.error("Fetch data after signup failed");
-            }
-          });
+          axios
+            .get(`http://localhost:5000/user/getUser?email=${Email}`)
+            .then((response) => {
+              if (response.data.code === 200) {
+                localStorage.setItem("username", Email);
+                localStorage.setItem("id", response.data.data.UserID);
+                setIsLoggedIn(true);
+                setUsername(Email);
+                handleNewUser();
+              } else {
+                console.error("Fetch data after signup failed");
+              }
+            });
         } else {
           console.error("Signup failed");
         }
