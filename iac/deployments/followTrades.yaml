@@ -1,0 +1,137 @@
+###################
+## follow trades ##
+###################
+
+# network policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-port-4001
+  namespace: esd-project
+spec:
+  podSelector:
+    matchLabels:
+      app: follow-trades
+  policyTypes:
+  - Ingress
+  ingress:
+  - from: []
+    ports:
+    - protocol: TCP
+      port: 4001
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: follow-trades-deployment
+  namespace: esd-project
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: follow-trades
+  template:
+    metadata:
+      labels:
+        app: follow-trades
+    spec:
+      containers:
+      - name: follow-trades
+        image: docker.io/chernise/esdproject-follow_trades:latest
+        ports:
+        - containerPort: 4001
+        env:
+        - name: PORT
+          value: "4001"
+        - name: TRANSACTION_URL
+          value: "http://transactions:6002/"
+        - name: SCRAPER_URL
+          value: "http://scraper:5000/"
+        - name: SENATOR_URL
+          value: "http://senator-filings:4002/"
+        command: ["npm", "start"]
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: follow-trades
+  namespace: esd-project
+spec:
+  type: LoadBalancer
+  selector:
+    app: follow-trades
+  ports:
+    - protocol: TCP
+      port: 4001
+      targetPort: 4001
+
+
+###################
+##senator filings##
+###################
+
+# network policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-port-4002
+  namespace: esd-project
+spec:
+  podSelector:
+    matchLabels:
+      app: senator-filings
+  policyTypes:
+  - Ingress
+  ingress:
+  - from: []
+    ports:
+    - protocol: TCP
+      port: 4002
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: senator-filings-deployment
+  namespace: esd-project
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: senator-filings
+  template:
+    metadata:
+      labels:
+        app: senator-filings
+    spec:
+      containers:
+      - name: senator-filings
+        image: docker.io/chernise/esdproject-senator_filings:latest
+        ports:
+        - containerPort: 4002
+        command: ["gunicorn"]
+        args: ["-w", "1", "--threads", "2", "-b", ":4002", "--timeout", "600", "main:app"]
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: senator-filings
+  namespace: esd-project
+spec:
+  type: LoadBalancer
+  selector:
+    app: senator-filings
+  ports:
+    - protocol: TCP
+      port: 4002
+      targetPort: 4002
+
+
+

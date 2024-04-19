@@ -43,13 +43,13 @@ spec:
         command: ["npm", "start"]
         ports:
         - containerPort: 3002
-    env:
-    - name: AMQP_SERVER
-      value: "amqp://rabbitmq:5672"
-    - name: BOT_TOKEN
-      value: "7039505633:AAFoCvJc3XwP8N7bUd1XsjkCP5rH311TrWQ"
-    - name: BOT_URL
-      value: "https://api.telegram.org/bot"
+        env:
+        - name: AMQP_SERVER
+          value: "amqp://rabbitmq:5672"
+        - name: BOT_TOKEN
+          value: "7039505633:AAFoCvJc3XwP8N7bUd1XsjkCP5rH311TrWQ"
+        - name: BOT_URL
+          value: "https://api.telegram.org/bot"
 
 
 ---

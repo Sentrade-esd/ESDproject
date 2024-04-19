@@ -43,8 +43,8 @@ spec:
         image: docker.io/chernise/esdproject-user_service:latest  # changed here
         ports:
         - containerPort: 6000
-      command: ["gunicorn"]
-      args: ["-w", "1", "--threads", "2", "-b", ":6000", "--timeout", "600", "user:app"]
+        command: ["gunicorn"]
+        args: ["-w", "1", "--threads", "2", "-b", ":6000", "--timeout", "600", "user:app"]
 
 ---
 
@@ -67,6 +67,21 @@ spec:
 ########## user db #####
 ########################
 
+#sample volume
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: app-volume-claim
+#   namespace: esd-project
+# spec:
+#   storageClassName: standard-rwo
+#   accessModes:
+#     - ReadWriteOnce
+#   resources:
+#     requests:
+#       storage: 18Gi
+
+
 #volume 
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -74,6 +89,7 @@ metadata:
   name: user-db-volume
   namespace: esd-project
 spec:
+  storageClassName: standard-rwo
   accessModes:
     - ReadWriteOnce
   resources:
@@ -130,6 +146,11 @@ spec:
         volumeMounts:
         - name: user-db-volume
           mountPath: /var/lib/postgresql/data
+      
+      volumes:
+      - name: user-db-volume
+        persistentVolumeClaim:
+          claimName: user-db-volume
 
 ---
 
@@ -146,32 +167,3 @@ spec:
     - protocol: TCP
       port: 5432
       targetPort: 5432
-
-# user_service:
-#     image: chernise/esdproject-user_service:latest
-#     command: gunicorn -w 1 --threads 2 -b :6000 --timeout 600 User:app
-#     hostname: user_service
-#     ports:
-#       - "6000:6000"
-#     environment:
-#       - SQL_URI=postgresql://postgres:root@user_db:5432
-#     networks:
-#       - user_network
-#       - kong_network
-#     restart: unless-stopped
-
-#   user_db:
-#     image: chernise/esdproject-user_db:latest
-#     hostname: user_db
-#     ports:
-#       - 5432:5432
-#     environment:
-#       POSTGRES_PASSWORD: root
-#       POSTGRES_USER: postgres
-#       POSTGRES_DB: user_db
-#       PGDATA: /var/lib/postgresql/data/pgdata
-#     volumes:
-#       - user_db_data:/var/lib/postgresql/data
-#     networks:
-#       - user_network
-#     restart: unless-stopped

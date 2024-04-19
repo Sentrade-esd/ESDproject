@@ -116,16 +116,21 @@ spec:
         image: docker.io/cherise/esdproject-watchlist_db:latest
         ports:
         - containerPort: 27017
-    env:
-    - name: MONGO_INITDB_DATABASE
-      value: "watchlist"
-    - name: MONGO_INITDB_ROOT_USERNAME
-      value: "root"
-    - name: MONGO_INITDB_ROOT_PASSWORD
-      value: "root"
-    volumeMounts:
-    - name: watchlist-db-volume
-      mountPath: /data/db
+        env:
+        - name: MONGO_INITDB_DATABASE
+          value: "watchlist"
+        - name: MONGO_INITDB_ROOT_USERNAME
+          value: "root"
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          value: "root"
+        volumeMounts:
+        - name: watchlist-db-volume
+          mountPath: /data/db
+      
+      volumes:
+      - name: watchlist-db-volume
+        persistentVolumeClaim:
+          claimName: watchlist-db-volume
 ---
 apiVersion: v1
 kind: Service

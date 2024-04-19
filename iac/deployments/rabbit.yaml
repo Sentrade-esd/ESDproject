@@ -60,12 +60,17 @@ spec:
         ports:
         - containerPort: 5672
         - containerPort: 15672
-    env:
-    - name: RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS
-      value: "-rabbitmq_management load_definitions /etc/rabbitmq/definitions.json"
-    volumeMounts:
-    - name: rabbitmq-data
-      mountPath: /var/lib/rabbitmq
+        env:
+        - name: RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS
+          value: "-rabbitmq_management load_definitions /etc/rabbitmq/definitions.json"
+        volumeMounts:
+        - name: rabbitmq-data
+          mountPath: /var/lib/rabbitmq
+
+      volumes:
+      - name: rabbitmq-data
+        persistentVolumeClaim:
+          claimName: rabbitmq-data
 ---
 apiVersion: v1
 kind: Service
@@ -78,8 +83,10 @@ spec:
     app: rabbitmq
   ports:
     - protocol: TCP
+      name: amqp-point
       port: 5672
       targetPort: 5672
     - protocol: TCP
+      name: gui-point
       port: 15672
       targetPort: 15672

@@ -188,10 +188,10 @@ spec:
           persistentVolumeClaim:
             claimName: app-volume-claim
 
-      hostAliases:
-        - ip: "127.0.0.1"
-          hostnames:
-          - "kong"
+      # hostAliases:
+      #   - ip: "127.0.0.1"
+      #     hostnames:
+      #     - "kong"
 
 ---
 apiVersion: v1

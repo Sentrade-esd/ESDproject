@@ -42,8 +42,8 @@ spec:
         image: docker.io/chernise/esdproject-sentiment_service:latest  # changed here
         ports:
         - containerPort: 5002
-      command: ["gunicorn"]
-      args: ["-w", "1", "--threads", "2", "-b", ":5002", "--timeout", "600", "sentimentApp:app"]
+        command: ["gunicorn"]
+        args: ["-w", "1", "--threads", "2", "-b", ":5002", "--timeout", "600", "sentimentApp:app"]
 
 ---
 
