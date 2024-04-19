@@ -1,0 +1,365 @@
+###############################
+# comments service #
+###############################
+
+# network policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-port-6001
+  namespace: esd-project
+spec:
+  podSelector:
+    matchLabels:
+      app: comments-service
+  policyTypes:
+  - Ingress
+  ingress:
+  - from: []
+    ports:
+    - protocol: TCP
+      port: 6001
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comments-service-deployment
+  namespace: esd-project
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: comments-service
+  template:
+    metadata:
+      labels:
+        app: comments-service
+    spec:
+      containers:
+      - name: comments-service
+        image: docker.io/chernise/esdproject-comments_service:latest
+        ports:
+        - containerPort: 6001
+
+      env:
+        - name: DB_URL
+          value: comments-db:27017
+        - name: AMQP_SERVER
+          value: amqp://rabbitmq:5672
+      command: ["npm"]
+      args: ["start"]
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: comments-service
+  namespace: esd-project
+spec:
+  type: LoadBalancer
+  selector:
+    app: comments-service
+  ports:
+    - protocol: TCP
+      port: 6001
+      targetPort: 6001
+
+---
+########################
+# comments db
+########################
+
+#volume
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: comments-db-volume
+  namespace: esd-project
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+
+# network policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-port-27017
+  namespace: esd-project
+spec:
+  podSelector:
+    matchLabels:
+      app: comments-db
+  policyTypes:
+  - Ingress
+  ingress:
+  - from: []
+    ports:
+    - protocol: TCP
+      port: 27017
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comments-db-deployment
+  namespace: esd-project
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: comments-db
+  template:
+    metadata:
+      labels:
+        app: comments-db
+    spec:
+      containers:
+      - name: comments-db
+        image: docker.io/chernise/esdproject-comments_db:latest
+        ports:
+        - containerPort: 27017
+        env:
+        - name: MONGO_INITDB_DATABASE
+          value: comments
+        - name: MONGO_INITDB_ROOT_USERNAME
+          value: root
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          value: root
+        volumeMounts:
+        - name: comments-db-volume
+          mountPath: /data/db
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: comments-db
+  namespace: esd-project
+spec:
+  type: ClusterIP
+  selector:
+    app: comments-db
+  ports:
+    - protocol: TCP
+      port: 27017
+      targetPort: 27017
+
+
+
+
+# comments_service:
+#     image: chernise/esdproject-comments_service:latest
+#     command: npm start
+#     ports:
+#       - "6001:6001"
+#     networks:
+#       - comments_network
+#       - kong_network
+#       - queue_network
+#     environment:
+#       - DB_URL=comments_db:27017
+#       - AMQP_SERVER=amqp://rabbitmq:5672
+#     restart: unless-stopped
+    
+#   comments_db:
+#     image: chernise/esdproject-sentiment_db:latest
+#     hostname: comments_db
+#     ports:  
+#       - "27020:27017"
+#     environment:
+#       - MONGO_INITDB_DATABASE=comments
+#       - MONGO_INITDB_ROOT_USERNAME=root
+#       - MONGO_INITDB_ROOT_PASSWORD=root
+#     volumes:
+#       - comments_db:/data/db
+#     networks:
+#       - comments_network
+#     restart: unless-stopped
+
+# --------------------------------------
+
+# ########################
+# ### user service #######
+# ########################
+
+# # network policy
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: allow-port-6000
+#   namespace: esd-project
+# spec:
+#   podSelector:
+#     matchLabels:
+#       app: user-service  # changed here
+#   policyTypes:
+#   - Ingress
+#   ingress:
+#   - from: []
+#     ports:
+#     - protocol: TCP
+#       port: 6000
+
+# ---
+
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: user-service-deployment  # changed here
+#   namespace: esd-project
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: user-service  # changed here
+#   template:
+#     metadata:
+#       labels:
+#         app: user-service  # changed here
+#     spec:
+#       containers:
+#       - name: user-service  # changed here
+#         image: docker.io/chernise/esdproject-user_service:latest  # changed here
+#         ports:
+#         - containerPort: 6000
+#       command: ["gunicorn"]
+#       args: ["-w", "1", "--threads", "2", "-b", ":6000", "--timeout", "600", "user:app"]
+
+# ---
+
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: user-service  # changed here
+#   namespace: esd-project
+# spec:
+#   type: LoadBalancer
+#   selector:
+#     app: user-service  # changed here
+#   ports:
+#     - protocol: TCP
+#       port: 6000
+#       targetPort: 6000
+
+# ---
+# ########################
+# ########## user db #####
+# ########################
+
+# #volume 
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: user-db-volume
+#   namespace: esd-project
+# spec:
+#   accessModes:
+#     - ReadWriteOnce
+#   resources:
+#     requests:
+#       storage: 10Gi
+# ---
+# # network policy
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: allow-port-5432
+#   namespace: esd-project
+# spec:
+#   podSelector:
+#     matchLabels:
+#       app: user-db
+#   policyTypes:
+#   - Ingress
+#   ingress:
+#   - from: []
+#     ports:
+#     - protocol: TCP
+#       port: 5432
+
+# ---
+
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: user-db-deployment
+#   namespace: esd-project
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: user-db
+#   template:
+#     metadata:
+#       labels:
+#         app: user-db
+#     spec:
+#       containers:
+#       - name: user-db
+#         image: postgres:latest
+#         ports:
+#         - containerPort: 5432
+#         env:
+#         - name: POSTGRES_USER
+#           value: "postgres"
+#         - name: POSTGRES_PASSWORD
+#           value: "password"
+#         - name: POSTGRES_DB
+#           value: "user_db"
+#         volumeMounts:
+#         - name: user-db-volume
+#           mountPath: /var/lib/postgresql/data
+
+# ---
+
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: user-db
+#   namespace: esd-project
+# spec:
+#   type: ClusterIP
+#   selector:
+#     app: user-db
+#   ports:
+#     - protocol: TCP
+#       port: 5432
+
+# # user_service:
+# #     image: chernise/esdproject-user_service:latest
+# #     command: gunicorn -w 1 --threads 2 -b :6000 --timeout 600 User:app
+# #     hostname: user_service
+# #     ports:
+# #       - "6000:6000"
+# #     environment:
+# #       - SQL_URI=postgresql://postgres:root@user_db:5432
+# #     networks:
+# #       - user_network
+# #       - kong_network
+# #     restart: unless-stopped
+
+# #   user_db:
+# #     image: chernise/esdproject-user_db:latest
+# #     hostname: user_db
+# #     ports:
+# #       - 5432:5432
+# #     environment:
+# #       POSTGRES_PASSWORD: root
+# #       POSTGRES_USER: postgres
+# #       POSTGRES_DB: user_db
+# #       PGDATA: /var/lib/postgresql/data/pgdata
+# #     volumes:
+# #       - user_db_data:/var/lib/postgresql/data
+# #     networks:
+# #       - user_network
+# #     restart: unless-stopped

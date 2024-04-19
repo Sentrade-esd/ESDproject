@@ -243,7 +243,7 @@ services:
     restart: unless-stopped
     
   comments_db:
-    image: chernise/esdproject-sentiment_db:latest
+    image: chernise/esdproject-comments_db:latest
     hostname: comments_db
     ports:  
       - "27020:27017"
