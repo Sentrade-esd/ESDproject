@@ -1,72 +1,82 @@
-########################
-###### watchlist  ######
-########################
+###############################
+# comments service #
+###############################
 
 # network policy
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-port-3000
+  name: allow-port-6001
   namespace: esd-project
 spec:
   podSelector:
     matchLabels:
-      app: watchlist
+      app: comments-service
   policyTypes:
   - Ingress
   ingress:
   - from: []
     ports:
     - protocol: TCP
-      port: 3000
+      port: 6001
 
 ---
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: watchlist-deployment
+  name: comments-service-deployment
   namespace: esd-project
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: watchlist
+      app: comments-service
   template:
     metadata:
       labels:
-        app: watchlist
+        app: comments-service
     spec:
       containers:
-      - name: watchlist
-        image: docker.io/chernise/esdproject-watchlist:latest
-        command: ["npm", "start"]
+      - name: comments-service
+        image: docker.io/chernise/esdproject-comments_service:latest
         ports:
-        - containerPort: 3000
+        - containerPort: 6001
+
         env:
-        - name: DB_URL
-          value: "watchlist-db:27017"  # changed here
+          - name: DB_URL
+            value: comments-db:27017
+          - name: AMQP_SERVER
+            value: amqp://rabbitmq:5672
+        command: ["npm"]
+        args: ["start"]
+
 ---
+
 apiVersion: v1
 kind: Service
 metadata:
-  name: watchlist
+  name: comments-service
   namespace: esd-project
-spec: 
-  type: LoadBalancer
+spec:
+  type: ClusterIP
   selector:
-    app: watchlist
+    app: comments-service
   ports:
     - protocol: TCP
-      port: 3000
-      targetPort: 3000
+      port: 6001
+      targetPort: 6001
+
 ---
 ########################
-#### watchlist db ######
+# comments db
 ########################
+
+#volume
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: watchlist-db-volume
+  name: comments-db-volume
   namespace: esd-project
 spec:
   storageClassName: standard-rwo
@@ -86,7 +96,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app: watchlist-db  # changed here
+      app: comments-db
   policyTypes:
   - Ingress
   ingress:
@@ -94,54 +104,60 @@ spec:
     ports:
     - protocol: TCP
       port: 27017
+
 ---
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: watchlist-db-deployment
+  name: comments-db-deployment
   namespace: esd-project
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: watchlist-db  # changed here
+      app: comments-db
   template:
     metadata:
       labels:
-        app: watchlist-db  # changed here
+        app: comments-db
     spec:
       containers:
-      - name: watchlist-db
-        image: docker.io/cherise/esdproject-watchlist_db:latest
+      - name: comments-db
+        image: docker.io/chernise/esdproject-comments_db:latest
         ports:
         - containerPort: 27017
         env:
         - name: MONGO_INITDB_DATABASE
-          value: "watchlist"
+          value: comments
         - name: MONGO_INITDB_ROOT_USERNAME
-          value: "root"
+          value: root
         - name: MONGO_INITDB_ROOT_PASSWORD
-          value: "root"
+          value: root
         volumeMounts:
-        - name: watchlist-db-volume
+        - name: comments-db-volume
           mountPath: /data/db
       
       volumes:
-      - name: watchlist-db-volume
+      - name: comments-db-volume
         persistentVolumeClaim:
-          claimName: watchlist-db-volume
+          claimName: comments-db-volume
+          
+
 ---
+
 apiVersion: v1
 kind: Service
 metadata:
-  name: watchlist-db  # changed here
-  namespace: esd-project  
+  name: comments-db
+  namespace: esd-project
 spec:
   type: ClusterIP
   selector:
-    app: watchlist-db  # changed here
+    app: comments-db
   ports:
     - protocol: TCP
       port: 27017
       targetPort: 27017
+
+

@@ -1,3 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: esd-project
+---
 
 ########################
 ###### kong       ######
@@ -79,20 +84,29 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: kong
+  name: kong-service
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: kong
   ports:
   - protocol: TCP
-    name: kong
+    name: kong-entry
     port: 8000
     targetPort: 8000
   - protocol: TCP
     name: kong-admin
     port: 8001
     targetPort: 8001
+  - protocol: TCP
+    name: kong-ssl
+    port: 8443
+    targetPort: 8443
+  - protocol: TCP
+    name: kong-ssl-admin
+    port: 8444
+    targetPort: 8444
+    
 ---
 ########################
 ###### prometheus ######

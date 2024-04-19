@@ -1,82 +1,82 @@
-###############################
-# comments service #
-###############################
+########################
+## sentiment app     ###
+########################
 
 # network policy
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-port-6001
+  name: allow-port-5001
   namespace: esd-project
 spec:
   podSelector:
     matchLabels:
-      app: comments-service
+      app: sentiment-app  # changed here
   policyTypes:
   - Ingress
   ingress:
   - from: []
     ports:
     - protocol: TCP
-      port: 6001
-
+      port: 5001
 ---
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: comments-service-deployment
+  name: sentiment-app-deployment  # changed here
   namespace: esd-project
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: comments-service
+      app: sentiment-app  # changed here
   template:
     metadata:
       labels:
-        app: comments-service
+        app: sentiment-app  # changed here
     spec:
       containers:
-      - name: comments-service
-        image: docker.io/chernise/esdproject-comments_service:latest
+      - name: sentiment-app  # changed here
+        image: docker.io/chernise/esdproject-sentiment_app:latest  # changed here
+        command: ["npm", "start"]
         ports:
-        - containerPort: 6001
-
+        - containerPort: 5001
         env:
-          - name: DB_URL
-            value: comments-db:27017
-          - name: AMQP_SERVER
-            value: amqp://rabbitmq:5672
-        command: ["npm"]
-        args: ["start"]
-
+        - name: AMQP_SERVER
+          value: "amqp://rabbitmq:5672"
+        - name: DB_URL
+          value: "sentiment-db:27017"  # changed here
+        - name: SCRAPER_URL
+          value: "http://scraper:5000"
+        - name: TRANSACTIONS_URL  
+          value: "http://transactions:6002"
+        - name: SENTIMENT_SERVICE_URL
+          value: "http://sentiment-service:5002/"  # changed here
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
-  name: comments-service
+  name: sentiment-app  # changed here
   namespace: esd-project
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
-    app: comments-service
+    app: sentiment-app  # changed here
   ports:
     - protocol: TCP
-      port: 6001
-      targetPort: 6001
-
+      port: 5001
+      targetPort: 5001
 ---
 ########################
-# comments db
+####### sentiment db ###
 ########################
 
-#volume
+# volume
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: comments-db-volume
+  name: sentiment-db-volume  # changed here
   namespace: esd-project
 spec:
   storageClassName: standard-rwo
@@ -96,7 +96,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app: comments-db
+      app: sentiment-db  # changed here
   policyTypes:
   - Ingress
   ingress:
@@ -104,60 +104,55 @@ spec:
     ports:
     - protocol: TCP
       port: 27017
-
 ---
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: comments-db-deployment
+  name: sentiment-db-deployment  # changed here
   namespace: esd-project
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: comments-db
+      app: sentiment-db  # changed here
   template:
     metadata:
       labels:
-        app: comments-db
+        app: sentiment-db  # changed here
     spec:
       containers:
-      - name: comments-db
-        image: docker.io/chernise/esdproject-comments_db:latest
+      - name: sentiment-db  # changed here
+        image: docker.io/chernise/esdproject-sentiment_db:latest  # changed here
         ports:
         - containerPort: 27017
         env:
         - name: MONGO_INITDB_DATABASE
-          value: comments
+          value: "sentiment"
         - name: MONGO_INITDB_ROOT_USERNAME
-          value: root
+          value: "root"
         - name: MONGO_INITDB_ROOT_PASSWORD
-          value: root
+          value: "root"
         volumeMounts:
-        - name: comments-db-volume
+        - name: sentiment-db-volume  # changed here
           mountPath: /data/db
-      
-      volumes:
-      - name: comments-db-volume
-        persistentVolumeClaim:
-          claimName: comments-db-volume
-          
 
+      volumes:
+      - name: sentiment-db-volume  # changed here
+        persistentVolumeClaim:
+          claimName: sentiment-db-volume  # changed here
 ---
 
 apiVersion: v1
 kind: Service
 metadata:
-  name: comments-db
+  name: sentiment-db  # changed here
   namespace: esd-project
 spec:
   type: ClusterIP
   selector:
-    app: comments-db
+    app: sentiment-db  # changed here
   ports:
     - protocol: TCP
       port: 27017
       targetPort: 27017
-
-

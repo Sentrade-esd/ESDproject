@@ -53,7 +53,7 @@ metadata:
   name: sentiment-service  # changed here
   namespace: esd-project
 spec: 
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: sentiment-service  # changed here
   ports:

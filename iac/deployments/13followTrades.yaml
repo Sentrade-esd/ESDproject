@@ -61,7 +61,7 @@ metadata:
   name: follow-trades
   namespace: esd-project
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: follow-trades
   ports:
@@ -125,7 +125,7 @@ metadata:
   name: senator-filings
   namespace: esd-project
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: senator-filings
   ports:

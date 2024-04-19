@@ -54,7 +54,7 @@ metadata:
   name: user-service  # changed here
   namespace: esd-project
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: user-service  # changed here
   ports:
@@ -81,7 +81,20 @@ spec:
 #     requests:
 #       storage: 18Gi
 
-
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: user-db-volume
+  namespace: esd-project
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/opt/postgres-data"
+---
 #volume 
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -143,11 +156,11 @@ spec:
           value: "password"
         - name: POSTGRES_DB
           value: "user_db"
-        - name: "PGDATA"
-          value: "/var/lib/postgresql/data/pgdata"
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
         volumeMounts:
         - name: user-db-volume
-          mountPath: /var/lib/postgresql/data/pgdata
+          mountPath: /var/lib/postgresql/data/
       
       volumes:
       - name: user-db-volume

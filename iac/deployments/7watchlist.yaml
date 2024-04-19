@@ -1,82 +1,72 @@
 ########################
-## sentiment app     ###
+###### watchlist  ######
 ########################
 
 # network policy
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-port-5001
+  name: allow-port-3000
   namespace: esd-project
 spec:
   podSelector:
     matchLabels:
-      app: sentiment-app  # changed here
+      app: watchlist
   policyTypes:
   - Ingress
   ingress:
   - from: []
     ports:
     - protocol: TCP
-      port: 5001
----
+      port: 3000
 
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sentiment-app-deployment  # changed here
+  name: watchlist-deployment
   namespace: esd-project
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: sentiment-app  # changed here
+      app: watchlist
   template:
     metadata:
       labels:
-        app: sentiment-app  # changed here
+        app: watchlist
     spec:
       containers:
-      - name: sentiment-app  # changed here
-        image: docker.io/chernise/esdproject-sentiment_app:latest  # changed here
+      - name: watchlist
+        image: docker.io/chernise/esdproject-watchlist:latest
         command: ["npm", "start"]
         ports:
-        - containerPort: 5001
+        - containerPort: 3000
         env:
-        - name: AMQP_SERVER
-          value: "amqp://rabbitmq:5672"
         - name: DB_URL
-          value: "sentiment-db:27017"  # changed here
-        - name: SCRAPER_URL
-          value: "http://scraper:5000"
-        - name: TRANSACTIONS_URL  
-          value: "http://transactions:6002"
-        - name: SENTIMENT_SERVICE_URL
-          value: "http://sentiment-service:5002/"  # changed here
+          value: "watchlist-db:27017"  # changed here
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: sentiment-app  # changed here
+  name: watchlist
   namespace: esd-project
-spec:
-  type: LoadBalancer
+spec: 
+  type: ClusterIP
   selector:
-    app: sentiment-app  # changed here
+    app: watchlist
   ports:
     - protocol: TCP
-      port: 5001
-      targetPort: 5001
+      port: 3000
+      targetPort: 3000
 ---
 ########################
-####### sentiment db ###
+#### watchlist db ######
 ########################
-
-# volume
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: sentiment-db-volume  # changed here
+  name: watchlist-db-volume
   namespace: esd-project
 spec:
   storageClassName: standard-rwo
@@ -96,7 +86,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app: sentiment-db  # changed here
+      app: watchlist-db  # changed here
   policyTypes:
   - Ingress
   ingress:
@@ -109,49 +99,48 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sentiment-db-deployment  # changed here
+  name: watchlist-db-deployment
   namespace: esd-project
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: sentiment-db  # changed here
+      app: watchlist-db  # changed here
   template:
     metadata:
       labels:
-        app: sentiment-db  # changed here
+        app: watchlist-db  # changed here
     spec:
       containers:
-      - name: sentiment-db  # changed here
-        image: docker.io/chernise/esdproject-sentiment_db:latest  # changed here
+      - name: watchlist-db
+        image: docker.io/chernise/esdproject-watchlist_db:latest
         ports:
         - containerPort: 27017
         env:
         - name: MONGO_INITDB_DATABASE
-          value: "sentiment"
+          value: "watchlist"
         - name: MONGO_INITDB_ROOT_USERNAME
           value: "root"
         - name: MONGO_INITDB_ROOT_PASSWORD
           value: "root"
         volumeMounts:
-        - name: sentiment-db-volume  # changed here
+        - name: watchlist-db-volume
           mountPath: /data/db
-
+      
       volumes:
-      - name: sentiment-db-volume  # changed here
+      - name: watchlist-db-volume
         persistentVolumeClaim:
-          claimName: sentiment-db-volume  # changed here
+          claimName: watchlist-db-volume
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
-  name: sentiment-db  # changed here
-  namespace: esd-project
+  name: watchlist-db  # changed here
+  namespace: esd-project  
 spec:
   type: ClusterIP
   selector:
-    app: sentiment-db  # changed here
+    app: watchlist-db  # changed here
   ports:
     - protocol: TCP
       port: 27017

@@ -59,7 +59,7 @@ metadata:
   name: transactions  # changed here
   namespace: esd-project
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: transactions  # changed here
   ports:
@@ -72,6 +72,21 @@ spec:
 ########################
 ## transactions db #####
 ########################
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: transactions-db-volume
+  namespace: esd-project
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/opt/postgres-data"
+---
 
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -138,7 +153,7 @@ spec:
           value: /var/lib/postgresql/data/pgdata
         volumeMounts:
         - name: transactions-db-volume
-          mountPath: /var/lib/postgresql/data/pgdata
+          mountPath: /var/lib/postgresql/data/
 
       volumes:
       - name: transactions-db-volume

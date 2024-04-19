@@ -13,3 +13,21 @@ variable "cluster_name" {
 variable "region" {
   default = "us-central1-a"
 }
+
+variable "files" {
+  default = [
+    "1kong.yaml",
+    "2app.yaml",
+    "3rabbit.yaml",
+    "4sentimentApp.yaml",
+    "5sentimentService.yaml",
+    "6scraper.yaml",
+    "7watchlist.yaml",
+    "8notificationManager.yaml",
+    "9telebot.yaml",
+    "10userService.yaml",
+    "11commentsService.yaml",
+    "12transactionsService.yaml",
+    "13followTrades.yaml"
+  ]
+}

@@ -49,8 +49,8 @@ resource "null_resource" "deploy_app" {
   provisioner "local-exec" {
     command = <<EOF
       gcloud container clusters get-credentials ${google_container_cluster.primary.name} --region ${var.region}
-      for file in ./deployments/*.yaml; do
-        kubectl apply -f $file
+      for file in $(echo "${join(" ", var.files)}") ; do
+        kubectl apply -f ./deployments/$file
       done
     EOF
   }

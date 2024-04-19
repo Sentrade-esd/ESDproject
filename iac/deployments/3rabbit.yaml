@@ -62,7 +62,7 @@ spec:
         - containerPort: 15672
         env:
         - name: RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS
-          value: "-rabbitmq_management load_definitions /etc/rabbitmq/definitions.json"
+          value: '-rabbitmq_management load_definitions "/etc/rabbitmq/definitions.json"'
         volumeMounts:
         - name: rabbitmq-data
           mountPath: /var/lib/rabbitmq

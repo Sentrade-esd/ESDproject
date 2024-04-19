@@ -56,7 +56,7 @@ metadata:
   name: notification-manager  # changed here
   namespace: esd-project
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: notification-manager  # changed here
   ports:
