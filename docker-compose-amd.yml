@@ -260,7 +260,7 @@ services:
   transactions:
     image: chernise/esdproject-transactions:latest
     command: gunicorn -w 1 --threads 2 -b :6002 --timeout 600 transaction:app
-    hostname: user_service
+    hostname: transactions
     ports:
       - "6002:6002"
     environment:

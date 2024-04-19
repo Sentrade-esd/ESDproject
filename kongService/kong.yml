@@ -23,7 +23,8 @@ plugins:
 
 services: 
   - name: sentiment-service
-    url: http://sentiment_app:5001/
+    # url: http://sentiment_app:5001/
+    url: http://sentiment-app:5001/
     routes:
       - name: welcome-route
         paths:
@@ -95,7 +96,8 @@ services:
         strip_path: false
 
   - name: user-service
-    url: http://user_service:6000/
+    # url: http://user_service:6000/
+    url: http://user-service:6000/
     routes:
       - name: user
         paths:
@@ -116,7 +118,8 @@ services:
 
 
   - name: comments-service
-    url: http://comments_service:6001/
+    # url: http://comments_service:6001/
+    url: http://comments-service:6001/
     routes:
       - name: comments
         paths:
@@ -213,7 +216,8 @@ services:
       
 
   - name: follow-trade-service
-    url: http://follow_trades:4001/
+    # url: http://follow_trades:4001/
+    url: http://follow-trades:4001/
     routes:
       - name: root-route
         methods:

@@ -46,11 +46,16 @@ resource "google_container_node_pool" "primary_nodes" {
 
 resource "null_resource" "deploy_app" {
   provisioner "local-exec" {
-    command = "gcloud container clusters get-credentials ${google_container_cluster.primary.name} --region ${var.region} && kubectl apply -f ./esdk8s.yaml"
+    command = <<EOF
+      gcloud container clusters get-credentials ${google_container_cluster.primary.name} --region ${var.region}
+      for file in ./deployments/*.yaml; do
+        kubectl apply -f $file
+      done
+    EOF
   }
   depends_on = [
     google_container_cluster.primary,
-    google_container_node_pool.primary_preemptible_nodes
+    google_container_node_pool.primary_nodes
   ]
 }
 

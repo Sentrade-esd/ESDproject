@@ -1,0 +1,142 @@
+########################
+###### watchlist  ######
+########################
+
+# network policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-port-3000
+  namespace: esd-project
+spec:
+  podSelector:
+    matchLabels:
+      app: watchlist
+  policyTypes:
+  - Ingress
+  ingress:
+  - from: []
+    ports:
+    - protocol: TCP
+      port: 3000
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: watchlist-deployment
+  namespace: esd-project
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: watchlist
+  template:
+    metadata:
+      labels:
+        app: watchlist
+    spec:
+      containers:
+      - name: watchlist
+        image: docker.io/chernise/esdproject-watchlist:latest
+        command: ["npm", "start"]
+        ports:
+        - containerPort: 3000
+        env:
+        - name: DB_URL
+          value: "watchlist-db:27017"  # changed here
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: watchlist
+  namespace: esd-project
+spec: 
+  type: LoadBalancer
+  selector:
+    app: watchlist
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+---
+########################
+#### watchlist db ######
+########################
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: watchlist-db-volume
+  namespace: esd-project
+spec:
+  storageClassName: standard-rwo
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+
+# network policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-port-27017
+  namespace: esd-project
+spec:
+  podSelector:
+    matchLabels:
+      app: watchlist-db  # changed here
+  policyTypes:
+  - Ingress
+  ingress:
+  - from: []
+    ports:
+    - protocol: TCP
+      port: 27017
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: watchlist-db-deployment
+  namespace: esd-project
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: watchlist-db  # changed here
+  template:
+    metadata:
+      labels:
+        app: watchlist-db  # changed here
+    spec:
+      containers:
+      - name: watchlist-db
+        image: docker.io/cherise/esdproject-watchlist_db:latest
+        ports:
+        - containerPort: 27017
+    env:
+    - name: MONGO_INITDB_DATABASE
+      value: "watchlist"
+    - name: MONGO_INITDB_ROOT_USERNAME
+      value: "root"
+    - name: MONGO_INITDB_ROOT_PASSWORD
+      value: "root"
+    volumeMounts:
+    - name: watchlist-db-volume
+      mountPath: /data/db
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: watchlist-db  # changed here
+  namespace: esd-project  
+spec:
+  type: ClusterIP
+  selector:
+    app: watchlist-db  # changed here
+  ports:
+    - protocol: TCP
+      port: 27017
+      targetPort: 27017

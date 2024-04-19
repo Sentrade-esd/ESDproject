@@ -1,0 +1,62 @@
+########################
+## sentiment service ###
+########################
+
+# network policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-port-5002
+  namespace: esd-project
+spec:
+  podSelector:
+    matchLabels:
+      app: sentiment-service  # changed here
+  policyTypes:
+  - Ingress
+  ingress:
+  - from: []
+    ports:
+    - protocol: TCP
+      port: 5002
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sentiment-service-deployment  # changed here
+  namespace: esd-project
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sentiment-service  # changed here
+  template:
+    metadata:
+      labels:
+        app: sentiment-service  # changed here
+    spec:
+      containers:
+      - name: sentiment-service  # changed here
+        image: docker.io/chernise/esdproject-sentiment_service:latest  # changed here
+        ports:
+        - containerPort: 5002
+      command: ["gunicorn"]
+      args: ["-w", "1", "--threads", "2", "-b", ":5002", "--timeout", "600", "sentimentApp:app"]
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: sentiment-service  # changed here
+  namespace: esd-project
+spec: 
+  type: LoadBalancer
+  selector:
+    app: sentiment-service  # changed here
+  ports:
+    - protocol: TCP
+      port: 5002
+      targetPort: 5002
