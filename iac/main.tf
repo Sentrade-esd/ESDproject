@@ -28,7 +28,7 @@ resource "google_container_cluster" "primary" {
   }
 }
 
-resource "google_container_node_pool" "primary_preemptible_nodes" {
+resource "google_container_node_pool" "primary_nodes" {
   name       = "esd-node-pool"
   cluster    = google_container_cluster.primary.id
   node_count = 1
