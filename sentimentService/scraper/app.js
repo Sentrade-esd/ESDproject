@@ -202,6 +202,40 @@ app.get("/scraper/scrapeCurrentPrice", async (req, res) => {
   }
 });
 
+app.get("/scraper/getYahooComments", async (req, res) => {
+  // const {ticker} = req.params;
+  let ticker = req.query.ticker || null;
+  let company = req.query.company || null;
+
+  if (!ticker && company) {
+    console.log("getting ticker");
+    ticker = await convertCompanyToTicker(company);
+  }
+
+  console.log("Ticker: ", ticker);
+
+  try {
+
+
+    const worker = new Worker('./methodsGetYahooComments.js');
+    
+    // Listen for messages from the worker thread
+    worker.on('message', message => {
+        // Send response back to the client
+        res.send(message);
+    });
+
+    // Send message to worker thread with query and ticker
+    worker.postMessage({ ticker });
+
+
+  } catch (error) {
+    console.error(error);
+    // return 500 with error message
+    res.status(500).send("Error: " + error);
+  }
+});
+
 async function convertCompanyToTicker(company) {
   // Get company ticker
   // let keys = ["GIEADKJM8OSQN0AR", "TQXOA5D8XQ2ATY3J", "GIC3VJ1I8N8DXJAO"];
