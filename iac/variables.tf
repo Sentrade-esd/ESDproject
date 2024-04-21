@@ -11,7 +11,8 @@ variable "cluster_name" {
 }
 
 variable "region" {
-  default = "us-central1-a"
+  # default = "us-central1-a"
+  default = "asia-southeast1-a"
 }
 
 variable "files" {

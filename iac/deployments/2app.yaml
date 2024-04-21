@@ -24,6 +24,26 @@ spec:
     - protocol: TCP
       port: 80
 ---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-to-kong
+  namespace: esd-project
+spec:
+  podSelector:
+    matchLabels:
+      app: app
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: kong
+    ports:
+    - protocol: TCP
+      port: 8000
+---
 
 # Define a ClusterRole that allows accessing pods, services and deployments in the esd-project namespace
 apiVersion: rbac.authorization.k8s.io/v1

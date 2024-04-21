@@ -54,20 +54,34 @@ spec:
         command: ["npm", "start"]
 
 ---
-
-apiVersion: v1
-kind: Service
+apiVersion: "v1"
+kind: "Service"
 metadata:
-  name: follow-trades
-  namespace: esd-project
+  name: "follow-trades-service"
+  namespace: "esd-project"
 spec:
-  type: ClusterIP
-  selector:
-    app: follow-trades
   ports:
-    - protocol: TCP
-      port: 4001
-      targetPort: 4001
+  - protocol: "TCP"
+    port: 4001
+    targetPort: 4001
+  selector:
+    app: "follow-trades"
+  type: "ClusterIP"
+
+---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: follow-trades-service
+#   namespace: esd-project
+# spec:
+#   type: ClusterIP
+#   selector:
+#     app: follow-trades
+#   ports:
+#     - protocol: TCP
+#       port: 4001
+#       targetPort: 4001
 
 
 ###################
