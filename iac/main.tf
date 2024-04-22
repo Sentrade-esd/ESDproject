@@ -54,9 +54,6 @@ resource "null_resource" "deploy_app" {
     command = <<EOF
       gcloud container clusters get-credentials ${google_container_cluster.primary.name} --region ${var.region}
       for file in $(echo "${join(" ", var.files)}") ; do
-        kubectl delete -f ./deployments/$file --ignore-not-found
-      done
-      for file in $(echo "${join(" ", var.files)}") ; do
         kubectl apply -f ./deployments/$file
       done
     EOF
@@ -69,3 +66,6 @@ resource "null_resource" "deploy_app" {
 }
 
 
+      # for file in $(echo "${join(" ", var.files)}") ; do
+      #   kubectl delete -f ./deployments/$file --ignore-not-found
+      # done
