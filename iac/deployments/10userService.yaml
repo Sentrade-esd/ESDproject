@@ -43,10 +43,13 @@ spec:
         image: docker.io/chernise/esdproject-user_service:latest  # changed here
         ports:
         - containerPort: 6000
-        # command: ["gunicorn"]
-        # args: ["-w", "1", "--threads", "2", "-b", ":6000", "--timeout", "600", "User:app"]
-        command: ["/bin/sh", "-c"]
-        args: ["pip install mysql-connector-python && gunicorn -w 1 --threads 2 -b :6000 --timeout 600 User:app"]
+        command: ["gunicorn"]
+        args: ["-w", "1", "--threads", "2", "-b", ":6000", "--timeout", "600", "User:app"]
+        # command: ["/bin/sh", "-c"]
+        # args: ["pip install mysql-connector-python && gunicorn -w 1 --threads 2 -b :6000 --timeout 600 User:app"]
+        env:
+          - name: SQL_URI
+            value: "postgresql://postgres:root@user-db:5432"
 
 ---
 
