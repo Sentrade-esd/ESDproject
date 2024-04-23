@@ -23,7 +23,9 @@ plugins:
 
 services: 
   - name: sentiment-service
-    url: http://sentiment_app:5001/
+    # url: http://sentiment_app:5001/
+    # url: http://sentiment-app:5001/
+    url: ${SENTIMENT_SERVICE_URL}
     routes:
       - name: welcome-route
         paths:
@@ -50,7 +52,8 @@ services:
         strip_path: false
 
   - name: scraper-service
-    url: http://scraper:5000/
+    # url: http://scraper:5000/
+    url: ${SCRAPER_SERVICE_URL}
     routes:
       - name: scrapeCurrentPrice-route
         methods:
@@ -60,7 +63,8 @@ services:
         strip_path: false
 
   - name: watchlist-service
-    url: http://watchlist:3000/
+    # url: http://watchlist:3000/
+    url: ${WATCHLIST_SERVICE_URL}
     routes:
       - name: watchlist-add
         paths:
@@ -95,7 +99,9 @@ services:
         strip_path: false
 
   - name: user-service
-    url: http://user_service:6000/
+    # url: http://user_service:6000/
+    # url: http://user-service:6000/
+    url: ${USER_SERVICE_URL}
     routes:
       - name: user
         paths:
@@ -116,7 +122,9 @@ services:
 
 
   - name: comments-service
-    url: http://comments_service:6001/
+    # url: http://comments_service:6001/
+    # url: http://comments-service:6001/
+    url: ${COMMENTS_SERVICE_URL}
     routes:
       - name: comments
         paths:
@@ -136,7 +144,8 @@ services:
       #   strip_path: false
 
   - name: transactions-service
-    url: http://transactions:6002/
+    # url: http://transactions:6002/
+    url: ${TRANSACTIONS_SERVICE_URL}
     routes:
       - name: transaction-all-route
         paths:
@@ -213,7 +222,10 @@ services:
       
 
   - name: follow-trade-service
-    url: http://follow_trades:4001/
+    # url: http://follow_trades:4001/
+    # url: http://follow-trades:4001/
+    url: ${FOLLOW_TRADE_SERVICE_URL}
+
     routes:
       - name: root-route
         methods:
@@ -232,7 +244,8 @@ services:
         strip_path: false
 
   - name: telebot-service
-    url: http://telebot:3002/
+    # url: http://telebot:3002/
+    url: ${TELEBOT_SERVICE_URL}
     routes: 
       - name: send-message
         methods:

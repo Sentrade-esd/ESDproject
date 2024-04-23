@@ -243,7 +243,7 @@ services:
     restart: unless-stopped
     
   comments_db:
-    image: chernise/esdproject-sentiment_db:latest
+    image: chernise/esdproject-comments_db:latest
     hostname: comments_db
     ports:  
       - "27020:27017"
@@ -260,7 +260,7 @@ services:
   transactions:
     image: chernise/esdproject-transactions:latest
     command: gunicorn -w 1 --threads 2 -b :6002 --timeout 600 transaction:app
-    hostname: user_service
+    hostname: transactions
     ports:
       - "6002:6002"
     environment:

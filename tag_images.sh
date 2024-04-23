@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define your Docker Hub username
-USERNAME="chernise"
+USERNAME="nmywrld"
 
 # Define the names of your Docker images
 IMAGES=("esdproject-telebot" "esdproject-watchlist" "esdproject-follow_trades" "esdproject-comments_service" "esdproject-sentiment_service" "esdproject-senator_filings" "esdproject-scraper" "esdproject-sentiment_app" "esdproject-user_db" "esdproject-transactions_db" "esdproject-rabbitmq" "esdproject-user_service" "esdproject-transactions" "esdproject-notification_manager" "esdproject-sentiment_db" "esdproject-comments_db" "esdproject-scraper_db" "esdproject-watchlist_db" "esdproject-kong" "esdproject-app" "esdproject-grafana" "esdproject-prometheus")

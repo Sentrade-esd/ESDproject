@@ -1,0 +1,92 @@
+
+########################
+###### rabbitmq   ######
+########################
+
+# volume
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: rabbitmq-data
+  namespace: esd-project
+spec:
+  storageClassName: standard-rwo
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+
+# netowrk policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-port-5672
+  namespace: esd-project
+spec:
+  podSelector:
+    matchLabels:
+      app: rabbitmq
+  policyTypes:
+  - Ingress
+  ingress:
+  - from: []
+    ports:
+    - protocol: TCP
+      port: 5672
+    - protocol: TCP
+      port: 15672
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq-deployment
+  namespace: esd-project
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbitmq
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      containers:
+      - name: rabbitmq
+        image: docker.io/chernise/esdproject-rabbitmq:latest
+        ports:
+        - containerPort: 5672
+        - containerPort: 15672
+        env:
+        - name: RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS
+          value: '-rabbitmq_management load_definitions "/etc/rabbitmq/definitions.json"'
+        volumeMounts:
+        - name: rabbitmq-data
+          mountPath: /var/lib/rabbitmq
+
+      volumes:
+      - name: rabbitmq-data
+        persistentVolumeClaim:
+          claimName: rabbitmq-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq
+  namespace: esd-project
+spec:
+  type: LoadBalancer
+  selector:
+    app: rabbitmq
+  ports:
+    - protocol: TCP
+      name: amqp-point
+      port: 5672
+      targetPort: 5672
+    - protocol: TCP
+      name: gui-point
+      port: 15672
+      targetPort: 15672

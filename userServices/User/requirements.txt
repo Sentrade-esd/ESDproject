@@ -4,3 +4,4 @@ Flask-Cors
 gunicorn
 werkzeug
 psycopg2-binary
+mysql-connector-python

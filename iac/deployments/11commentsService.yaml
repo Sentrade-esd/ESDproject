@@ -1,0 +1,163 @@
+###############################
+# comments service #
+###############################
+
+# network policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-port-6001
+  namespace: esd-project
+spec:
+  podSelector:
+    matchLabels:
+      app: comments-service
+  policyTypes:
+  - Ingress
+  ingress:
+  - from: []
+    ports:
+    - protocol: TCP
+      port: 6001
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comments-service-deployment
+  namespace: esd-project
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: comments-service
+  template:
+    metadata:
+      labels:
+        app: comments-service
+    spec:
+      containers:
+      - name: comments-service
+        image: docker.io/chernise/esdproject-comments_service:latest
+        ports:
+        - containerPort: 6001
+
+        env:
+          - name: DB_URL
+            value: comments-db:27017
+          - name: AMQP_SERVER
+            value: amqp://rabbitmq:5672
+        command: ["npm"]
+        args: ["start"]
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: comments-service
+  namespace: esd-project
+spec:
+  type: ClusterIP
+  selector:
+    app: comments-service
+  ports:
+    - protocol: TCP
+      port: 6001
+      targetPort: 6001
+
+---
+########################
+# comments db
+########################
+
+#volume
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: comments-db-volume
+  namespace: esd-project
+spec:
+  storageClassName: standard-rwo
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+
+# network policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-port-27017
+  namespace: esd-project
+spec:
+  podSelector:
+    matchLabels:
+      app: comments-db
+  policyTypes:
+  - Ingress
+  ingress:
+  - from: []
+    ports:
+    - protocol: TCP
+      port: 27017
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comments-db-deployment
+  namespace: esd-project
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: comments-db
+  template:
+    metadata:
+      labels:
+        app: comments-db
+    spec:
+      containers:
+      - name: comments-db
+        image: docker.io/chernise/esdproject-comments_db:latest
+        ports:
+        - containerPort: 27017
+        env:
+        - name: MONGO_INITDB_DATABASE
+          value: comments
+        - name: MONGO_INITDB_ROOT_USERNAME
+          value: root
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          value: root
+        volumeMounts:
+        - name: comments-db-volume
+          mountPath: /data/db
+      
+      volumes:
+      - name: comments-db-volume
+        persistentVolumeClaim:
+          claimName: comments-db-volume
+          
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: comments-db
+  namespace: esd-project
+spec:
+  type: ClusterIP
+  selector:
+    app: comments-db
+  ports:
+    - protocol: TCP
+      port: 27017
+      targetPort: 27017
+
+
