@@ -41,8 +41,8 @@ async function performScraping(query) {
     }
   });
 
-  // await page.goto(url, { waitUntil: "networkidle2" });
-  await page.goto(url);
+  await page.goto(url, { waitUntil: "networkidle2" });
+  // await page.goto(url);
 // Scroll to the middle of the page
   await page.evaluate(() => {
     window.scrollTo(0, document.body.scrollHeight / 2);
