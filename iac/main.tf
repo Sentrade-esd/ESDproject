@@ -65,7 +65,7 @@ resource "null_resource" "deploy_app" {
   ]
 }
 
-# ------------------
+
 data "external" "get_backend_service" {
   program = ["bash", "-c", "gcloud container clusters get-credentials ${google_container_cluster.primary.name} --region ${var.region} && kubectl get ing ingress-nginx-esd-project -n esd-project -o json | jq -r '.metadata.annotations[\"ingress.kubernetes.io/backends\"]' "]
 
@@ -76,33 +76,16 @@ data "external" "get_backend_service" {
   ]
 }
 
-
-
-resource "google_compute_health_check" "default" {
-  name               = "default-health-check"
-  check_interval_sec = 5
-  timeout_sec        = 5
-  http_health_check {
-    port = 80
+resource "null_resource" "enable_cdn" {
+  provisioner "local-exec" {
+    command = "gcloud compute backend-services update ${keys(data.external.get_backend_service.result)[0]} --enable-cdn --global"
   }
-}
 
-resource "google_compute_backend_service" "cdn_backend_service" {
-  name    = "cdn-esd-cluster"
-  project = var.project_id
-  backend {
-    group = "https://www.googleapis.com/compute/v1/projects/${var.project_id}/zones/${var.region}/networkEndpointGroups/${keys(data.external.get_backend_service.result)[0]}"
-    balancing_mode = "RATE"
-    max_rate_per_endpoint = 100 # Adjust this value as needed
-  }
-  backend {
-    group = "https://www.googleapis.com/compute/v1/projects/${var.project_id}/zones/${var.region}/networkEndpointGroups/${keys(data.external.get_backend_service.result)[1]}"
-    balancing_mode = "RATE"
-    max_rate_per_endpoint = 100 # Adjust this value as needed
-  }
-  health_checks = [google_compute_health_check.default.self_link]
-  enable_cdn = true
-  depends_on = [ data.external.get_backend_service ]
+  depends_on = [
+    google_container_cluster.primary,
+    google_container_node_pool.primary_nodes,
+    null_resource.deploy_app
+  ]
 }
 
 
