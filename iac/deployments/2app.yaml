@@ -1,0 +1,242 @@
+# apiVersion: v1
+# kind: Namespace
+# metadata:
+#   name: esd-project
+# ---
+
+########################
+###### app        ######
+########################
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-port-80
+  namespace: esd-project
+spec:
+  podSelector:
+    matchLabels:
+      app: app
+  policyTypes:
+  - Ingress
+  ingress:
+  - from: []
+    ports:
+    - protocol: TCP
+      port: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-to-kong
+  namespace: esd-project
+spec:
+  podSelector:
+    matchLabels:
+      app: app
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: kong
+    ports:
+    - protocol: TCP
+      port: 8000
+---
+
+# Define a ClusterRole that allows accessing pods, services and deployments in the esd-project namespace
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ingress-nginx-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - services
+  - deployments
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ingress-nginx-role-binding
+roleRef:
+  kind: ClusterRole
+  name: ingress-nginx-role
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: esd-project
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-configuration
+  namespace: esd-project
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-ingress-controller
+  namespace: esd-project
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ingress-nginx
+  template:
+    metadata:
+      labels:
+        app: ingress-nginx
+    spec:
+      containers:
+      - name: nginx-ingress-controller
+        image: k8s.gcr.io/ingress-nginx/controller:v1.0.4
+        args:
+          - /nginx-ingress-controller
+          - --configmap=$(POD_NAMESPACE)/nginx-configuration
+        env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+        ports:
+        - name: http
+          containerPort: 80
+        - name: https
+          containerPort: 443
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingress-nginx
+  namespace: esd-project
+spec:
+  type: LoadBalancer
+  selector:
+    app: ingress-nginx
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+    - name: https
+      port: 443
+      targetPort: https
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-nginx-esd-project
+  namespace: esd-project
+spec:
+  rules:
+  - http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: app-service
+            port:
+              number: 80
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: app-volume-claim
+  namespace: esd-project
+spec:
+  storageClassName: standard-rwo
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 18Gi
+---
+
+# multi-container deployment
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-deployment
+  namespace: esd-project
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app
+  template:
+    metadata:
+      labels:
+        app: app
+    spec:
+      containers:
+      - name: app
+        image: docker.io/chernise/esdproject-app:latest
+        command: ["nginx", "-g", "daemon off;"]
+        ports:
+        - containerPort: 80
+        env:
+        - name: KONG_URL
+          value: "http://kong:8000/"
+        volumeMounts:
+        - name: app-volume
+          mountPath: /usr/src/app
+
+
+      volumes:
+        - name: app-volume
+          persistentVolumeClaim:
+            claimName: app-volume-claim
+
+---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: app-service
+#   namespace: esd-project
+# spec:
+#   type: LoadBalancer
+#   selector:
+#     app: app
+#   ports:
+#     - name: app-port
+#       protocol: TCP
+#       port: 80
+#       targetPort: 80
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-service
+  namespace: esd-project
+spec:
+  type: NodePort
+  selector:
+    app: app
+  ports:
+    - name: app-port
+      protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 30080

@@ -1,0 +1,253 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: esd-project
+---
+
+########################
+###### kong       ######
+########################
+# netowrk policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-port-8000
+  namespace: esd-project
+spec:
+  podSelector:
+    matchLabels:
+      app: kong
+  policyTypes:
+  - Ingress
+  ingress:
+  - from: []
+    ports:
+    - protocol: TCP
+      port: 8000
+    - protocol: TCP
+      port: 8001
+    - protocol: TCP
+      port: 8443
+    - protocol: TCP
+      port: 8444
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kong-deployment
+  namespace: esd-project
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kong
+  template:
+    metadata:
+      labels:
+        app: kong
+    spec:
+      containers:
+      - name: kong
+        image: docker.io/chernise/esdproject-kong:latest
+        ports:
+        - containerPort: 8000
+        - containerPort: 8001
+        - containerPort: 8443
+        - containerPort: 8444
+        env:
+        - name: SENTIMENT_SERVICE_URL
+          value: "http://sentiment-app:5001/"
+        - name: SCRAPER_SERVICE_URL
+          value: "http://scraper:5000/"
+        - name: WATCHLIST_SERVICE_URL
+          value: "http://watchlist:3000/"
+        - name: USER_SERVICE_URL
+          value: "http://user-service:6000/"
+        - name: COMMENTS_SERVICE_URL
+          value: "http://comments-service:6001/"
+        - name: TRANSACTIONS_SERVICE_URL
+          value: "http://transactions:6002/"
+        - name: FOLLOW_TRADE_SERVICE_URL
+          value: "http://follow-trades:4001/"
+        - name: TELEBOT_SERVICE_URL
+          value: "http://telebot:3002/"
+        - name: KONG_DECLARATIVE_CONFIG
+          value: /etc/kong/kong_ready.yml
+        
+        command: ["/bin/sh", "-c"]
+        args: ["envsubst < /etc/kong/kong.yml > /etc/kong/kong_ready.yml && exec /docker-entrypoint.sh kong docker-start"]
+
+
+
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: kong-service
+# spec:
+#   type: LoadBalancer
+#   selector:
+#     app: kong
+#   ports:
+#   - protocol: TCP
+#     name: kong-entry
+#     port: 8000
+#     targetPort: 8000
+#   - protocol: TCP
+#     name: kong-admin
+#     port: 8001
+#     targetPort: 8001
+#   - protocol: TCP
+#     name: kong-ssl
+#     port: 8443
+#     targetPort: 8443
+#   - protocol: TCP
+#     name: kong-ssl-admin
+#     port: 8444
+#     targetPort: 8444
+---
+apiVersion: "v1"
+kind: "Service"
+metadata:
+  name: "kong"
+  namespace: "esd-project"
+spec:
+  ports:
+  - name: "8000-to-8000-tcp"
+    protocol: "TCP"
+    port: 8000
+    targetPort: 8000
+  - name: "8001-to-8001-tcp"
+    protocol: "TCP"
+    port: 8001
+    targetPort: 8001
+  - name: "8443-to-8443-tcp"
+    protocol: "TCP"
+    port: 8443
+    targetPort: 8443
+  - name: "8444-to-8444-tcp"
+    protocol: "TCP"
+    port: 8444
+    targetPort: 8444
+  selector:
+    app: "kong"
+  type: "ClusterIP"
+    
+---
+########################
+###### prometheus ######
+########################
+
+# netowrk policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-port-9090
+  namespace: esd-project
+spec:
+  podSelector:
+    matchLabels:
+      app: prometheus
+  policyTypes:
+  - Ingress
+  ingress:
+  - from: []
+    ports:
+    - protocol: TCP
+      port: 9090
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-deployment
+  namespace: esd-project
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      containers:
+      - name: prometheus
+        image: docker.io/chernise/esdproject-prometheus:latest
+        ports:
+        - containerPort: 9090
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: esd-project
+spec:
+  type: LoadBalancer
+  selector:
+    app: prometheus
+  ports:
+  - protocol: TCP
+    port: 9090
+    targetPort: 9090
+---
+########################
+###### grafana    ######
+########################
+
+# netowrk policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-port-3000
+  namespace: esd-project
+spec:
+  podSelector:
+    matchLabels:
+      app: grafana
+  policyTypes:
+  - Ingress
+  ingress:
+  - from: []
+    ports:
+    - protocol: TCP
+      port: 3000
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana-deployment
+  namespace: esd-project
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+      - name: grafana
+        image: docker.io/chernise/esdproject-grafana:latest
+        ports:
+        - containerPort: 3000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: esd-project
+spec:
+  type: LoadBalancer
+  selector:
+    app: grafana
+  ports:
+  - protocol: TCP
+    port: 8100
+    targetPort: 3000

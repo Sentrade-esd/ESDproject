@@ -75,10 +75,12 @@ parentPort.on('message', async message => {
         // Perform CPU-bound task (e.g., scraping)
         const response = await performScraping(query, ticker);
         console.log('response', response);
-        
-        let addToDBResponse = await scraperDBMethods.add(ticker, query, response);
 
-        // console.log('addToDBresponse', addToDBResponse);
+        console.log('adding to db');
+        let addToDBResponse = await scraperDBMethods.add(ticker, query, response);
+        console.log('added to db');
+
+        console.log('addToDBresponse: ', addToDBResponse);
         // res.send(response);
         // Send result back to the main thread
         parentPort.postMessage(response);

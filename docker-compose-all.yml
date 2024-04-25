@@ -16,6 +16,28 @@ services:
       - "8001:8001"
     networks:
       - kong_network
+    environment:
+      # SENTIMENT_SERVICE_URL: http://sentiment-app:5001/
+      # SCRAPER_SERVICE_URL: http://scraper:5000/
+      # WATCHLIST_SERVICE_URL: http://watchlist:3000/
+      # USER_SERVICE_URL: http://user-service:6000/
+      # COMMENTS_SERVICE_URL: http://comments-service:6001/
+      # TRANSACTIONS_SERVICE_URL: http://transactions:6002/
+      # FOLLOW_TRADE_SERVICE_URL: http://follow-trades:4001/
+      # TELEBOT_SERVICE_URL: http://telebot:3002/
+
+      SENTIMENT_SERVICE_URL: http://sentiment_app:5001/
+      SCRAPER_SERVICE_URL: http://scraper:5000/
+      WATCHLIST_SERVICE_URL: http://watchlist:3000/
+      USER_SERVICE_URL: http://user_service:6000/
+      COMMENTS_SERVICE_URL: http://comments_service:6001/
+      TRANSACTIONS_SERVICE_URL: http://transactions:6002/
+      FOLLOW_TRADE_SERVICE_URL: http://follow_trades:4001/
+      TELEBOT_SERVICE_URL: http://telebot:3002/
+      KONG_DECLARATIVE_CONFIG: /etc/kong/kong_ready.yml
+
+    entrypoint: ["/bin/sh", "-c", "envsubst < /etc/kong/kong.yml > /etc/kong/kong_ready.yml && exec /docker-entrypoint.sh kong docker-start"]  
+
     restart: unless-stopped
 
   prometheus:

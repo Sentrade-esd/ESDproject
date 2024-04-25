@@ -19,12 +19,12 @@ let channel;
 let amqpServer = process.env.AMQP_SERVER || "amqp://localhost";
 
 mongoose
-  // .connect("mongodb://root:root@" + DB_service_url + "/comments", {
-  //   authSource: "admin",
-  // })
-  .connect(DB_service_url, {
+  .connect("mongodb://root:root@" + DB_service_url + "/comments", {
     authSource: "admin",
   })
+  // .connect(DB_service_url, {
+  //   authSource: "admin",
+  // })
   // mongoose.connect(`${uri}/watchlist`, {})
   .then(() => {
     console.log("Connected to the database!");
