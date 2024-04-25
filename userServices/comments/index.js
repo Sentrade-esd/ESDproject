@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const cron = require("node-cron");
 
 const { Schema } = mongoose;
 const amqp = require("amqplib");
@@ -35,6 +36,7 @@ mongoose
 const commentSchema = new Schema({
   comment: String,
   likes: { type: Number, default: 0 },
+  sentiment_comments: { type: Number, default: 0 },
   // add other properties as needed
 });
 const commentSchemaCompany = new Schema({
@@ -62,6 +64,50 @@ const comments = mongoose.model("comments", commentsByCompanySchema);
 
 const commentsUser = mongoose.model("commentsUser", commentsByUserSchema);
 
+// ----------------- Reputation algo -----------------
+// Schedule task to run at 12 AM every day
+cron.schedule("0 0 * * *", async function () {
+  // Fetch all comments
+  const comments = await commentsUser.find({});
+
+  // Calculate reputation for each user
+  const userReputations = {};
+  comments.forEach((comment) => {
+    if (!userReputations[comment.userId]) {
+      userReputations[comment.userId] = {
+        totalLikes: 0,
+        totalComments: 0,
+      };
+    }
+    comment.commentsMade.forEach((innerComment) => {
+      userReputations[comment.userId].totalLikes += innerComment.likes;
+      userReputations[comment.userId].totalComments += 1;
+    });
+  });
+
+  // Update sentiment_comments for each user
+  for (const userId in userReputations) {
+    const reputation = userReputations[userId];
+    let sentimentComments;
+    const reputationRatio = reputation.totalLikes / reputation.totalComments;
+
+    if (reputationRatio < 1) {
+      sentimentComments = 1;
+    } else if (reputationRatio < 2) {
+      sentimentComments = 4;
+    } else if (reputationRatio < 5) {
+      sentimentComments = 10;
+    }
+
+    // Update all comments of the user
+    await commentsUser.updateMany(
+      { userId: userId },
+      { sentiment_comments: sentimentComments }
+    );
+  }
+
+  console.log("Reputation calculated for all users");
+});
 // ----------------- AMQP -----------------
 
 const startAmqp = async () => {
