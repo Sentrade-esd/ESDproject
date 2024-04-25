@@ -191,9 +191,7 @@ function Trade() {
   const [keyword, setKeyword] = useState(null);
   const [keyWords, setKeyWords] = useState(null);
   const [emotions, setEmotions] = useState(null);
-  const [comments, setComments] = useState(
-    JSON.parse(localStorage.getItem("comments")) || []
-  );
+  const [comments, setComments] = useState([]);
   const [news, SetNews] = useState([]);
   const toggleBuyModal = () => {
     setBuyModal(!buyModal);
@@ -389,69 +387,69 @@ function Trade() {
   // }, []);
 
   // First useEffect for fetching price, market cap, and average volume
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const ScrapeResponse = await axios.get(
-        `/kong/scraper/scrapeCurrentPrice?ticker=${encodeURIComponent(
-          companySymbol
-        )}`
-      );
-      setPrice(ScrapeResponse.data.price);
-      setFetchedData(true);
-      setMarketCap(ScrapeResponse.data.marketCap);
-      setAvgVolume(ScrapeResponse.data.avgVolume);
-    } catch (error) {
-      console.error(
-        "Error fetching price, market cap, and average volume:",
-        error
-      );
-    }
-  };
-
-  fetchData();
-}, []);
-
-// Second useEffect for fetching latest 20 comments
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const CommentsResponse = await axios.get(
-        `/kong/comments/${companyName}`
-      );
-      setComments(CommentsResponse.data);
-      localStorage.setItem("comments", JSON.stringify(CommentsResponse.data));
-    } catch (error) {
-      if (error.response && error.response.status === 404) {
-        setComments([]);
-        localStorage.setItem("comments", JSON.stringify([]));
-      } else {
-        throw error;
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const ScrapeResponse = await axios.get(
+          `/kong/scraper/scrapeCurrentPrice?ticker=${encodeURIComponent(
+            companySymbol
+          )}`
+        );
+        setPrice(ScrapeResponse.data.price);
+        setFetchedData(true);
+        setMarketCap(ScrapeResponse.data.marketCap);
+        setAvgVolume(ScrapeResponse.data.avgVolume);
+      } catch (error) {
+        console.error(
+          "Error fetching price, market cap, and average volume:",
+          error
+        );
       }
-    }
-  };
+    };
 
-  fetchData();
-}, []);
+    fetchData();
+  }, []);
 
-// Third useEffect for fetching sentiment score and news
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const SentimentResponse = await axios.get(
-        `/kong/sentimentAPI/sentiment_query?search_term=${companyName}&ticker=${companySymbol}`
-      );
-      setSentimentScore(SentimentResponse.data.sentiments.sentiment_score);
-      setEmotion(SentimentResponse.data.sentiments.emotion);
-      setKeyword(SentimentResponse.data.sentiments.keyword);
-      SetNews(SentimentResponse.data.newsArticles);
-    } catch (error) {
-      console.error("Error fetching sentiment:", error);
-    }
-  };
+  // Second useEffect for fetching latest 20 comments
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const CommentsResponse = await axios.get(
+          `/kong/comments/${companyName}`
+        );
+        setComments(CommentsResponse.data);
+        // localStorage.setItem("comments", JSON.stringify(CommentsResponse.data));
+      } catch (error) {
+        if (error.response && error.response.status === 404) {
+          setComments([]);
+          // localStorage.setItem("comments", JSON.stringify([]));
+        } else {
+          throw error;
+        }
+      }
+    };
 
-  fetchData();
-}, []);
+    fetchData();
+  }, []);
+
+  // Third useEffect for fetching sentiment score and news
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const SentimentResponse = await axios.get(
+          `/kong/sentimentAPI/sentiment_query?search_term=${companyName}&ticker=${companySymbol}`
+        );
+        setSentimentScore(SentimentResponse.data.sentiments.sentiment_score);
+        setEmotion(SentimentResponse.data.sentiments.emotion);
+        setKeyword(SentimentResponse.data.sentiments.keyword);
+        SetNews(SentimentResponse.data.newsArticles);
+      } catch (error) {
+        console.error("Error fetching sentiment:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   // return (
   //     <div>
@@ -512,14 +510,11 @@ useEffect(() => {
   // const { search, sentiment_score } = jsonData.result;
   const handleWatchlist = async () => {
     try {
-      const response = await axios.post(
-        `/kong/watchlist/add`,
-        {
-          userID: userId,
-          teleID: teleId,
-          watchlistedCompany: companyName,
-        }
-      );
+      const response = await axios.post(`/kong/watchlist/add`, {
+        userID: userId,
+        teleID: teleId,
+        watchlistedCompany: companyName,
+      });
       console.log("watvhlist", response.data);
       setAlert("Added to watchlist successfully");
       setWatchlisted(true);
@@ -608,9 +603,12 @@ useEffect(() => {
             }</p>
             <p>Buy Amount: ${followTradeResponse.data.buyAmount}</p>
             <p>Sell Amount: ${followTradeResponse.data.sellAmount}</p>
-            <p>Total Account Value: ${followTradeResponse.data.totalAccountValue}</p>
+            <p>Total Account Value: ${
+              followTradeResponse.data.totalAccountValue
+            }</p>
             <p>Current PnL: ${(
-              followTradeResponse.data.sellAmount - followTradeResponse.data.buyAmount
+              followTradeResponse.data.sellAmount -
+              followTradeResponse.data.buyAmount
             ).toFixed(2)}</p>
           </div>`,
         });

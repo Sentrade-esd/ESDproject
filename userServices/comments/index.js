@@ -12,14 +12,18 @@ app.use(cors());
 const DB_service_url =
   process.env.DB_URL || "mongodb://127.0.0.1:27017/comments";
 
-  console.log("mongodb://" + DB_service_url + "/comments");
+console.log("mongodb://" + DB_service_url + "/comments");
 let connection;
 let channel;
 let amqpServer = process.env.AMQP_SERVER || "amqp://localhost";
 
-
 mongoose
-  .connect("mongodb://root:root@" + DB_service_url + "/comments", {authSource:"admin"})
+  // .connect("mongodb://root:root@" + DB_service_url + "/comments", {
+  //   authSource: "admin",
+  // })
+  .connect(DB_service_url, {
+    authSource: "admin",
+  })
   // mongoose.connect(`${uri}/watchlist`, {})
   .then(() => {
     console.log("Connected to the database!");
@@ -28,17 +32,35 @@ mongoose
     console.error("Error connecting to the database:", err);
   });
 
+const commentSchema = new Schema({
+  comment: String,
+  likes: { type: Number, default: 0 },
+  // add other properties as needed
+});
+const commentSchemaCompany = new Schema({
+  userId: { type: String },
+  commentIndex: { type: Number },
+  comment: String,
+  likes: { type: Number, default: 0 },
+});
+const commentsByCompanySchema = new Schema({
+  // _id: { type: String, alias: "company", unique: true },
+  // commentsMade: [String],
 
+  company: { type: String, unique: true },
+  commentsMade: [commentSchemaCompany],
+});
+const commentsByUserSchema = new Schema({
+  // _id: { type: String, alias: "company", unique: true },
+  // commentsMade: [String],
 
-  const commentsByCompanySchema = new Schema({
-    // _id: { type: String, alias: "company", unique: true },
-    // commentsMade: [String],
+  userId: { type: String, unique: true },
+  commentsMade: [commentSchema],
+});
 
-    company: { type: String, unique: true },
-    commentsMade: [String],
-  });
-  
-  const comments = mongoose.model("comments", commentsByCompanySchema);
+const comments = mongoose.model("comments", commentsByCompanySchema);
+
+const commentsUser = mongoose.model("commentsUser", commentsByUserSchema);
 
 // ----------------- AMQP -----------------
 
@@ -83,6 +105,7 @@ const sendToQueue = async (exchange, routingKey, msg) => {
 app.post("/comments", async (req, res) => {
   const company = req.body.company;
   const comment = req.body.comment;
+  const userId = req.body.userId;
 
   if (!company || !comment) {
     return res
@@ -91,19 +114,33 @@ app.post("/comments", async (req, res) => {
   }
 
   let companyComments = null;
-
+  let userComments = null;
+  const commentIn = {
+    comment: comment,
+  };
+  let commentCompany = {};
   try {
+    userComments = await commentsUser.findOneAndUpdate(
+      { userId: userId },
+      { $push: { commentsMade: commentIn } },
+      { new: true, upsert: true }
+    );
+    const commentIndex = userComments.commentsMade.length - 1;
+    commentCompany = {
+      userId: userId,
+      commentIndex: commentIndex,
+      comment: comment,
+    };
     companyComments = await comments.findOneAndUpdate(
       { company: company },
-      { $push: { commentsMade: comment } },
+      { $push: { commentsMade: commentCompany } },
       { new: true, upsert: true }
     );
 
-    if (companyComments.commentsMade.length > 20) {
-      companyComments.commentsMade.shift();
-      await companyComments.save();
-    }
-
+    // if (companyComments.commentsMade.length > 20) {
+    //   companyComments.commentsMade.shift();
+    //   await companyComments.save();
+    // }
   } catch (error) {
     console.error("Error adding comment:", error);
     res.status(500).send({ message: "Error adding comment" });
@@ -118,7 +155,49 @@ app.post("/comments", async (req, res) => {
     console.error("Error sending message to queue:", error);
     res.status(500).send({ message: "Error sending message to queue" });
   }
+});
+app.post("/comments/like", async (req, res) => {
+  const company = req.body.company;
+  const commentIndex = req.body.commentIndex;
+  const userId = req.body.userId;
 
+  if (!company || !commentIndex || !userId) {
+    return res
+      .status(400)
+      .send({ message: "Company, commentIndex and userId are required" });
+  }
+
+  let companyComments = null;
+  let userComments = null;
+  try {
+    userComments = await commentsUser.findOne({ userId: userId });
+    const comment = userComments.commentsMade[commentIndex];
+    comment.likes += 1;
+    await userComments.save();
+    const doc = await comments.findOne({
+      company: company,
+      "commentsMade.userId": userId,
+    });
+
+    if (doc) {
+      // Find the comment with the correct commentIndex
+      const comment = doc.commentsMade.find(
+        (c) => c.commentIndex === commentIndex
+      );
+
+      if (comment) {
+        // Increment the likes of the comment
+        comment.likes += 1;
+
+        // Save the document back to the database
+        await doc.save();
+      }
+    }
+    res.sendStatus(200);
+  } catch (error) {
+    console.error("Error liking comment:", error);
+    res.status(500).send({ message: "Error liking comment" });
+  }
 });
 
 app.get("/comments/:company", async (req, res) => {
@@ -142,7 +221,6 @@ app.get("/comments/:company", async (req, res) => {
   await startAmqp();
 })();
 
-
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`, );
+  console.log(`Server running on port ${PORT}`);
 });
