@@ -10,7 +10,7 @@ const sleep = (milliseconds) => {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 };
 
-async function performScraping(query) {
+async function performScrapingComments(query, ticker) {
   let browser = await puppeteer.launch({
     headless: 'new',
     // executablePath: "/usr/bin/chromium",
@@ -18,7 +18,7 @@ async function performScraping(query) {
   });
   let page = await browser.newPage();
 
-  let url = `https://finance.yahoo.com/quote/${query}/community`;
+  let url = `https://finance.yahoo.com/quote/${ticker}/community`;
   // await page.goto(url);
 
   let headers = {};
@@ -99,9 +99,21 @@ async function performScraping(query) {
   let comments = parsedResponse["conversation"].comments;
   let data = [];
 
+  let n = 1;
   comments.map((comment) => {
-    data.push(comment.content[0].text);
+    // console.log(comment);
+    let commentDetails = {}
+    commentDetails["i"] = n;
+    commentDetails.title = comment.content[0].text;
+    commentDetails.link = "COMMENT";
+    commentDetails.dateTime = new Date(comment["written_at"] * 1000).toISOString();
+
+    data.push(commentDetails);
+    n++;
+    // data.push(comment.content[0].text);
   });
+
+  console.log("Done scraping Comments");
 
   // let comments = parsedResponse["conversation"]['comments']
   // let comments = JSON.parse(response).conversation.comments;
@@ -111,15 +123,13 @@ async function performScraping(query) {
   //   commentsBody.push(comment.content.text);
   // })
 
-
-
   return data;
 
   
 }
 
 parentPort.on("message", async (message) => {
-  const { ticker } = message;
+  const { query ,ticker } = message;
   console.log("worker ticker", ticker);
 
   try {
@@ -127,7 +137,7 @@ parentPort.on("message", async (message) => {
     // console.log("Current Price: ", response);
     // res.send(response);
 
-    let response = await performScraping(ticker);
+    let response = await performScrapingComments(query, ticker);
     if (response) {
         response.ticker = ticker;
         parentPort.postMessage(response);
