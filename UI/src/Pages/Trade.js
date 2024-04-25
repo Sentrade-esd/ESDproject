@@ -390,6 +390,26 @@ function Trade() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const WatchListResponse = await axios.get(
+          `/kong/watchlist/user/${userId}`
+        );
+        const watchlist = WatchListResponse.data;
+        if (watchlist.includes(companyName)) {
+          setWatchlisted(true);
+        }
+      } catch (error) {
+        console.error(
+          "Error fetching price, market cap, and average volume:",
+          error
+        );
+      }
+    };
+
+    fetchData();
+  }, []);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
         const ScrapeResponse = await axios.get(
           `/kong/scraper/scrapeCurrentPrice?ticker=${encodeURIComponent(
             companySymbol
