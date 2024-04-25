@@ -115,18 +115,67 @@ async function performScrapingComments(query, ticker) {
 
   console.log("Done scraping Comments");
 
-  // let comments = parsedResponse["conversation"]['comments']
-  // let comments = JSON.parse(response).conversation.comments;
-  // let commentsBody = [];
-  // comments.map((comment)=> {
-  //   console.log("Comment:", comment.content.text);
-  //   commentsBody.push(comment.content.text);
-  // })
-
   return data;
 
-  
 }
+
+// async function performScrapingComments(query, ticker) {
+//   const browser = await puppeteer.launch({
+//     headless: true,
+//     args: ["--no-sandbox", "--disable-setuid-sandbox"],
+//   });
+//   const page = await browser.newPage();
+
+//   let intercepted = false;
+//   let headers = {};
+//   let postData = {};
+
+//   // Intercept the specific network request
+//   await page.setRequestInterception(true);
+//   page.on('request', interceptedRequest => {
+//     if (interceptedRequest.url().includes('api-2-0.spot.im/v1.0.0/conversation/read') && interceptedRequest.method() === 'POST') {
+//       intercepted = true;
+//       headers = interceptedRequest.headers();
+//       postData = JSON.parse(interceptedRequest.postData());  // Make sure to parse the POST data
+
+//       interceptedRequest.continue();  // Allow the request to continue
+//     } else {
+//       interceptedRequest.continue();
+//     }
+//   });
+
+//   // Navigate to the page and wait for network to be idle
+//   await page.goto(`https://finance.yahoo.com/quote/${ticker}/community`, { waitUntil: 'networkidle0' });
+
+//   // Check if the necessary request was intercepted
+//   if (!intercepted) {
+//     console.error('The required network request was not intercepted.');
+//     await browser.close();
+//     return;
+//   }
+
+//   // Use the intercepted data to make an Axios request
+//   const response = await axios.post('https://api-2-0.spot.im/v1.0.0/conversation/read', postData, {
+//     headers: {
+//       ...headers,
+//       'Content-Type': 'application/json'
+//     }
+//   });
+
+//   // Process the response to extract comments
+//   const comments = response.data.conversation.comments;
+//   const data = comments.map((comment, index) => ({
+//     index: index + 1,
+//     title: comment.content[0].text,
+//     link: "COMMENT",
+//     dateTime: new Date(comment.written_at * 1000).toISOString()
+//   }));
+
+//   console.log("Done scraping Comments");
+//   await browser.close();
+//   return data;
+// }
+
 
 parentPort.on("message", async (message) => {
   const { query ,ticker } = message;
