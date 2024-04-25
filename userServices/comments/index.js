@@ -182,19 +182,20 @@ app.post("/comments", async (req, res) => {
       { $push: { commentsMade: commentCompany } },
       { new: true, upsert: true }
     );
-
-    // if (companyComments.commentsMade.length > 20) {
-    //   companyComments.commentsMade.shift();
-    //   await companyComments.save();
-    // }
   } catch (error) {
     console.error("Error adding comment:", error);
     res.status(500).send({ message: "Error adding comment" });
   }
 
   try {
-    const msg = { company, comment };
-    await sendToQueue("comments_exchange", "comment", msg);
+    if (userComments.sentiment_comments > 0) {
+      const msg = { company, comment };
+      await sendToQueue("comments_exchange", "comment", msg);
+
+      // Decrement sentiment_comments by 1
+      userComments.sentiment_comments -= 1;
+      await userComments.save();
+    }
 
     res.send(companyComments);
   } catch (error) {
