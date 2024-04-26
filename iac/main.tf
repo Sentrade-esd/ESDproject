@@ -1,14 +1,3 @@
-terraform {
-  backend "remote" {
-    organization = "example-organization"
-
-    workspaces {
-      name = "example-workspace"
-    }
-  }
-}
-
-
 
 
 data "google_service_account" "default" {
