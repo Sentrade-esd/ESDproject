@@ -94,7 +94,7 @@ jobs:
       run: terraform plan -input=false
       working-directory: ./iac
       env:
-        GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+        TF_VAR_gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
 
       # On push to "main", build or change infrastructure according to Terraform configuration files
       # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
