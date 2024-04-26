@@ -105,7 +105,7 @@ jobs:
       run: terraform init
       working-directory: ./iac
       env:
-        TF_VAR_gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
+        TF_VAR_GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
       
     # Checks that all Terraform configuration files adhere to a canonical format
     # - name: Terraform Format
@@ -119,7 +119,7 @@ jobs:
       run: terraform plan 
       working-directory: ./iac
       env:
-        TF_VAR_gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
+        TF_VAR_GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
 
 
       # On push to "main", build or change infrastructure according to Terraform configuration files
