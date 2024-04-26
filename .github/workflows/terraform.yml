@@ -69,6 +69,28 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    - name: Setup gCloud
+      uses: google-github-actions/auth@v2.1.2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+    
+    - name: 'Set up Cloud SDK'
+      uses: 'google-github-actions/setup-gcloud@v2.1.0'
+
+    - name: 'Use gcloud CLI'
+      run: 'gcloud info'
+
+    # - uses: "google-github-actions/setup-gcloud@v2"
+    #   with:
+    #     install_components: "gke-gcloud-auth-plugin"
+
+    # - name: Authenticate to GKE cluster
+    #   uses: google-github-actions/get-gke-credentials@v2
+    #   with:
+    #     cluster_name: my_cluster
+    #     location: europe-west1-b
+    
+
     # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
