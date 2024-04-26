@@ -102,8 +102,8 @@ jobs:
         terraform_version:  1.8.2
 
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
-    - name: Terraform Init
-      run: terraform init
+    - name: Terraform Init and apply
+      run: terraform init && terraform apply -auto-approve
       working-directory: ./iac
       env:
         TF_VAR_gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
@@ -116,17 +116,17 @@ jobs:
     #     GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
 
     # Generates an execution plan for Terraform
-    - name: Terraform Plan
-      run: export TF_VAR_gcp_sa_key='${{ secrets.GCP_SA_KEY }}' && terraform plan 
-      working-directory: ./iac
-      # env:
-      #   TF_VAR_gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
+    # - name: Terraform Plan
+    #   run: export TF_VAR_gcp_sa_key='${{ secrets.GCP_SA_KEY }}' && terraform plan 
+    #   working-directory: ./iac
+    #   env:
+    #     TF_VAR_gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
 
 
-      # On push to "main", build or change infrastructure according to Terraform configuration files
-      # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
-    - name: Terraform Apply
-      run: terraform apply -auto-approve -var="GCP_SA_KEY=$GCP_SA_KEY"
-      working-directory: ./iac
-      env:
-        GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+    #   # On push to "main", build or change infrastructure according to Terraform configuration files
+    #   # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
+    # - name: Terraform Apply
+    #   run: terraform apply -auto-approve -var="GCP_SA_KEY=$GCP_SA_KEY"
+    #   working-directory: ./iac
+    #   env:
+    #     GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
