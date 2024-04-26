@@ -5,14 +5,29 @@ terraform {
       version = "5.25.0"
     }
   }
+
+  backend "remote" {
+    hostname     = "app.terraform.io"
+    organization = "sentrade_esd"
+
+    workspaces {
+      name = "ESDproject"
+    }
+  }
 }
 
 
 provider "google" {
   project = var.project_id
   region  = var.region
-  credentials = var.GCP_SA_KEY
+  # credentials = var.GCP_SA_KEY
 }
+
+
+# variable "GCP_SA_KEY" {
+#   description = "GCP Service Account Key in JSON format"
+#   type        = string
+# }
 
 data "google_client_config" "default" {}
 
