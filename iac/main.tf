@@ -78,7 +78,7 @@ data "external" "get_backend_service" {
 
 resource "null_resource" "enable_cdn" {
   provisioner "local-exec" {
-    command = "gcloud compute backend-services update ${keys(data.external.get_backend_service.result)[0]} --enable-cdn --global"
+    command = "gcloud compute backend-services update ${keys(data.external.get_backend_service.result)[0]} --enable-cdn --global --enable-logging --custom-request-header=ESD-Project:esd-project"
   }
 
   depends_on = [
