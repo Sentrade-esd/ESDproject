@@ -1,14 +1,22 @@
-name: CD
+name: "old-Terraform"
 
 on:
-  push:
-    branches:
-      - dev
+  # push:
+  #   branches: ["dev"]
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   terraform:
+    name: "Terraform"
     runs-on: ubuntu-latest
+    environment: production
+
+    defaults:
+      run:
+        shell: bash
 
     steps:
       - name: Checkout
@@ -16,16 +24,21 @@ jobs:
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
+          # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
       - name: Terraform Init
-        run: terraform init iac
+        run: terraform init
 
-      - name: Terraform Validate
-        run: terraform validate iac
+      # Checks that all Terraform configuration files adhere to a canonical format
+      - name: Terraform Format
+        run: terraform fmt -check
 
+      # Generates an execution plan for Terraform
       - name: Terraform Plan
-        run: terraform plan iac
-        continue-on-error: true
+        run: terraform plan -input=false
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve iac
+        if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false iac
