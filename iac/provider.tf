@@ -20,11 +20,11 @@ terraform {
 provider "google" {
   project = var.project_id
   region  = var.region
-  credentials = var.GCP_SA_KEY
+  credentials = var.gcp_sa_key
 }
 
 
-variable "GCP_SA_KEY" {
+variable "gcp_sa_key" {
   description = "GCP Service Account Key in JSON format"
   type        = string
 }
