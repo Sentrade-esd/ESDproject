@@ -65,6 +65,8 @@ resource "null_resource" "deploy_app" {
   ]
 }
 
+
+
 resource "google_clouddeploy_target" "github_target" {
   name = "github-target"
   description = "Target for deploying from GitHub repository"
@@ -80,6 +82,8 @@ resource "google_clouddeploy_delivery_pipeline" "github_pipeline" {
   name        = "github-pipeline"
   description = "Pipeline for deploying from GitHub repository"
   location    = var.region
+
+  
 
 }
 
