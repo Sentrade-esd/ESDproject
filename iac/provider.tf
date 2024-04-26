@@ -27,7 +27,7 @@ provider "google" {
 variable "gcp_sa_key" {
   description = "GCP Service Account Key in JSON format"
   type        = string
-  default = ""
+  # default = ""
 }
 
 data "google_client_config" "default" {}
