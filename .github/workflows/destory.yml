@@ -1,8 +1,6 @@
-name: "Terraform"
+name: "Terraform Destroy"
 
 on:
-  push:
-    branches: ["dev"]
   workflow_dispatch:
 
 permissions:
@@ -10,7 +8,7 @@ permissions:
 
 jobs:
   terraform:
-    name: "Terraform"
+    name: "Terraform Destroy"
     runs-on: ubuntu-latest
     environment: production
 
@@ -30,13 +28,5 @@ jobs:
       - name: Terraform Init
         run: terraform init iac
 
-      - name: Terraform Format
-        run: terraform fmt -check iac
-
-      - name: Terraform Plan
-        run: terraform plan -input=false iac
-        continue-on-error: true
-
-      - name: Terraform Apply
-        if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false iac
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve iac
