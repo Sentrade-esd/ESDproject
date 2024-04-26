@@ -46,7 +46,7 @@ name: 'Terraform-GCP-Workflow'
 
 on:
   push:
-    branches: [ "deploy" ]
+    branches: [ "dev" ]
   pull_request:
 
 permissions:
