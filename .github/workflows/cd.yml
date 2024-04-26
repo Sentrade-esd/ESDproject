@@ -1,0 +1,31 @@
+name: CD
+
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      - name: Terraform Init
+        run: terraform init iac
+
+      - name: Terraform Validate
+        run: terraform validate iac
+
+      - name: Terraform Plan
+        run: terraform plan iac
+        continue-on-error: true
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve iac
