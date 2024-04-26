@@ -79,7 +79,8 @@ jobs:
       run: terraform init
       working-directory: ./iac
       env:
-        GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+        TF_VAR_gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
+      
 
     # Checks that all Terraform configuration files adhere to a canonical format
     # - name: Terraform Format

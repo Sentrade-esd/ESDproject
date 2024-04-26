@@ -15,6 +15,11 @@ variable "region" {
   default = "asia-southeast1-a"
 }
 
+variable "GCP_SA_KEY" {
+  description = "GCP Service Account Key in JSON format"
+  type        = string
+}
+
 variable "files" {
   default = [
     "1kong.yaml",

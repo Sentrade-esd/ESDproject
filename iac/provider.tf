@@ -10,7 +10,8 @@ terraform {
 
 provider "google" {
   project = var.project_id
-  region  = "us-central1-a"  # Change to your desired region
+  region  = var.region
+  credentials = var.GCP_SA_KEY
 }
 
 data "google_client_config" "default" {}
@@ -24,6 +25,6 @@ provider "kubernetes" {
   cluster_ca_certificate = base64decode(google_container_cluster.primary.master_auth[0].cluster_ca_certificate)
 }
 
-provider "kubernetes-alpha" {
-  config_path = "~/.kube/config" # Update this with the path to your kubeconfig file
-}
+# provider "kubernetes-alpha" {
+#   config_path = "~/.kube/config" # Update this with the path to your kubeconfig file
+# }
