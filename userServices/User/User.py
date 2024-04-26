@@ -28,15 +28,17 @@ class User(db.Model):
     Password = db.Column('password', db.String(255), nullable=False)
     Telehandle = db.Column('telehandle', db.String(255))
     TeleID = db.Column('teleid', db.Integer, nullable=True)
+    CreationDate = db.Column('creationdate', db.String(255), nullable=False)
 
-    def __init__(self, Email, Password, Telehandle, TeleID):
+    def __init__(self, Email, Password, Telehandle, TeleID, CreationDate):
         self.Email = Email
         self.Password = Password
         self.Telehandle = Telehandle
         self.TeleID = TeleID
+        self.CreationDate = CreationDate
 
     def json(self):
-        return {"UserID": self.UserID, "Email": self.Email, "Password": self.Password, "Telehandle": self.Telehandle, "TeleID": self.TeleID}
+        return {"UserID": self.UserID, "Email": self.Email, "Password": self.Password, "Telehandle": self.Telehandle, "TeleID": self.TeleID, "CreationDate": self.CreationDate}
 
 @app.route("/user", methods=['GET', 'POST'])
 def users():
@@ -65,7 +67,7 @@ def users():
         # if 'Password' in data:
         #     data['Password'] = hashlib.sha1(data['Password'].encode()).hexdigest()
 
-        new_user = User(data['Email'], data['Password'], data.get('Telehandle', None), data.get('TeleID', None))
+        new_user = User(data['Email'], data['Password'], data.get('Telehandle', None), data.get('TeleID', None), data['CreationDate'])
 
         try:
             db.session.add(new_user)

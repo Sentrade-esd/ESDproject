@@ -27,7 +27,7 @@ const CommentsAndNewsTabs = ({
   setComments,
 }) => {
   const [activeTab, setActiveTab] = useState("comments");
-  const [comment, setComment] = useState("");
+
   const toggleTab = (tab) => {
     if (activeTab !== tab) setActiveTab(tab);
   };
@@ -35,27 +35,48 @@ const CommentsAndNewsTabs = ({
   // Check if user is logged in
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
-
+  const [userId, setUserId] = useState(localStorage.getItem("UserId") || "");
+  const [comment, setComment] = useState({
+    userId: userId,
+    commentIndex: 0,
+    comment: "",
+    likes: 0,
+  });
+  // left off here
   const handleCommentSubmit = async (e) => {
     e.preventDefault(); // Prevent the default form submission behavior
-    setComments((prevComments) => [...prevComments, comment]); // Add the new comment to the comments array
-    localStorage.setItem("comments", JSON.stringify([...comments, comment])); // Store the updated comments array in local storage
-    setComment(""); // Clear the comment input field
+    setComments((prevComments) => [...prevComments, comment]);
+    // localStorage.setItem("comments", JSON.stringify([...comments, comment]));
+    setComment({ comment: "", likes: 0 }); // Clear the comment input field
     try {
       const commentData = {
         company: companyName,
         comment: comment,
+        userId: userId,
       };
       console.log("commentData", commentData);
-      const CommentsResponse = await axios.post(
-        `/kong/comments/`,
-        commentData
-      );
+      const CommentsResponse = await axios.post(`/kong/comments/`, commentData);
       if (CommentsResponse.status === 200) {
         console.log("yes bro");
       }
     } catch (error) {
       console.error("Error fetching comments:", error);
+    }
+  };
+  const handleLike = async (userId, commentIndex) => {
+    try {
+      const body = {
+        company: companyName,
+        commentIndex: commentIndex,
+        userId: userId,
+      };
+      // need add to kong
+      const likeResponse = await axios.post(`/kong/comments/like/`, body);
+      if (likeResponse.status === 200) {
+        console.log("liked");
+      }
+    } catch (error) {
+      console.error("Error liking comment:", error);
     }
   };
 
@@ -123,7 +144,9 @@ const CommentsAndNewsTabs = ({
                         rows="4"
                         type="textarea"
                         value={comment}
-                        onChange={(e) => setComment(e.target.value)}
+                        onChange={(e) =>
+                          setComment({ ...comment, comment: e.target.value })
+                        }
                       />
                       <div className="media-footer">
                         <Button
@@ -147,10 +170,9 @@ const CommentsAndNewsTabs = ({
                     {/* Your comments */}
                     {comments.map((comment, index) => {
                       return (
-                        <Media>
+                        <Media key={`${comment.userId}_${index}`}>
                           <a
                             className="pull-left"
-                            // href="#pablo"
                             onClick={(e) => e.preventDefault()}
                           >
                             <div className="avatar">
@@ -165,8 +187,16 @@ const CommentsAndNewsTabs = ({
                             <Media heading tag="h5" style={labelStyles}>
                               Anonymous{" "}
                             </Media>
-                            <p>{comment}</p>
+                            <p>{comment.userId}</p>
                             <br></br>
+                            <Button
+                              onClick={() =>
+                                handleLike(comment.userId, comment.commentIndex)
+                              }
+                            >
+                              Like
+                            </Button>
+                            <p>{comment.likes} likes</p>
                           </Media>
                         </Media>
                       );

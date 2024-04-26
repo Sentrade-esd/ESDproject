@@ -1,6 +1,6 @@
 _format_version: "1.1"
 
-plugins:  
+plugins:
   - name: prometheus
   - name: cors
     config:
@@ -20,8 +20,7 @@ plugins:
       credentials: true
       max_age: 3600
 
-
-services: 
+services:
   - name: sentiment-service
     # url: http://sentiment_app:5001/
     # url: http://sentiment-app:5001/
@@ -37,7 +36,7 @@ services:
 
       - name: query-route
         paths:
-          - /sentimentAPI/sentiment_query  # Define the full path including the base path
+          - /sentimentAPI/sentiment_query # Define the full path including the base path
         methods:
           - GET
           - OPTIONS
@@ -45,7 +44,7 @@ services:
 
       - name: comment-route
         paths:
-          - /sentimentAPI/sentiment_comment  # Define the full path including the base path
+          - /sentimentAPI/sentiment_comment # Define the full path including the base path
         methods:
           - POST
           - OPTIONS
@@ -73,7 +72,7 @@ services:
           - POST
           - OPTIONS
         strip_path: false
-        
+
       - name: watchlist-remove
         paths:
           - /watchlist/remove
@@ -120,7 +119,6 @@ services:
           - OPTIONS
         strip_path: false
 
-
   - name: comments-service
     # url: http://comments_service:6001/
     # url: http://comments-service:6001/
@@ -132,6 +130,14 @@ services:
         methods:
           - POST
           - GET
+          - OPTIONS
+        strip_path: false
+
+      - name: comments-addlike
+        paths:
+          - /comments/like
+        methods:
+          - POST
           - OPTIONS
         strip_path: false
 
@@ -149,58 +155,58 @@ services:
     routes:
       - name: transaction-all-route
         paths:
-        - /transaction
+          - /transaction
         methods:
-        - GET
-        - OPTIONS
+          - GET
+          - OPTIONS
         strip_path: false
 
       - name: transaction-total-by-id-route
         paths:
-        - /transaction/total
+          - /transaction/total
         methods:
-        - GET
-        - OPTIONS
+          - GET
+          - OPTIONS
         strip_path: false
 
       - name: transaction-newTrade-route
         paths:
-        - /transaction/newTrade
+          - /transaction/newTrade
         methods:
-        - POST
-        - OPTIONS
+          - POST
+          - OPTIONS
         strip_path: false
 
       - name: transaction-updateTrade-route
         paths:
-        - /transaction/updateTrade
+          - /transaction/updateTrade
         methods:
-        - POST
-        - OPTIONS
+          - POST
+          - OPTIONS
         strip_path: false
 
       - name: transaction-checkBalance-route
         paths:
-        - /transaction/checkBalance
+          - /transaction/checkBalance
         methods:
-        - GET
-        - OPTIONS
+          - GET
+          - OPTIONS
         strip_path: false
 
       - name: transaction-setup-route
         paths:
-        - /transaction/setup
+          - /transaction/setup
         methods:
-        - POST
-        - OPTIONS
+          - POST
+          - OPTIONS
         strip_path: false
-      
+
       - name: transaction-getLatestByUser-route
         paths:
-        - /transaction
+          - /transaction
         methods:
-        - GET
-        - OPTIONS
+          - GET
+          - OPTIONS
         strip_path: false
 
       # - name: transaction-checkBalance
@@ -219,8 +225,6 @@ services:
       #   - OPTIONS
       #   strip_path: false
 
-      
-
   - name: follow-trade-service
     # url: http://follow_trades:4001/
     # url: http://follow-trades:4001/
@@ -229,24 +233,24 @@ services:
     routes:
       - name: root-route
         methods:
-        - GET
-        - OPTIONS
+          - GET
+          - OPTIONS
         paths:
-        - /
+          - /
         strip_path: false
 
       - name: followTrade-buy-route
         methods:
-        - POST
-        - OPTIONS
+          - POST
+          - OPTIONS
         paths:
-        - /followTrade/buy
+          - /followTrade/buy
         strip_path: false
 
   - name: telebot-service
     # url: http://telebot:3002/
     url: ${TELEBOT_SERVICE_URL}
-    routes: 
+    routes:
       - name: send-message
         methods:
           - POST
@@ -259,7 +263,5 @@ services:
           - GET
           - OPTIONS
         paths:
-          - /teleBot/redirect       #### temporary
+          - /teleBot/redirect #### temporary
         strip_path: false
-
-  

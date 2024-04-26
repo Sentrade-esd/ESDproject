@@ -66,6 +66,26 @@ resource "null_resource" "deploy_app" {
 }
 
 
-      # for file in $(echo "${join(" ", var.files)}") ; do
-      #   kubectl delete -f ./deployments/$file --ignore-not-found
-      # done
+data "external" "get_backend_service" {
+  program = ["bash", "-c", "gcloud container clusters get-credentials ${google_container_cluster.primary.name} --region ${var.region} && kubectl get ing ingress-nginx-esd-project -n esd-project -o json | jq -r '.metadata.annotations[\"ingress.kubernetes.io/backends\"]' "]
+
+  depends_on = [ 
+    google_container_cluster.primary, 
+    google_container_node_pool.primary_nodes,
+    null_resource.deploy_app
+  ]
+}
+
+resource "null_resource" "enable_cdn" {
+  provisioner "local-exec" {
+    command = "gcloud compute backend-services update ${keys(data.external.get_backend_service.result)[0]} --enable-cdn --global"
+  }
+
+  depends_on = [
+    google_container_cluster.primary,
+    google_container_node_pool.primary_nodes,
+    null_resource.deploy_app
+  ]
+}
+
+

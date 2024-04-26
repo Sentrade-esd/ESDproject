@@ -6,6 +6,7 @@ Run Docker Desktop
 
 this script will run the following services and respective ports on the HOST device
 <br> ensure that these ports are not being used:
+
 - Kong Service: 8000, 8001
 - Prometheus: 8090
 - Grafana: 8100
@@ -29,36 +30,38 @@ this script will run the following services and respective ports on the HOST dev
 - Senator Filings: 4002
 - App (UI): 9000
 
-In your Visual Studio Code Terminal, at the root folder (the one with docker-compose-all.yml), 
+In your Visual Studio Code Terminal, at the root folder (the one with docker-compose-all.yml),
 <br>
 run the following commands in order:
 
 1. docker compose -f docker-compose-all.yml build
-<br>
+   <br>
 2. docker compose -f docker-compose-all.yml up -d
 
 ## if any of the build process cannot be completed
 
 please run the following commands instead
 <br>
+
 - if you're on a x86/windows machine:
-  1. docker compose -f docker-compose-amd.yml pull 
-    <br>
+
+  1. docker compose -f docker-compose-amd.yml pull
+     <br>
   2. docker compose -f docker-compose-amd.yml up -d
 
-
 - if you're on an arm machine (mac m1):
-  1. docker compose -f docker-compose-arm.yml pull 
-    <br>
+  1. docker compose -f docker-compose-arm.yml pull
+     <br>
   2. docker compose -f docker-compose-arm.yml up -d
 
-
 ## after deployment
+
 UIs available for use
+
 - APP ui: localhost:9000
 - Grafana: localhost:8100
 - Prometheus: localhost:8090
-- RabbitMQ:  localhost:15672
+- RabbitMQ: localhost:15672
 
 <br>
 begin using the service after sentiment_service container displays the following 

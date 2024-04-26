@@ -17,29 +17,29 @@ const Navigation = () => {
     }
   }, []);
 
-const handleLogin = (username, password) => {
-  
-  axios.get(`http://localhost:5000/user/${username}`)
-    .then((response) => {
-      if (response.data.code === 200) {
-        if (password === response.data.data.Password) {
-          console.log(response.data.data);
-          localStorage.setItem('username', username); // Note that username is actually the email
-          localStorage.setItem("id", response.data.data.UserID);
-          setIsLoggedIn(true);
-          setUsername(username); 
-          setModalShow(false);
+  const handleLogin = (username, password) => {
+    axios
+      .get(`http://localhost:5000/user/${username}`)
+      .then((response) => {
+        if (response.data.code === 200) {
+          if (password === response.data.data.Password) {
+            console.log(response.data.data);
+            localStorage.setItem("username", username); // Note that username is actually the email
+            localStorage.setItem("id", response.data.data.UserID);
+            setIsLoggedIn(true);
+            setUsername(username);
+            setModalShow(false);
+          } else {
+            console.error("Wrong password");
+          }
         } else {
-          console.error('Wrong password');
+          console.error("User does not exist");
         }
-      } else {
-        console.error('User does not exist');
-      }
-    })
-    .catch((error) => {
-      console.error('There was an error!', error);
-    });
-};
+      })
+      .catch((error) => {
+        console.error("There was an error!", error);
+      });
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("username");
@@ -48,49 +48,54 @@ const handleLogin = (username, password) => {
   };
 
   const handleSignup = (Email, Password, TelegramHandle) => {
-    axios.post("http://127.0.0.1:5000/user", {
-      Email: Email,
-      Password: Password,
-      telegram_handle: TelegramHandle,
-    })
-    .then((response) => {
-      if (response.data.code === 200) {
-        axios.get(`http://localhost:5000/user/${Email}`).then((response) => {
-          if (response.data.code === 200) {
-            localStorage.setItem("username", Email); 
-            localStorage.setItem("id", response.data.data.UserID);
-            setIsLoggedIn(true);
-            setUsername(Email); 
-            handleNewUser();
-          } else {
-            console.error("Fetch data after signup failed");
-          }
-        });
-      } else {
-        console.error("Signup failed");
-      }
-      setModalShow(false);
-    })
-    .catch((error) => {
-      console.error("There was an error while signing up!", error);
-    });
+    const unixTimestamp = Math.floor(Date.now() / 1000);
+    axios
+      .post("http://127.0.0.1:5000/user", {
+        Email: Email,
+        Password: Password,
+        Telehandle: TelegramHandle, // changed from 'telegram_handle'
+        CreationDate: unixTimestamp, // changed from 'created_at'
+        // You might also need to add 'TeleID' if it's required in your backend
+      })
+      .then((response) => {
+        if (response.data.code === 200) {
+          axios
+            .get(`http://localhost:5000/user/getUser?email=${Email}`)
+            .then((response) => {
+              if (response.data.code === 200) {
+                localStorage.setItem("username", Email);
+                localStorage.setItem("id", response.data.data.UserID);
+                setIsLoggedIn(true);
+                setUsername(Email);
+                handleNewUser();
+              } else {
+                console.error("Fetch data after signup failed");
+              }
+            });
+        } else {
+          console.error("Signup failed");
+        }
+        setModalShow(false);
+      })
+      .catch((error) => {
+        console.error("There was an error while signing up!", error);
+      });
   };
 
   const handleNewUser = () => {
     axios.post("http://127.0.0.1:5000/transaction/setup", {
       userId: localStorage.getItem("id"),
-      email: localStorage.getItem("username")
-    })
+      email: localStorage.getItem("username"),
+    });
   };
-
 
   const navigate = useNavigate();
 
   const handleTradeHistoryClick = () => {
     if (!isLoggedIn) {
-      setModalShow(true); 
+      setModalShow(true);
     } else {
-      navigate('/TradeHistory'); 
+      navigate("/TradeHistory");
     }
   };
 
@@ -101,26 +106,38 @@ const handleLogin = (username, password) => {
         <Nav className="me-auto">
           <Nav.Link href="home">Home</Nav.Link>
           <Nav.Link href="search">Search</Nav.Link>
-          { isLoggedIn && ( // Only show if logged in
+          {isLoggedIn && ( // Only show if logged in
             <Nav.Link onClick={handleTradeHistoryClick}>Trade History</Nav.Link>
           )}
         </Nav>
         {isLoggedIn ? (
           <React.Fragment>
             <Navbar.Text>Signed in as: {username}</Navbar.Text>
-            <Button onClick={handleLogout} variant="outline-info">Logout</Button>
+            <Button onClick={handleLogout} variant="outline-info">
+              Logout
+            </Button>
           </React.Fragment>
         ) : (
           <Button variant="outline-info" onClick={() => setModalShow(true)}>
-            {isLogin ? 'Login' : 'Sign Up'}
+            {isLogin ? "Login" : "Sign Up"}
           </Button>
         )}
       </Container>
-      {isLoggedIn ? null : isLogin ? 
-        <LoginModal handleLogin={handleLogin} show={modalShow} onHide={() => setModalShow(false)} flipModal={() => setIsLogin(!isLogin)} />  
-        :
-        <SignupModal handleSignup={handleSignup} show={modalShow} onHide={() => setModalShow(false)} flipModal={() => setIsLogin(!isLogin)} />
-      }
+      {isLoggedIn ? null : isLogin ? (
+        <LoginModal
+          handleLogin={handleLogin}
+          show={modalShow}
+          onHide={() => setModalShow(false)}
+          flipModal={() => setIsLogin(!isLogin)}
+        />
+      ) : (
+        <SignupModal
+          handleSignup={handleSignup}
+          show={modalShow}
+          onHide={() => setModalShow(false)}
+          flipModal={() => setIsLogin(!isLogin)}
+        />
+      )}
     </Navbar>
   );
 };
@@ -143,13 +160,27 @@ const LoginModal = ({ handleLogin, flipModal, ...props }) => {
         <Form onSubmit={onSubmit}>
           <Form.Group className="mb-3">
             <Form.Label>Email</Form.Label>
-            <Form.Control type="text" placeholder="Enter username" value={username} onChange={(event) => setUsername(event.target.value)} required />
+            <Form.Control
+              type="text"
+              placeholder="Enter username"
+              value={username}
+              onChange={(event) => setUsername(event.target.value)}
+              required
+            />
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>Password</Form.Label>
-            <Form.Control type="password" placeholder="Password" value={password} onChange={(event) => setPassword(event.target.value)} required />
+            <Form.Control
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              required
+            />
           </Form.Group>
-          <Button variant="primary" type="submit">Submit</Button>
+          <Button variant="primary" type="submit">
+            Submit
+          </Button>
         </Form>
       </Modal.Body>
       <Modal.Footer>
@@ -180,17 +211,37 @@ const SignupModal = ({ handleSignup, flipModal, ...props }) => {
         <Form onSubmit={onSubmit}>
           <Form.Group className="mb-3">
             <Form.Label>Email</Form.Label>
-            <Form.Control type="email" placeholder="Enter email" value={email} onChange={(event) => setEmail(event.target.value)} required />
+            <Form.Control
+              type="email"
+              placeholder="Enter email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              required
+            />
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>Password</Form.Label>
-            <Form.Control type="password" placeholder="Password" value={password} onChange={(event) => setPassword(event.target.value)} required />
+            <Form.Control
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              required
+            />
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>Telegram Handle</Form.Label>
-            <Form.Control type="text" placeholder="Enter Telegram handle" value={telegramHandle} onChange={(event) => setTelegramHandle(event.target.value)} required />
+            <Form.Control
+              type="text"
+              placeholder="Enter Telegram handle"
+              value={telegramHandle}
+              onChange={(event) => setTelegramHandle(event.target.value)}
+              required
+            />
           </Form.Group>
-          <Button variant="primary" type="submit">Submit</Button>
+          <Button variant="primary" type="submit">
+            Submit
+          </Button>
         </Form>
       </Modal.Body>
       <Modal.Footer>
