@@ -610,29 +610,59 @@ function Trade() {
       //       email: "ProbablyPassedFromUI",
       //     },
       //   };
+      // if (!followTradeResponse.status) {
+      //   // alert('Unable to process the transaction')
+      //   setAlert("Unsuccessful. Please try again later.");
+      // } else {
+      //   // alert('Transaction successful');
+      //   setAlert({
+      //     __html: `Successful...
+      //     <div style="display: flex; justify-content: space-between; margin-top: 5px;">
+      //       <p style="margin-top: 3px">Company: ${
+      //         followTradeResponse.data.data.company
+      //       }</p>
+      //       <p>Buy Amount: ${followTradeResponse.data.buyAmount}</p>
+      //       <p>Sell Amount: ${followTradeResponse.data.sellAmount}</p>
+      //       <p>Total Account Value: ${
+      //         followTradeResponse.data.totalAccountValue
+      //       }</p>
+      //       <p>Current PnL: ${(
+      //         followTradeResponse.data.sellAmount -
+      //         followTradeResponse.data.buyAmount
+      //       ).toFixed(2)}</p>
+      //     </div>`,
+      //   });
+      // }
       if (!followTradeResponse.status) {
         // alert('Unable to process the transaction')
         setAlert("Unsuccessful. Please try again later.");
       } else {
-        // alert('Transaction successful');
-        setAlert({
-          __html: `Successful...
-          <div style="display: flex; justify-content: space-between; margin-top: 5px;">
-            <p style="margin-top: 3px">Company: ${
-              followTradeResponse.data.data.company
-            }</p>
-            <p>Buy Amount: ${followTradeResponse.data.buyAmount}</p>
-            <p>Sell Amount: ${followTradeResponse.data.sellAmount}</p>
-            <p>Total Account Value: ${
-              followTradeResponse.data.totalAccountValue
-            }</p>
-            <p>Current PnL: ${(
-              followTradeResponse.data.sellAmount -
-              followTradeResponse.data.buyAmount
-            ).toFixed(2)}</p>
-          </div>`,
-        });
+        // const filings = followTradeResponse.data.data.filings.map(filing => `<p>${JSON.stringify(filing)}</p>`).join('');
+        const filings = followTradeResponse.data.data.filings.map(filing => 
+          `<p style="color: #000;">Name of Senator: ${filing.full_name}  Order: ${filing.order_type}<br>Filed Date: ${filing.file_date} Filed Price: ${filing.file_price}  |  Transacted Date: ${filing.file_date} Transacted Price: ${filing.tx_price}</p>`
+        ).join('');
+
+        const alertHtml = `
+        <div style="display: flex; justify-content: space-between; margin-top: 5px;">
+          <div style="border: 1px solid #000; padding: 10px; color: #000; background-color: #f0f0f0; margin-right: 10px;">
+            <p style="color: #000;">Company: ${followTradeResponse.data.data.company}</p>
+          </div>
+          <div style="border: 1px solid #000; padding: 10px; color: #000; background-color: #f0f0f0; margin-right: 10px;">
+            <p style="color: #000;">Buy Amount: ${followTradeResponse.data.buyAmount}</p>
+            <p style="color: #000;">Sell Amount: ${followTradeResponse.data.sellAmount}</p>
+          </div>
+          <div style="border: 1px solid #000; padding: 10px; color: #000; background-color: #f0f0f0; margin-right: 50px;">
+            <p style="color: #000;">Current PnL: ${(followTradeResponse.data.sellAmount - followTradeResponse.data.buyAmount).toFixed(2)}</p>
+            <p style="color: #000;">Total Account Value: ${followTradeResponse.data.totalAccountValue}</p>
+          </div>
+          <div style="border: 1px solid #000; padding: 10px; color: #000; background-color: #f0f0f0; overflow-y: auto; max-height: 200px; flex: 2;">
+            ${filings}
+          </div>
+        </div>
+      `;
+      setAlert(alertHtml);       
       }
+
     } catch (error) {
       setIsLoading(false);
       console.error(error);
