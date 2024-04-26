@@ -45,52 +45,82 @@ resource "google_container_node_pool" "primary_nodes" {
   }
 }
 
-# resource "null_resource" "deploy_app" {
-#     triggers = {
-#     always_run = "${timestamp()}"
-#   }
+resource "null_resource" "deploy_app" {
+    triggers = {
+    always_run = "${timestamp()}"
+  }
 
-#   provisioner "local-exec" {
-#     command = <<EOF
-#       gcloud container clusters get-credentials ${google_container_cluster.primary.name} --region ${var.region}
-#       for file in $(echo "${join(" ", var.files)}") ; do
-#         kubectl apply -f ./deployments/$file
-#       done
-#     EOF
-#   }
+  provisioner "local-exec" {
+    command = <<EOF
+      gcloud container clusters get-credentials ${google_container_cluster.primary.name} --region ${var.region}
+      for file in $(echo "${join(" ", var.files)}") ; do
+        kubectl apply -f ./deployments/$file
+      done
+    EOF
+  }
 
-#   depends_on = [
-#     google_container_cluster.primary,
-#     google_container_node_pool.primary_nodes
-#   ]
+  depends_on = [
+    google_container_cluster.primary,
+    google_container_node_pool.primary_nodes
+  ]
+}
+
+resource "google_clouddeploy_target" "github_target" {
+  name = "github-target"
+  description = "Target for deploying from GitHub repository"
+  require_approval = false
+  location = var.region
+
+  gke {
+    cluster = "projects/${var.project_id}/locations/${var.region}/clusters/${google_container_cluster.primary.id}"
+  }
+}
+
+resource "google_clouddeploy_delivery_pipeline" "github_pipeline" {
+  name        = "github-pipeline"
+  description = "Pipeline for deploying from GitHub repository"
+  location    = var.region
+
+}
+
+
+
+# resource "google_cloud_deploy_pipeline" "example_pipeline" {
+#   name        = "example-pipeline"
+#   description = "Pipeline for deploying Kubernetes configurations"
+#   trigger     = google_cloud_deploy_trigger.example_trigger.id
+
+#   for_each = { for idx, filename in var.files : idx => filename }
+
+#   dynamic "steps" {
+#     for_each = var.files
+
+#     content {
+#       name     = "apply-kubernetes-configs-${steps.key}"
+#       action   = "apply-manifests"
+#       manifest = file("path/to/${steps.value}")
+#     }
+#   }
+# }
+# branch_name = "drago/tanzuDemo"
+# url = "https://github.com/nmywrld/ESDproject"
+
+# resource "google_clouddeploy_delivery_pipeline" "github_pipeline" {
+#   name = "github-pipeline"
+#   description = "Pipeline for deploying from GitHub repository"
+#   location = var.region
+
+  # serialised_config = google_cloud_deploy_pipeline.example_pipeline.
+
+  # serial_pipeline {
+  #   stages {
+  #     target_id = google_clouddeploy_target.github_target.id
+
+  #   }
+  # }
 # }
 
-resource "google_cloud_deploy_trigger" "example_trigger" {
-  name        = "example-trigger"
-  description = "Trigger for deploying Kubernetes configurations"
-  repository {
-    url = "https://github.com/your-repo.git"
-  }
-  branch_name = "main"  # Specify the branch to watch for changes
-}
 
-resource "google_cloud_deploy_pipeline" "example_pipeline" {
-  name        = "example-pipeline"
-  description = "Pipeline for deploying Kubernetes configurations"
-  trigger     = google_cloud_deploy_trigger.example_trigger.id
-
-  for_each = { for idx, filename in var.files : idx => filename }
-
-  dynamic "steps" {
-    for_each = var.files
-
-    content {
-      name     = "apply-kubernetes-configs-${steps.key}"
-      action   = "apply-manifests"
-      manifest = file("path/to/${steps.value}")
-    }
-  }
-}
 
 
 data "external" "get_backend_service" {
@@ -109,9 +139,7 @@ resource "null_resource" "enable_cdn" {
   }
 
   depends_on = [
-    google_container_cluster.primary,
-    google_container_node_pool.primary_nodes,
-    null_resource.deploy_app
+    data.external.get_backend_service
   ]
 }
 
