@@ -45,24 +45,51 @@ resource "google_container_node_pool" "primary_nodes" {
   }
 }
 
-resource "null_resource" "deploy_app" {
-    triggers = {
-    always_run = "${timestamp()}"
-  }
+# resource "null_resource" "deploy_app" {
+#     triggers = {
+#     always_run = "${timestamp()}"
+#   }
 
-  provisioner "local-exec" {
-    command = <<EOF
-      gcloud container clusters get-credentials ${google_container_cluster.primary.name} --region ${var.region}
-      for file in $(echo "${join(" ", var.files)}") ; do
-        kubectl apply -f ./deployments/$file
-      done
-    EOF
-  }
+#   provisioner "local-exec" {
+#     command = <<EOF
+#       gcloud container clusters get-credentials ${google_container_cluster.primary.name} --region ${var.region}
+#       for file in $(echo "${join(" ", var.files)}") ; do
+#         kubectl apply -f ./deployments/$file
+#       done
+#     EOF
+#   }
 
-  depends_on = [
-    google_container_cluster.primary,
-    google_container_node_pool.primary_nodes
-  ]
+#   depends_on = [
+#     google_container_cluster.primary,
+#     google_container_node_pool.primary_nodes
+#   ]
+# }
+
+resource "google_cloud_deploy_trigger" "example_trigger" {
+  name        = "example-trigger"
+  description = "Trigger for deploying Kubernetes configurations"
+  repository {
+    url = "https://github.com/your-repo.git"
+  }
+  branch_name = "main"  # Specify the branch to watch for changes
+}
+
+resource "google_cloud_deploy_pipeline" "example_pipeline" {
+  name        = "example-pipeline"
+  description = "Pipeline for deploying Kubernetes configurations"
+  trigger     = google_cloud_deploy_trigger.example_trigger.id
+
+  for_each = { for idx, filename in var.files : idx => filename }
+
+  dynamic "steps" {
+    for_each = var.files
+
+    content {
+      name     = "apply-kubernetes-configs-${steps.key}"
+      action   = "apply-manifests"
+      manifest = file("path/to/${steps.value}")
+    }
+  }
 }
 
 

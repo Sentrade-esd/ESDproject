@@ -72,13 +72,31 @@ spec:
         persistentVolumeClaim:
           claimName: rabbitmq-data
 ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: rabbitmq
+#   namespace: esd-project
+# spec:
+#   type: LoadBalancer
+#   selector:
+#     app: rabbitmq
+#   ports:
+#     - protocol: TCP
+#       name: amqp-point
+#       port: 5672
+#       targetPort: 5672
+#     - protocol: TCP
+#       name: gui-point
+#       port: 15672
+#       targetPort: 15672
 apiVersion: v1
 kind: Service
 metadata:
   name: rabbitmq
   namespace: esd-project
 spec:
-  type: LoadBalancer
+  type: NodePort
   selector:
     app: rabbitmq
   ports:
@@ -86,7 +104,9 @@ spec:
       name: amqp-point
       port: 5672
       targetPort: 5672
+      nodePort: 30072
     - protocol: TCP
       name: gui-point
       port: 15672
       targetPort: 15672
+      nodePort: 30073
