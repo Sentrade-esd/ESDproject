@@ -74,7 +74,7 @@ async function performScraping(query, ticker) {
 async function performScrapingComments(query, ticker) {
   let browser = await puppeteer.launch({
     headless: 'new',
-    // executablePath: "/usr/bin/chromium",
+    executablePath: "/usr/bin/chromium",
     args: ["--no-sandbox"],
   });
   let page = await browser.newPage();
@@ -192,37 +192,33 @@ parentPort.on('message', async message => {
     const { query, ticker } = message;
     
     try {
+        let responseComments = [];
         // Perform CPU-bound task (e.g., scraping)
         const response = await performScraping(query, ticker);
-        const responseComments = await performScrapingComments(query, ticker);
+        // responseComments = await performScrapingComments(query, ticker); // uncomment to invoke comments scraping
 
         console.log('adding to db');
         let addToDBResponse = await scraperDBMethods.add(ticker, query, response);
         console.log('added to db');
 
-        // console.log('addToDBresponse: ', addToDBResponse);
+        console.log('addToDBresponse: ', addToDBResponse);
 
-        // // add responseComments list into response
-        // let combinedResponse = [...response, ...responseComments];
-        // console.log(combinedResponse);
         let n = 1;
         let lastNumber = response[response.length-1]["i"];
         console.log(lastNumber);
         if(responseComments.length > 0){
-        for (let i = 0; i < responseComments.length; i ++ ){
-            let body = {};
-            body["i"] = n + lastNumber;
-            body["title"] = responseComments[i].title;
-            body ["link"] = responseComments[i].link;
-            body["datetime"] = responseComments[i].dateTime;
-            // console.log(body);
-            response.push(body);
-            n++
-          }
+          for (let i = 0; i < responseComments.length; i ++ ){
+              let body = {};
+              body["i"] = n + lastNumber;
+              body["title"] = responseComments[i].title;
+              body ["link"] = responseComments[i].link;
+              body["datetime"] = responseComments[i].dateTime;
+              // console.log(body);
+              response.push(body);
+              n++
+            }
         }
         console.log("Response:", response)
-
-
         parentPort.postMessage(response);
     } catch (error) {
         // Handle errors
