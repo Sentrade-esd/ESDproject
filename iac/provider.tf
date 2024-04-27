@@ -4,31 +4,35 @@ terraform {
       source = "hashicorp/google"
       version = "5.25.0"
     }
-  }
-
-  backend "remote" {
-    hostname     = "app.terraform.io"
-    organization = "sentrade_esd"
-
-    workspaces {
-      name = "ESDproject"
+    kubernetes = {
+      source = "hashicorp/kubernetes"
     }
   }
+  # required_version = ">= 1.8.0"
+
+  # backend "remote" {
+  #   hostname     = "app.terraform.io"
+  #   organization = "sentrade_esd"
+
+  #   workspaces {
+  #     name = "ESDproject"
+  #   }
+  # }
 }
 
 
 provider "google" {
   project = var.project_id
   region  = var.region
-  credentials = var.gcp_sa_key != "" ? var.gcp_sa_key : null
+  # credentials = var.gcp_sa_key != "" ? var.gcp_sa_key : null
 }
 
 
-variable "gcp_sa_key" {
-  description = "GCP Service Account Key in JSON format"
-  type        = string
-  # default = ""
-}
+# variable "gcp_sa_key" {
+#   description = "GCP Service Account Key in JSON format"
+#   type        = string
+#   # default = ""
+# }
 
 data "google_client_config" "default" {}
 

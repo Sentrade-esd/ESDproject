@@ -86,12 +86,6 @@ jobs:
     # - uses: "google-github-actions/setup-gcloud@v2"
     #   with:
     #     install_components: "gke-gcloud-auth-plugin"
-
-    # - name: Authenticate to GKE cluster
-    #   uses: google-github-actions/get-gke-credentials@v2
-    #   with:
-    #     cluster_name: my_cluster
-    #     location: europe-west1-b
     
 
     # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
@@ -129,5 +123,29 @@ jobs:
     - name: Terraform Apply
       run: terraform apply -auto-approve 
       working-directory: ./iac
+      env:
+        GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+
+    
+    - name: Deploy to GKE
+      uses: ameydev/gke-kubectl-action@master
+      env:
+        CLUSTER_NAME: 'esd-cluster'
+        ZONE_NAME: 'asia-southeast1-a'
+        APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+        PROJECT_ID: ${{ env.CLOUDSDK_PROJECT}}
+      with:
+        args: apply -f $(ls ./iac/deployment/*.yaml | sort)
+
+    - name: Authenticate to GKE cluster
+      uses: 'google-github-actions/get-gke-credentials@v2'
+      with:
+        cluster_name: esd-cluster
+        location: asia-southeast1-a
+
+    - name: Enable CDN
+      run: |
+        BACKEND_SERVICE=$(kubectl get ing ingress-nginx-esd-project -n esd-project -o json | jq -r '.metadata.annotations["ingress.kubernetes.io/backends"]' | jq -r 'keys[] | select(contains("app-service"))')
+        gcloud compute backend-services update $BACKEND_SERVICE --enable-cdn --global --enable-logging --custom-request-header=ESD-Project:esd-project
       env:
         GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}

@@ -46,58 +46,98 @@ resource "google_container_node_pool" "primary_nodes" {
   }
 }
 
-# resource "null_resource" "deploy_app" {
-#     triggers = {
-#     always_run = "${timestamp()}"
-#   }
+resource "null_resource" "deploy_app" {
+    triggers = {
+    always_run = "${timestamp()}"
+  }
 
-#   provisioner "local-exec" {
-#     command = <<EOF
-#       gcloud container clusters get-credentials ${google_container_cluster.primary.name} --region ${var.region}
-#       for file in $(echo "${join(" ", var.files)}") ; do
-#         kubectl apply -f ./deployments/$file
-#       done
-#     EOF
-#   }
+  provisioner "local-exec" {
+    command = <<EOF
+      gcloud container clusters get-credentials ${google_container_cluster.primary.name} --region ${var.region}
+      for file in $(echo "${join(" ", var.files)}") ; do
+        kubectl apply -f ./deployments/$file
+      done
+    EOF
+  }
 
-#   depends_on = [
-#     google_container_cluster.primary,
-#     google_container_node_pool.primary_nodes
-#   ]
+  depends_on = [
+    google_container_cluster.primary,
+    google_container_node_pool.primary_nodes
+  ]
+}
+
+
+# module "yaml_json_decoder" {
+#   source  = "levmel/yaml_json/multidecoder"
+#   version = "0.2.3"
+#   filepaths = sort([for f in var.files : "./deployments/${f}"])
 # }
 
-data "local_file" "k8s_resources" {
-  for_each = toset(var.files)
-  filename = "./deployments/${each.value}"
-}
-
-resource "kubernetes_manifest" "deploy_app" {
-  for_each = data.local_file.k8s_resources
-
-  manifest = yamldecode(each.value.content)
-}
+# output "names" {
+#   value = module.yaml_json_decoder.files.1kong
+# }
 
 
+# data "local_file" "k8s_resources" {
+#   for_each = toset(var.files)
+#   filename = "./deployments/${each.value}"
+# }
 
-resource "google_clouddeploy_target" "github_target" {
-  name = "github-target"
-  description = "Target for deploying from GitHub repository"
-  require_approval = false
-  location = var.region
 
-  gke {
-    cluster = "projects/${var.project_id}/locations/${var.region}/clusters/${google_container_cluster.primary.id}"
-  }
-}
 
-resource "google_clouddeploy_delivery_pipeline" "github_pipeline" {
-  name        = "github-pipeline"
-  description = "Pipeline for deploying from GitHub repository"
-  location    = var.region
+# locals {
+#   inst_specs_final = { for final in flatten([for i in fileset("./", "*.yaml") : yamldecode(file(i))["Inst_Specs"]]) : final.name => final }
+# }
+
+# output "seeing" {
+#   value = local.inst_specs_final
+# }
+
+# Function to split YAML documents
+# This function splits the YAML content into separate documents
+# and returns a list of decoded sections
+# It assumes each document starts with "---" and separates them accordingly
+# Note: This function is available in Terraform 0.13 and later versions
+# For earlier versions, you might need to implement a custom solution
+# locals {
+#   split_yaml = try(functiondecode(jsonencode({
+#     for idx, chunk in regexall("^---(\n|$)", tostring(file_data)) : idx => chunk
+#   })), [])
+# }
+
+# resource "kubernetes_manifest" "deploy_app" {
+#   for_each = merge([
+#     for filename, sections in local.decoded_sections : {
+#       for idx, section in sections : "${filename}-${idx}" => section
+#     }
+#   ]...)
+
+#   manifest = each.value
+#   # Additional configuration for your Kubernetes resources
+# }
+
+
+
+
+# resource "google_clouddeploy_target" "github_target" {
+#   name = "github-target"
+#   description = "Target for deploying from GitHub repository"
+#   require_approval = false
+#   location = var.region
+
+#   gke {
+#     cluster = "projects/${var.project_id}/locations/${var.region}/clusters/${google_container_cluster.primary.id}"
+#   }
+# }
+
+# resource "google_clouddeploy_delivery_pipeline" "github_pipeline" {
+#   name        = "github-pipeline"
+#   description = "Pipeline for deploying from GitHub repository"
+#   location    = var.region
 
   
 
-}
+# }
 
 
 
@@ -137,25 +177,25 @@ resource "google_clouddeploy_delivery_pipeline" "github_pipeline" {
 # }
 
 
+# ------------------------------------
 
+# data "external" "get_backend_service" {
+#   program = ["bash", "-c", "gcloud container clusters get-credentials ${google_container_cluster.primary.name} --region ${var.region} && kubectl get ing ingress-nginx-esd-project -n esd-project -o json | jq -r '.metadata.annotations[\"ingress.kubernetes.io/backends\"]' "]
 
-data "external" "get_backend_service" {
-  program = ["bash", "-c", "gcloud container clusters get-credentials ${google_container_cluster.primary.name} --region ${var.region} && kubectl get ing ingress-nginx-esd-project -n esd-project -o json | jq -r '.metadata.annotations[\"ingress.kubernetes.io/backends\"]' "]
+#   depends_on = [
+#     google_container_cluster.primary,
+#     google_container_node_pool.primary_nodes,
+#     null_resource.deploy_app
+#   ]
+# }
 
-  depends_on = [
-    google_container_cluster.primary,
-    google_container_node_pool.primary_nodes,
-    null_resource.deploy_app
-  ]
-}
+# resource "null_resource" "enable_cdn" {
+#   provisioner "local-exec" {
+#     command = "gcloud compute backend-services update ${keys(data.external.get_backend_service.result)[0]} --enable-cdn --global --enable-logging --custom-request-header=ESD-Project:esd-project"
+#   }
 
-resource "null_resource" "enable_cdn" {
-  provisioner "local-exec" {
-    command = "gcloud compute backend-services update ${keys(data.external.get_backend_service.result)[0]} --enable-cdn --global --enable-logging --custom-request-header=ESD-Project:esd-project"
-  }
-
-  depends_on = [
-    data.external.get_backend_service
-  ]
-}
+#   depends_on = [
+#     data.external.get_backend_service
+#   ]
+# }
 
