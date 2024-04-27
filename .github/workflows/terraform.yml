@@ -102,7 +102,7 @@ jobs:
         terraform_version:  1.8.2
 
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
-    - name: Terraform Init and apply
+    - name: Terraform Init
       run: terraform init 
       working-directory: ./iac
       env:
@@ -117,7 +117,7 @@ jobs:
 
     # Generates an execution plan for Terraform
     - name: Terraform Plan
-      run:  terraform plan -var="GCP_SA_KEY=$GCP_SA_KEY"
+      run:  terraform plan -var="TF_VAR_gcp_sa_key=$GCP_SA_KEY"
       working-directory: ./iac
       env:
         TF_VAR_gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
