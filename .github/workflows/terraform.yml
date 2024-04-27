@@ -118,7 +118,7 @@ jobs:
 
     # Generates an execution plan for Terraform
     - name: Terraform Plan
-      run: TF_VAR_gcp_sa_key terraform plan 
+      run: TF_VAR_gcp_sa_key=${{ secrets.GCP_SA_KEY }} terraform plan 
       working-directory: ./iac
       env:
         TF_VAR_gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
