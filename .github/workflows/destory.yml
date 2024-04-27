@@ -49,5 +49,20 @@ jobs:
         working-directory: ./iac
         env:
           TF_VAR_gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
+      
+      - name: delete disks
+        run: |
+          while IFS= read -r disk
+          do
+            name=$(echo $disk | awk '{print $1}')
+            zone=$(echo $disk | awk '{print $2}')
+
+            echo $name
+            echo $zone
+
+            gcloud compute disks delete $curr_disk_name --zone=$curr_disk_zone --quiet
+
+          done < <(gcloud compute disks list --format="value(name,LOCATION)")
+        
 
 
