@@ -81,8 +81,8 @@ async function followTrade(userId, email, ticker, targetDate, buyAmountPerFiling
 
                 if (new Date(filing.file_date)  > refreshDate || new Date(filing.tx_date) > refreshDate){
                     continue;  
-                } else {
-                    
+                // } else {
+                } else if (filing.order_type.toLowerCase().includes("purchase")) {
                     let date = new Date(filing.file_date);
                     let year = date.getFullYear();
                     let month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based in JavaScript
