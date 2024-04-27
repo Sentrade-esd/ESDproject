@@ -114,10 +114,11 @@ jobs:
     #   working-directory: ./iac
     #   env:
     #     GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+    # -var="gcp_sa_key=$TF_VAR_gcp_sa_key"
 
     # Generates an execution plan for Terraform
     - name: Terraform Plan
-      run:  terraform plan -var="GCP_SA_KEY=$TF_VAR_gcp_sa_key"
+      run: TF_VAR_gcp_sa_key terraform plan 
       working-directory: ./iac
       env:
         TF_VAR_gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
