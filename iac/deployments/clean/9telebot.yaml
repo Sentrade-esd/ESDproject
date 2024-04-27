@@ -1,0 +1,68 @@
+
+########################
+###### telebot    ######
+########################
+
+# netowrk policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-port-3002
+  namespace: esd-project
+spec:
+  podSelector:
+    matchLabels:
+      app: telebot
+  policyTypes:
+  - Ingress
+  ingress:
+  - from: []
+    ports:
+    - protocol: TCP
+      port: 3002
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: telebot-deployment
+  namespace: esd-project
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: telebot
+  template:
+    metadata:
+      labels:
+        app: telebot
+    spec:
+      containers:
+      - name: telebot
+        image: docker.io/chernise/esdproject-telebot:latest
+        command: ["npm", "start"]
+        ports:
+        - containerPort: 3002
+        env:
+        - name: AMQP_SERVER
+          value: "amqp://rabbitmq:5672"
+        - name: BOT_TOKEN
+          value: "7039505633:AAFoCvJc3XwP8N7bUd1XsjkCP5rH311TrWQ"
+        - name: BOT_URL
+          value: "https://api.telegram.org/bot"
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: telebot
+  namespace: esd-project
+spec:
+  type: LoadBalancer
+  selector:
+    app: telebot
+  ports:
+    - protocol: TCP
+      port: 3002
+      targetPort: 3002

@@ -46,25 +46,25 @@ resource "google_container_node_pool" "primary_nodes" {
   }
 }
 
-resource "null_resource" "deploy_app" {
-    triggers = {
-    always_run = "${timestamp()}"
-  }
+# resource "null_resource" "deploy_app" {
+#     triggers = {
+#     always_run = "${timestamp()}"
+#   }
 
-  provisioner "local-exec" {
-    command = <<EOF
-      gcloud container clusters get-credentials ${google_container_cluster.primary.name} --region ${var.region}
-      for file in $(echo "${join(" ", var.files)}") ; do
-        kubectl apply -f ./deployments/$file
-      done
-    EOF
-  }
+#   provisioner "local-exec" {
+#     command = <<EOF
+#       gcloud container clusters get-credentials ${google_container_cluster.primary.name} --region ${var.region}
+#       for file in $(echo "${join(" ", var.files)}") ; do
+#         kubectl apply -f ./deployments/$file
+#       done
+#     EOF
+#   }
 
-  depends_on = [
-    google_container_cluster.primary,
-    google_container_node_pool.primary_nodes
-  ]
-}
+#   depends_on = [
+#     google_container_cluster.primary,
+#     google_container_node_pool.primary_nodes
+#   ]
+# }
 
 
 # module "yaml_json_decoder" {

@@ -143,6 +143,13 @@ jobs:
         cluster_name: esd-cluster
         location: asia-southeast1-a
 
+    - name: Deploy to GKE
+      working-directory: ./iac
+      run: |
+        kubectl apply -f $(ls ./deployment/*.yaml | sort)
+      env:
+        GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+
     - name: Enable CDN
       run: |
         BACKEND_SERVICE=$(kubectl get ing ingress-nginx-esd-project -n esd-project -o json | jq -r '.metadata.annotations["ingress.kubernetes.io/backends"]' | jq -r 'keys[] | select(contains("app-service"))')
