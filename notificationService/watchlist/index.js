@@ -16,8 +16,13 @@ const DB_service_url =
 console.log("mongodb://root:root@" + DB_service_url + "/watchlist");
 
 mongoose
-  .connect("mongodb://root:root@" + DB_service_url + "/watchlist", {authSource:"admin"})
+  .connect("mongodb://root:root@" + DB_service_url + "/watchlist", {
+    authSource: "admin",
+  })
   // mongoose.connect(`${uri}/watchlist`, {})
+  // .connect(DB_service_url, {
+  //   authSource: "admin",
+  // })
   .then(() => {
     console.log("Connected to the database!");
   })

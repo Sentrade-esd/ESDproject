@@ -1,6 +1,7 @@
 
+
 data "google_service_account" "default" {
-  account_id   = "demodeployment"
+  account_id = "demodeployment"
 }
 
 # resource "google_compute_disk" "esd-disk" {
@@ -46,7 +47,7 @@ resource "google_container_node_pool" "primary_nodes" {
 }
 
 resource "null_resource" "deploy_app" {
-    triggers = {
+  triggers = {
     always_run = "${timestamp()}"
   }
 
@@ -130,8 +131,8 @@ resource "google_clouddeploy_delivery_pipeline" "github_pipeline" {
 data "external" "get_backend_service" {
   program = ["bash", "-c", "gcloud container clusters get-credentials ${google_container_cluster.primary.name} --region ${var.region} && kubectl get ing ingress-nginx-esd-project -n esd-project -o json | jq -r '.metadata.annotations[\"ingress.kubernetes.io/backends\"]' "]
 
-  depends_on = [ 
-    google_container_cluster.primary, 
+  depends_on = [
+    google_container_cluster.primary,
     google_container_node_pool.primary_nodes,
     null_resource.deploy_app
   ]
@@ -146,5 +147,4 @@ resource "null_resource" "enable_cdn" {
     data.external.get_backend_service
   ]
 }
-
 

@@ -167,14 +167,11 @@ const NavBar = ({ transparent }) => {
       localStorage.setItem("pendingTeleId", "true");
       setPendingTeleID("true");
       try {
-        const response = await axios.get(
-          "/kong/teleBot/redirect",
-          {
-            headers: {
-              bro: window.location.href,
-            },
-          }
-        );
+        const response = await axios.get("/kong/teleBot/redirect", {
+          headers: {
+            bro: window.location.href,
+          },
+        });
 
         if (response.status === 200) {
           const redirectUrl = response.data;
@@ -201,46 +198,43 @@ const NavBar = ({ transparent }) => {
     console.log("password", Password);
     console.log("telegramhandle", TelegramHandle);
     console.log("lolol");
+    const unixTimestamp = Math.floor(Date.now() / 1000);
     axios
       .post("/kong/user", {
         Email: Email,
         Password: Password,
         Telehandle: TelegramHandle,
         TeleID: TeleId,
+        CreationDate: unixTimestamp,
       })
       .then((response) => {
         console.log("res", response);
         if (response.data.code === 201) {
           console.log("dwced");
-          axios
-            .get(`/kong/user/getUser?email=${Email}`)
-            .then((response) => {
-              if (response.data.code === 200) {
-                console.log("heyyy");
-                localStorage.setItem("username", Email);
-                localStorage.setItem("userId", response.data.data.UserID);
-                // setIsLoggedIn(true);
-                // setUsername(Email);
+          axios.get(`/kong/user/getUser?email=${Email}`).then((response) => {
+            if (response.data.code === 200) {
+              console.log("heyyy");
+              localStorage.setItem("username", Email);
+              localStorage.setItem("userId", response.data.data.UserID);
+              // setIsLoggedIn(true);
+              // setUsername(Email);
 
-                let userId = response.data.data.UserID;
-                console.log("userIDLOL", userId);
-                try {
-                  const body = {
-                    userID: userId,
-                    email: Email,
-                  };
+              let userId = response.data.data.UserID;
+              console.log("userIDLOL", userId);
+              try {
+                const body = {
+                  userID: userId,
+                  email: Email,
+                };
 
-                  axios.post(
-                    "/kong/transaction/setup",
-                    body
-                  );
-                } catch (error) {
-                  console.error(error);
-                }
-              } else {
-                console.error("Fetch data after signup failed");
+                axios.post("/kong/transaction/setup", body);
+              } catch (error) {
+                console.error(error);
               }
-            });
+            } else {
+              console.error("Fetch data after signup failed");
+            }
+          });
         } else {
           console.error("Signup failed");
         }

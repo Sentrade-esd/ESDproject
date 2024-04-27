@@ -191,9 +191,7 @@ function Trade() {
   const [keyword, setKeyword] = useState(null);
   const [keyWords, setKeyWords] = useState(null);
   const [emotions, setEmotions] = useState(null);
-  const [comments, setComments] = useState(
-    JSON.parse(localStorage.getItem("comments")) || []
-  );
+  const [comments, setComments] = useState([]);
   const [news, SetNews] = useState([]);
   const toggleBuyModal = () => {
     setBuyModal(!buyModal);
@@ -389,69 +387,89 @@ function Trade() {
   // }, []);
 
   // First useEffect for fetching price, market cap, and average volume
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const ScrapeResponse = await axios.get(
-        `/kong/scraper/scrapeCurrentPrice?ticker=${encodeURIComponent(
-          companySymbol
-        )}`
-      );
-      setPrice(ScrapeResponse.data.price);
-      setFetchedData(true);
-      setMarketCap(ScrapeResponse.data.marketCap);
-      setAvgVolume(ScrapeResponse.data.avgVolume);
-    } catch (error) {
-      console.error(
-        "Error fetching price, market cap, and average volume:",
-        error
-      );
-    }
-  };
-
-  fetchData();
-}, []);
-
-// Second useEffect for fetching latest 20 comments
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const CommentsResponse = await axios.get(
-        `/kong/comments/${companyName}`
-      );
-      setComments(CommentsResponse.data);
-      localStorage.setItem("comments", JSON.stringify(CommentsResponse.data));
-    } catch (error) {
-      if (error.response && error.response.status === 404) {
-        setComments([]);
-        localStorage.setItem("comments", JSON.stringify([]));
-      } else {
-        throw error;
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const WatchListResponse = await axios.get(
+          `/kong/watchlist/user/${userId}`
+        );
+        const watchlist = WatchListResponse.data;
+        if (watchlist.includes(companyName)) {
+          setWatchlisted(true);
+        }
+      } catch (error) {
+        console.error(
+          "Error fetching price, market cap, and average volume:",
+          error
+        );
       }
-    }
-  };
+    };
 
-  fetchData();
-}, []);
+    fetchData();
+  }, []);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const ScrapeResponse = await axios.get(
+          `/kong/scraper/scrapeCurrentPrice?ticker=${encodeURIComponent(
+            companySymbol
+          )}`
+        );
+        setPrice(ScrapeResponse.data.price);
+        setFetchedData(true);
+        setMarketCap(ScrapeResponse.data.marketCap);
+        setAvgVolume(ScrapeResponse.data.avgVolume);
+      } catch (error) {
+        console.error(
+          "Error fetching price, market cap, and average volume:",
+          error
+        );
+      }
+    };
 
-// Third useEffect for fetching sentiment score and news
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const SentimentResponse = await axios.get(
-        `/kong/sentimentAPI/sentiment_query?search_term=${companyName}&ticker=${companySymbol}`
-      );
-      setSentimentScore(SentimentResponse.data.sentiments.sentiment_score);
-      setEmotion(SentimentResponse.data.sentiments.emotion);
-      setKeyword(SentimentResponse.data.sentiments.keyword);
-      SetNews(SentimentResponse.data.newsArticles);
-    } catch (error) {
-      console.error("Error fetching sentiment:", error);
-    }
-  };
+    fetchData();
+  }, []);
 
-  fetchData();
-}, []);
+  // Second useEffect for fetching latest 20 comments
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const CommentsResponse = await axios.get(
+          `/kong/comments/${companyName}`
+        );
+        setComments(CommentsResponse.data);
+        // localStorage.setItem("comments", JSON.stringify(CommentsResponse.data));
+      } catch (error) {
+        if (error.response && error.response.status === 404) {
+          setComments([]);
+          // localStorage.setItem("comments", JSON.stringify([]));
+        } else {
+          throw error;
+        }
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Third useEffect for fetching sentiment score and news
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const SentimentResponse = await axios.get(
+          `/kong/sentimentAPI/sentiment_query?search_term=${companyName}&ticker=${companySymbol}`
+        );
+        setSentimentScore(SentimentResponse.data.sentiments.sentiment_score);
+        setEmotion(SentimentResponse.data.sentiments.emotion);
+        setKeyword(SentimentResponse.data.sentiments.keyword);
+        SetNews(SentimentResponse.data.newsArticles);
+      } catch (error) {
+        console.error("Error fetching sentiment:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   // return (
   //     <div>
@@ -512,14 +530,11 @@ useEffect(() => {
   // const { search, sentiment_score } = jsonData.result;
   const handleWatchlist = async () => {
     try {
-      const response = await axios.post(
-        `/kong/watchlist/add`,
-        {
-          userID: userId,
-          teleID: teleId,
-          watchlistedCompany: companyName,
-        }
-      );
+      const response = await axios.post(`/kong/watchlist/add`, {
+        userID: userId,
+        teleID: teleId,
+        watchlistedCompany: companyName,
+      });
       console.log("watvhlist", response.data);
       setAlert("Added to watchlist successfully");
       setWatchlisted(true);
@@ -595,26 +610,59 @@ useEffect(() => {
       //       email: "ProbablyPassedFromUI",
       //     },
       //   };
+      // if (!followTradeResponse.status) {
+      //   // alert('Unable to process the transaction')
+      //   setAlert("Unsuccessful. Please try again later.");
+      // } else {
+      //   // alert('Transaction successful');
+      //   setAlert({
+      //     __html: `Successful...
+      //     <div style="display: flex; justify-content: space-between; margin-top: 5px;">
+      //       <p style="margin-top: 3px">Company: ${
+      //         followTradeResponse.data.data.company
+      //       }</p>
+      //       <p>Buy Amount: ${followTradeResponse.data.buyAmount}</p>
+      //       <p>Sell Amount: ${followTradeResponse.data.sellAmount}</p>
+      //       <p>Total Account Value: ${
+      //         followTradeResponse.data.totalAccountValue
+      //       }</p>
+      //       <p>Current PnL: ${(
+      //         followTradeResponse.data.sellAmount -
+      //         followTradeResponse.data.buyAmount
+      //       ).toFixed(2)}</p>
+      //     </div>`,
+      //   });
+      // }
       if (!followTradeResponse.status) {
         // alert('Unable to process the transaction')
         setAlert("Unsuccessful. Please try again later.");
       } else {
-        // alert('Transaction successful');
-        setAlert({
-          __html: `Successful...
-          <div style="display: flex; justify-content: space-between; margin-top: 5px;">
-            <p style="margin-top: 3px">Company: ${
-              followTradeResponse.data.data.company
-            }</p>
-            <p>Buy Amount: ${followTradeResponse.data.buyAmount}</p>
-            <p>Sell Amount: ${followTradeResponse.data.sellAmount}</p>
-            <p>Total Account Value: ${followTradeResponse.data.totalAccountValue}</p>
-            <p>Current PnL: ${(
-              followTradeResponse.data.sellAmount - followTradeResponse.data.buyAmount
-            ).toFixed(2)}</p>
-          </div>`,
-        });
+        // const filings = followTradeResponse.data.data.filings.map(filing => `<p>${JSON.stringify(filing)}</p>`).join('');
+        const filings = followTradeResponse.data.data.filings.map(filing => 
+          `<p style="color: #000;">Name of Senator: ${filing.full_name}  Order: ${filing.order_type}<br>Filed Date: ${filing.file_date} Filed Price: ${filing.file_price}  |  Transacted Date: ${filing.file_date} Transacted Price: ${filing.tx_price}</p>`
+        ).join('');
+
+        const alertHtml = `
+        <div style="display: flex; justify-content: space-between; margin-top: 5px;">
+          <div style="border: 1px solid #000; padding: 10px; color: #000; background-color: #f0f0f0; margin-right: 10px;">
+            <p style="color: #000;">Company: ${followTradeResponse.data.data.company}</p>
+          </div>
+          <div style="border: 1px solid #000; padding: 10px; color: #000; background-color: #f0f0f0; margin-right: 10px;">
+            <p style="color: #000;">Buy Amount: ${followTradeResponse.data.buyAmount}</p>
+            <p style="color: #000;">Sell Amount: ${followTradeResponse.data.sellAmount}</p>
+          </div>
+          <div style="border: 1px solid #000; padding: 10px; color: #000; background-color: #f0f0f0; margin-right: 50px;">
+            <p style="color: #000;">Current PnL: ${(followTradeResponse.data.sellAmount - followTradeResponse.data.buyAmount).toFixed(2)}</p>
+            <p style="color: #000;">Total Account Value: ${followTradeResponse.data.totalAccountValue}</p>
+          </div>
+          <div style="border: 1px solid #000; padding: 10px; color: #000; background-color: #f0f0f0; overflow-y: auto; max-height: 200px; flex: 2;">
+            ${filings}
+          </div>
+        </div>
+      `;
+      setAlert(alertHtml);       
       }
+
     } catch (error) {
       setIsLoading(false);
       console.error(error);

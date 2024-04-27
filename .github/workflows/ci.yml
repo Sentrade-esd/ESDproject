@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Run tag_images.bat
+        run: .\tag_images.bat
