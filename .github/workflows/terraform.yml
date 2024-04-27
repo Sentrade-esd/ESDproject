@@ -144,14 +144,14 @@ jobs:
         location: asia-southeast1-a
 
     - name: Deploy to GKE
-      working-directory: ./iac
       run: |
-        kubectl apply -f $(ls ./deployment/*.yaml | sort)
+        kubectl apply -f $(ls /iac/deployment/*.yaml | sort)
       env:
         GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
 
     - name: Enable CDN
       run: |
+        sleep 300
         BACKEND_SERVICE=$(kubectl get ing ingress-nginx-esd-project -n esd-project -o json | jq -r '.metadata.annotations["ingress.kubernetes.io/backends"]' | jq -r 'keys[] | select(contains("app-service"))')
         gcloud compute backend-services update $BACKEND_SERVICE --enable-cdn --global --enable-logging --custom-request-header=ESD-Project:esd-project
       env:
