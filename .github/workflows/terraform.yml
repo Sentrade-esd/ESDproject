@@ -127,15 +127,15 @@ jobs:
         GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
 
     
-    - name: Deploy to GKE
-      uses: ameydev/gke-kubectl-action@master
-      env:
-        CLUSTER_NAME: 'esd-cluster'
-        ZONE_NAME: 'asia-southeast1-a'
-        APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        PROJECT_ID: ${{ env.CLOUDSDK_PROJECT}}
-      with:
-        args: apply -f $(ls ./iac/deployment/*.yaml | sort)
+    # - name: Deploy to GKE
+    #   uses: ameydev/gke-kubectl-action@master
+    #   env:
+    #     CLUSTER_NAME: 'esd-cluster'
+    #     ZONE_NAME: 'asia-southeast1-a'
+    #     APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+    #     PROJECT_ID: ${{ env.CLOUDSDK_PROJECT}}
+    #   with:
+    #     args: apply -f $(ls ./iac/deployment/*.yaml | sort)
 
     - name: Authenticate to GKE cluster
       uses: 'google-github-actions/get-gke-credentials@v2'
