@@ -146,7 +146,9 @@ jobs:
     - name: Deploy to GKE
       working-directory: ./iac
       run: |
-        kubectl apply -f $(ls ./deployments/*.yaml | sort)
+          for file in $(ls ./deployments/*.yaml | sort); do
+            kubectl apply -f $file
+          done
       env:
         GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
 
