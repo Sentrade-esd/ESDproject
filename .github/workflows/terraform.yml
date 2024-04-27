@@ -151,7 +151,7 @@ jobs:
           done
       env:
         GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
-
+ 
     - name: Enable CDN
       run: |
         sleep 300
