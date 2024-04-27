@@ -48,7 +48,7 @@ on:
   workflow_dispatch:
   push:
     branches: [ "deploy" ]
- 
+
 permissions:
   contents: read
 
