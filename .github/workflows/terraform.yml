@@ -153,7 +153,7 @@ jobs:
 
     - name: Enable CDN
       run: |
-        sleep 300
+        sleep 200
         BACKEND_SERVICE=$(kubectl get ing ingress-nginx-esd-project -n esd-project -o json | jq -r '.metadata.annotations["ingress.kubernetes.io/backends"]' | jq -r 'keys[] | select(contains("app-service"))')
         gcloud compute backend-services update $BACKEND_SERVICE --enable-cdn --global --enable-logging --custom-request-header=ESD-Project:esd-project
       env:
