@@ -5,6 +5,8 @@ import jsonData from "../test.json";
 import { useLocation } from "react-router-dom";
 import {
   Form,
+  OverlayTrigger,
+  Tooltip
   // Button
 } from "react-bootstrap";
 import WordCloud from "Components/wordCloud.js";
@@ -103,6 +105,15 @@ let slickSettings = {
     },
   ],
 };
+
+const tooltip = (
+  <Tooltip id="tooltip">
+    value as percentage change in sentiment score. 
+    <br />
+    <br />
+    Triggers a sell on your behalf when the threshold is reached.
+  </Tooltip>
+);
 
 const news = [
   {
@@ -501,13 +512,13 @@ function Trade() {
     if (keyword !== null && emotion !== null) {
       const keywords = Object.entries(keyword).map(([text, size]) => ({
         text,
-        size: size * 10,
+        size: size ,
       }));
       console.log("keywords", keywords);
       setKeyWords(keywords);
       const emotions = Object.entries(emotion).map(([text, size]) => ({
         text,
-        size: size * 10,
+        size: size ,
       }));
       console.log("emotions", emotions);
       setEmotions(emotions);
@@ -515,11 +526,11 @@ function Trade() {
   }, [keyword, emotion]);
   // console.log(marketCap, avgVolume, prevClose, keywordData, emotionData);
   useEffect(() => {
-    console.log("keyWord", keyword);
-    console.log("emotion", emotion);
+    // console.log("keyWord", keyword);
+    // console.log("emotion", emotion);
     console.log("keywords", keyWords);
     console.log("emotions", emotions);
-  }, [keyWords, emotions, keyword, emotion]);
+  }, [keyWords, emotions]);
 
   const options = {
     rotations: 0,
@@ -639,23 +650,23 @@ function Trade() {
       } else {
         // const filings = followTradeResponse.data.data.filings.map(filing => `<p>${JSON.stringify(filing)}</p>`).join('');
         const filings = followTradeResponse.data.data.filings.map(filing => 
-          `<p style="color: #000;">Name of Senator: ${filing.full_name}  Order: ${filing.order_type}<br>Filed Date: ${filing.file_date} Filed Price: ${filing.file_price}  |  Transacted Date: ${filing.file_date} Transacted Price: ${filing.tx_price}</p>`
+          `<p style="color: #344675;">Name of Senator: ${filing.full_name}  Order: ${filing.order_type}<br>Filed Date: ${filing.file_date} Filed Price: ${filing.file_price}  |  Transacted Date: ${filing.file_date} Transacted Price: ${filing.tx_price}</p>`
         ).join('');
 
         const alertHtml = `
         <div style="display: flex; justify-content: space-between; margin-top: 5px;">
-          <div style="border: 1px solid #000; padding: 10px; color: #000; background-color: #f0f0f0; margin-right: 10px;">
-            <p style="color: #000;">Company: ${followTradeResponse.data.data.company}</p>
+          <div style="border: 1px solid #344675; border-radius:15px ; padding: 10px; color: #344675; margin-right: 10px; box-shadow: rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em;">
+            <p style="color: #344675;">Company: ${followTradeResponse.data.data.company}</p>
           </div>
-          <div style="border: 1px solid #000; padding: 10px; color: #000; background-color: #f0f0f0; margin-right: 10px;">
-            <p style="color: #000;">Buy Amount: ${followTradeResponse.data.buyAmount}</p>
-            <p style="color: #000;">Sell Amount: ${followTradeResponse.data.sellAmount}</p>
+          <div style="border: 1px solid #344675; border-radius:15px ; padding: 10px; color: #344675; margin-right: 10px; box-shadow: rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em;">
+            <p style="color:#344675;">Buy Amount: ${followTradeResponse.data.buyAmount}</p>
+            <p style="color: #344675;">Sell Amount: ${followTradeResponse.data.sellAmount}</p>
           </div>
-          <div style="border: 1px solid #000; padding: 10px; color: #000; background-color: #f0f0f0; margin-right: 50px;">
-            <p style="color: #000;">Current PnL: ${(followTradeResponse.data.sellAmount - followTradeResponse.data.buyAmount).toFixed(2)}</p>
-            <p style="color: #000;">Total Account Value: ${followTradeResponse.data.totalAccountValue}</p>
+          <div style="border: 1px solid #344675; border-radius:15px ; padding: 10px; color: #344675; margin-right: 50px; box-shadow: rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em;">
+            <p style="color: #344675;">Current PnL: ${(followTradeResponse.data.sellAmount - followTradeResponse.data.buyAmount).toFixed(2)}</p>
+            <p style="color: #344675;">Total Account Value: ${followTradeResponse.data.totalAccountValue}</p>
           </div>
-          <div style="border: 1px solid #000; padding: 10px; color: #000; background-color: #f0f0f0; overflow-y: auto; max-height: 200px; flex: 2;">
+          <div style="border: 1px solid #344675; border-radius:15px; padding: 10px; color: #344675; overflow-y: auto; max-height: 200px; flex: 2; box-shadow: rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em;">
             ${filings}
           </div>
         </div>
@@ -953,6 +964,7 @@ function Trade() {
                       {emotions === null ? (
                         "Loading..."
                       ) : (
+                        console.log("emotions", emotions),
                         <WordCloud words={emotions} />
                       )}
                     </div>
@@ -1249,8 +1261,14 @@ function Trade() {
                 <Input type="number" id="buyAmount" />
               </FormGroup>
               <FormGroup>
-                <Label for="stopLossAmount">Stop Loss Amount (optional)</Label>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <Label for="stopLossAmount" style={{ marginRight: '10px' }}>Stop Loss (optional)</Label> 
+                <OverlayTrigger placement="left" overlay={tooltip}>
+                  <p style={{marginBottom:'8px', fontSize:'10px'}}>Find Out More</p>
+                </OverlayTrigger>
+              </div>
                 <Input type="number" id="stopLossAmount" />
+
               </FormGroup>
               <Button type="submit" onClick={handleBuyStock}>
                 Submit
