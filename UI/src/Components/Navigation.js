@@ -19,7 +19,7 @@ const Navigation = () => {
 
   const handleLogin = (username, password) => {
     axios
-      .get(`http://localhost:5000/user/${username}`)
+      .get(`/kong/user/${username}`)
       .then((response) => {
         if (response.data.code === 200) {
           if (password === response.data.data.Password) {
@@ -50,7 +50,7 @@ const Navigation = () => {
   const handleSignup = (Email, Password, TelegramHandle) => {
     const unixTimestamp = Math.floor(Date.now() / 1000);
     axios
-      .post("http://127.0.0.1:5000/user", {
+      .post("/kong/user", {
         Email: Email,
         Password: Password,
         Telehandle: TelegramHandle, // changed from 'telegram_handle'
@@ -60,7 +60,7 @@ const Navigation = () => {
       .then((response) => {
         if (response.data.code === 200) {
           axios
-            .get(`http://localhost:5000/user/getUser?email=${Email}`)
+            .get(`/kong/user/getUser?email=${Email}`)
             .then((response) => {
               if (response.data.code === 200) {
                 localStorage.setItem("username", Email);
@@ -83,7 +83,7 @@ const Navigation = () => {
   };
 
   const handleNewUser = () => {
-    axios.post("http://127.0.0.1:5000/transaction/setup", {
+    axios.post("/kong/transaction/setup", {
       userId: localStorage.getItem("id"),
       email: localStorage.getItem("username"),
     });

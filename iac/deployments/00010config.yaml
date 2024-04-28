@@ -1,73 +1,3 @@
-
-########################
-### user service #######
-########################
-
-# network policy
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-port-6000
-  namespace: esd-project
-spec:
-  podSelector:
-    matchLabels:
-      app: user-service  # changed here
-  policyTypes:
-  - Ingress
-  ingress:
-  - from: []
-    ports:
-    - protocol: TCP
-      port: 6000
-
----
-
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: user-service-deployment  # changed here
-  namespace: esd-project
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: user-service  # changed here
-  template:
-    metadata:
-      labels:
-        app: user-service  # changed here
-    spec:
-      containers:
-      - name: user-service  # changed here
-        image: docker.io/chernise/esdproject-user_service:latest  # changed here
-        ports:
-        - containerPort: 6000
-        command: ["gunicorn"]
-        args: ["-w", "1", "--threads", "2", "-b", ":6000", "--timeout", "600", "User:app"]
-        # command: ["/bin/sh", "-c"]
-        # args: ["pip install mysql-connector-python && gunicorn -w 1 --threads 2 -b :6000 --timeout 600 User:app"]
-        env:
-          - name: SQL_URI
-            value: "postgresql://postgres:root@user-db:5432"
-
----
-
-apiVersion: v1
-kind: Service
-metadata:
-  name: user-service  # changed here
-  namespace: esd-project
-spec:
-  type: ClusterIP
-  selector:
-    app: user-service  # changed here
-  ports:
-    - protocol: TCP
-      port: 6000
-      targetPort: 6000
-
----
 ########################
 ########## user db #####
 ########################
@@ -187,3 +117,74 @@ spec:
     - protocol: TCP
       port: 5432
       targetPort: 5432
+
+
+---
+########################
+### user service #######
+########################
+
+# network policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-port-6000
+  namespace: esd-project
+spec:
+  podSelector:
+    matchLabels:
+      app: user-service  # changed here
+  policyTypes:
+  - Ingress
+  ingress:
+  - from: []
+    ports:
+    - protocol: TCP
+      port: 6000
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service-deployment  # changed here
+  namespace: esd-project
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-service  # changed here
+  template:
+    metadata:
+      labels:
+        app: user-service  # changed here
+    spec:
+      containers:
+      - name: user-service  # changed here
+        image: docker.io/chernise/esdproject-user_service:latest  # changed here
+        ports:
+        - containerPort: 6000
+        command: ["gunicorn"]
+        args: ["-w", "1", "--threads", "2", "-b", ":6000", "--timeout", "600", "User:app"]
+        # command: ["/bin/sh", "-c"]
+        # args: ["pip install mysql-connector-python && gunicorn -w 1 --threads 2 -b :6000 --timeout 600 User:app"]
+        env:
+          - name: SQL_URI
+            value: "postgresql://postgres:root@user-db:5432"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service  # changed here
+  namespace: esd-project
+spec:
+  type: ClusterIP
+  selector:
+    app: user-service  # changed here
+  ports:
+    - protocol: TCP
+      port: 6000
+      targetPort: 6000
+

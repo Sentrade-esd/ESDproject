@@ -1,74 +1,4 @@
 ########################
-## sentiment app     ###
-########################
-
-# network policy
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-port-5001
-  namespace: esd-project
-spec:
-  podSelector:
-    matchLabels:
-      app: sentiment-app  # changed here
-  policyTypes:
-  - Ingress
-  ingress:
-  - from: []
-    ports:
-    - protocol: TCP
-      port: 5001
----
-
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: sentiment-app-deployment  # changed here
-  namespace: esd-project
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: sentiment-app  # changed here
-  template:
-    metadata:
-      labels:
-        app: sentiment-app  # changed here
-    spec:
-      containers:
-      - name: sentiment-app  # changed here
-        image: docker.io/chernise/esdproject-sentiment_app:latest  # changed here
-        command: ["npm", "start"]
-        ports:
-        - containerPort: 5001
-        env:
-        - name: AMQP_SERVER
-          value: "amqp://rabbitmq:5672"
-        - name: DB_URL
-          value: "sentiment-db:27017"  # changed here
-        - name: SCRAPER_URL
-          value: "http://scraper:5000"
-        - name: TRANSACTIONS_URL  
-          value: "http://transactions:6002"
-        - name: SENTIMENT_SERVICE_URL
-          value: "http://sentiment-service:5002/"  # changed here
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: sentiment-app  # changed here
-  namespace: esd-project
-spec:
-  type: ClusterIP
-  selector:
-    app: sentiment-app  # changed here
-  ports:
-    - protocol: TCP
-      port: 5001
-      targetPort: 5001
----
-########################
 ####### sentiment db ###
 ########################
 
@@ -156,3 +86,73 @@ spec:
     - protocol: TCP
       port: 27017
       targetPort: 27017
+---
+########################
+## sentiment app     ###
+########################
+
+# network policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-port-5001
+  namespace: esd-project
+spec:
+  podSelector:
+    matchLabels:
+      app: sentiment-app  # changed here
+  policyTypes:
+  - Ingress
+  ingress:
+  - from: []
+    ports:
+    - protocol: TCP
+      port: 5001
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sentiment-app-deployment  # changed here
+  namespace: esd-project
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sentiment-app  # changed here
+  template:
+    metadata:
+      labels:
+        app: sentiment-app  # changed here
+    spec:
+      containers:
+      - name: sentiment-app  # changed here
+        image: docker.io/chernise/esdproject-sentiment_app:latest  # changed here
+        command: ["npm", "start"]
+        ports:
+        - containerPort: 5001
+        env:
+        - name: AMQP_SERVER
+          value: "amqp://rabbitmq:5672"
+        - name: DB_URL
+          value: "sentiment-db:27017"  # changed here
+        - name: SCRAPER_URL
+          value: "http://scraper:5000"
+        - name: TRANSACTIONS_URL  
+          value: "http://transactions:6002"
+        - name: SENTIMENT_SERVICE_URL
+          value: "http://sentiment-service:5002/"  # changed here
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sentiment-app  # changed here
+  namespace: esd-project
+spec:
+  type: ClusterIP
+  selector:
+    app: sentiment-app  # changed here
+  ports:
+    - protocol: TCP
+      port: 5001
+      targetPort: 5001

@@ -1,73 +1,3 @@
-###############################
-# comments service #
-###############################
-
-# network policy
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-port-6001
-  namespace: esd-project
-spec:
-  podSelector:
-    matchLabels:
-      app: comments-service
-  policyTypes:
-  - Ingress
-  ingress:
-  - from: []
-    ports:
-    - protocol: TCP
-      port: 6001
-
----
-
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: comments-service-deployment
-  namespace: esd-project
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: comments-service
-  template:
-    metadata:
-      labels:
-        app: comments-service
-    spec:
-      containers:
-      - name: comments-service
-        image: docker.io/chernise/esdproject-comments_service:latest
-        ports:
-        - containerPort: 6001
-
-        env:
-          - name: DB_URL
-            value: comments-db:27017
-          - name: AMQP_SERVER
-            value: amqp://rabbitmq:5672
-        command: ["npm"]
-        args: ["start"]
-
----
-
-apiVersion: v1
-kind: Service
-metadata:
-  name: comments-service
-  namespace: esd-project
-spec:
-  type: ClusterIP
-  selector:
-    app: comments-service
-  ports:
-    - protocol: TCP
-      port: 6001
-      targetPort: 6001
-
----
 ########################
 # comments db
 ########################
@@ -161,3 +91,73 @@ spec:
       targetPort: 27017
 
 
+
+---
+###############################
+# comments service #
+###############################
+
+# network policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-port-6001
+  namespace: esd-project
+spec:
+  podSelector:
+    matchLabels:
+      app: comments-service
+  policyTypes:
+  - Ingress
+  ingress:
+  - from: []
+    ports:
+    - protocol: TCP
+      port: 6001
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comments-service-deployment
+  namespace: esd-project
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: comments-service
+  template:
+    metadata:
+      labels:
+        app: comments-service
+    spec:
+      containers:
+      - name: comments-service
+        image: docker.io/chernise/esdproject-comments_service:latest
+        ports:
+        - containerPort: 6001
+
+        env:
+          - name: DB_URL
+            value: comments-db:27017
+          - name: AMQP_SERVER
+            value: amqp://rabbitmq:5672
+        command: ["npm"]
+        args: ["start"]
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: comments-service
+  namespace: esd-project
+spec:
+  type: ClusterIP
+  selector:
+    app: comments-service
+  ports:
+    - protocol: TCP
+      port: 6001
+      targetPort: 6001
