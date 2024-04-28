@@ -23,5 +23,8 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Run tag_images.bat
-        run: .\tag_images.bat
+      - name: Build images
+        run: docker compose -f docker-compose-all.yml build
+
+      - name: Push images
+        run: ./tag_images.sh
