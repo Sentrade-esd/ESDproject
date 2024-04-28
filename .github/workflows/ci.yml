@@ -23,6 +23,18 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Set up node environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+                      
+      # - name: pip-secure-install
+        # uses: brettcannon/pip-secure-install@v1.0.0
+      - name: Setup Python
+        uses: actions/setup-python@v5.1.0
+        with:
+          python-version: '3.10'
+
       - name: Build images
         run: docker compose -f docker-compose-all.yml build
 
