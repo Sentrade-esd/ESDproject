@@ -204,7 +204,7 @@ def check_if_bought(UserID, Company):
 @app.route("/transaction/newTrade", methods=["POST"])
 def update_transaction():
     data = request.get_json()
-    # ticker = data["Ticker"]
+    # ticker = data["Ticker"] 
     cur_price = data["currentPrice"]
     stocks_bought = data["buyAmount"] / cur_price
 
