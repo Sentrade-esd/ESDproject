@@ -10,7 +10,7 @@ IMAGES=("esdproject-telebot" "esdproject-watchlist" "esdproject-follow_trades" "
 # Loop through each image and tag combination
 for ((i=0; i<${#IMAGES[@]}; i++)); do
     
-    docker tag "${IMAGES[$i]}" "$USERNAME/${IMAGES[$i]}:latest"
-    docker push "$USERNAME/${IMAGES[$i]}:latest"
+    sudo docker tag "${IMAGES[$i]}" "$USERNAME/${IMAGES[$i]}:latest"
+    sudo docker push "$USERNAME/${IMAGES[$i]}:latest"
     # docker push "$IMAGES[$i]:latest"
 done
