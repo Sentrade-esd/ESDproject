@@ -111,6 +111,7 @@ cron.schedule("0 0 * * *", async function () {
 // ----------------- AMQP -----------------
 
 const startAmqp = async () => {
+  console.log(amqpServer);
   return new Promise((resolve, reject) => {
     const start = async () => {
       try {
@@ -149,8 +150,15 @@ const sendToQueue = async (exchange, routingKey, msg) => {
 
 // ----------------- RESTFUL API -----------------
 app.post("/comments", async (req, res) => {
+  console.log(req.body)
+
+  // {
+  //   company: 'Apple Inc',
+  //   comment: { userId: '6', commentIndex: 0, comment: 'stupid', likes: 0 },
+  //   userId: '6'
+  // }
   const company = req.body.company;
-  const comment = req.body.comment;
+  const comment = req.body.comment.comment;
   const userId = req.body.userId;
 
   if (!company || !comment) {
@@ -176,6 +184,7 @@ app.post("/comments", async (req, res) => {
       userId: userId,
       commentIndex: commentIndex,
       comment: comment,
+      likes: 0,
     };
     companyComments = await comments.findOneAndUpdate(
       { company: company },
@@ -188,14 +197,15 @@ app.post("/comments", async (req, res) => {
   }
 
   try {
-    if (userComments.sentiment_comments > 0) {
+    // if (userComments.sentiment_comments > 0) {
       const msg = { company, comment };
+      console.log(msg);
       await sendToQueue("comments_exchange", "comment", msg);
 
       // Decrement sentiment_comments by 1
       userComments.sentiment_comments -= 1;
       await userComments.save();
-    }
+    // }
 
     res.send(companyComments);
   } catch (error) {
@@ -203,43 +213,60 @@ app.post("/comments", async (req, res) => {
     res.status(500).send({ message: "Error sending message to queue" });
   }
 });
+
+
 app.post("/comments/like", async (req, res) => {
+
   const company = req.body.company;
   const commentIndex = req.body.commentIndex;
   const userId = req.body.userId;
-
-  if (!company || !commentIndex || !userId) {
-    return res
-      .status(400)
-      .send({ message: "Company, commentIndex and userId are required" });
-  }
-
+  // console.log(company)
+  // console.log(commentIndex)
+  // console.log(userId)
+  
   let companyComments = null;
   let userComments = null;
+  // userComments = await commentsUser.findOne({ userId: userId });
+  //   console.log(userComments)
+
+
+  // if (!company || !commentIndex || !userId) {
+  //   return res
+  //     .status(400)
+  //     .send({ message: "Company, commentIndex and userId are required" });
+  // }
+
   try {
     userComments = await commentsUser.findOne({ userId: userId });
+    console.log(userComments)
+    if (!userComments) {
+      return res.status(404).send({ message: "User not found" });
+    }
+
     const comment = userComments.commentsMade[commentIndex];
+    // console.log(comment)
+
     comment.likes += 1;
+
+    // console.log(comment)
     await userComments.save();
-    const doc = await comments.findOne({
+
+    const filter = {
       company: company,
       "commentsMade.userId": userId,
-    });
-
-    if (doc) {
-      // Find the comment with the correct commentIndex
-      const comment = doc.commentsMade.find(
-        (c) => c.commentIndex === commentIndex
-      );
-
-      if (comment) {
-        // Increment the likes of the comment
-        comment.likes += 1;
-
-        // Save the document back to the database
-        await doc.save();
-      }
+      "commentsMade.commentIndex": commentIndex,
+    };
+  
+    const update = {
+      $inc: { "commentsMade.$.likes": 1 },
+    };
+  
+    const doc = await comments.findOneAndUpdate(filter, update);
+  
+    if (!doc) {
+      console.error("No matching document found");
     }
+  
     res.sendStatus(200);
   } catch (error) {
     console.error("Error liking comment:", error);

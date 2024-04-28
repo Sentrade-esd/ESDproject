@@ -79,6 +79,8 @@ async function followTrade(userId, email, ticker, targetDate, buyAmountPerFiling
             for (let i = 0; i < filings.length; i++) {
                 let filing = filings[i];
 
+                console.log(filing.order_type.toLowerCase());
+
                 if (new Date(filing.file_date)  > refreshDate || new Date(filing.tx_date) > refreshDate){
                     continue;  
                 // } else {

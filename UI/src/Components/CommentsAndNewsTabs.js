@@ -63,7 +63,7 @@ const CommentsAndNewsTabs = ({
       console.error("Error fetching comments:", error);
     }
   };
-  const handleLike = async (userId, commentIndex) => {
+  const handleLike = async (userId, commentIndex, commentLikes) => {
     try {
       const body = {
         company: companyName,
@@ -71,8 +71,9 @@ const CommentsAndNewsTabs = ({
         userId: userId,
       };
       // need add to kong
-      const likeResponse = await axios.post(`/kong/comments/like/`, body);
+      const likeResponse = await axios.post(`/kong/comments/like`, body);
       if (likeResponse.status === 200) {
+        commentLikes += 1;
         console.log("liked");
       }
     } catch (error) {
@@ -143,7 +144,7 @@ const CommentsAndNewsTabs = ({
                         placeholder="Write about the company"
                         rows="4"
                         type="textarea"
-                        value={comment}
+                        value={comment.comment}
                         onChange={(e) =>
                           setComment({ ...comment, comment: e.target.value })
                         }
@@ -169,6 +170,7 @@ const CommentsAndNewsTabs = ({
                     <h3 className="title text-center">Comments</h3>
                     {/* Your comments */}
                     {comments.map((comment, index) => {
+                      // console.log("comment", comment);
                       return (
                         <Media key={`${comment.userId}_${index}`}>
                           <a
@@ -187,11 +189,11 @@ const CommentsAndNewsTabs = ({
                             <Media heading tag="h5" style={labelStyles}>
                               Anonymous{" "}
                             </Media>
-                            <p>{comment.userId}</p>
+                            <p>{comment.comment}</p>
                             <br></br>
                             <Button
                               onClick={() =>
-                                handleLike(comment.userId, comment.commentIndex)
+                                handleLike(comment.userId, comment.commentIndex, comment.likes)
                               }
                             >
                               Like

@@ -7,6 +7,10 @@ const WordCloud = ({ words }) => {
   const wrapperRef = useRef();
 
   useEffect(() => {
+    const maxSize = Math.max(...words.map(word => word.size));
+    const scale = d3.scaleLinear().domain([0, maxSize]).range([10, 50]);
+    
+
     const svg = d3.select(svgRef.current);
     // const width = +svg.attr('width');
     // const height = +svg.attr('height');
@@ -19,7 +23,7 @@ const WordCloud = ({ words }) => {
 
     const layout = cloud()
       .size([width, height])
-      .words(words.map(word => ({ text: word.text, size: word.size })))
+      .words(words.map(word => ({ text: word.text, size: scale(word.size) })))
       .padding(5)
       .rotate(() => (Math.random() > 0.5 ? 0 : 90))
       .font('Impact')

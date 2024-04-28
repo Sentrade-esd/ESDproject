@@ -10,5 +10,6 @@ CREATE TABLE IF NOT EXISTS "user" (
     Email VARCHAR(255) NOT NULL UNIQUE,
     Password VARCHAR(255) NOT NULL,
     Telehandle VARCHAR(255),
-    TeleID INTEGER
+    TeleID INTEGER,
+    CreationDate VARCHAR(255) NOT NULL
 );
