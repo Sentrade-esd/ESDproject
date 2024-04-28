@@ -1,65 +1,4 @@
-########################
-###### watchlist  ######
-########################
 
-# network policy
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-port-3000
-  namespace: esd-project
-spec:
-  podSelector:
-    matchLabels:
-      app: watchlist
-  policyTypes:
-  - Ingress
-  ingress:
-  - from: []
-    ports:
-    - protocol: TCP
-      port: 3000
-
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: watchlist-deployment
-  namespace: esd-project
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: watchlist
-  template:
-    metadata:
-      labels:
-        app: watchlist
-    spec:
-      containers:
-      - name: watchlist
-        image: docker.io/chernise/esdproject-watchlist:latest
-        command: ["npm", "start"]
-        ports:
-        - containerPort: 3000
-        env:
-        - name: DB_URL
-          value: "watchlist-db:27017"  # changed here
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: watchlist
-  namespace: esd-project
-spec: 
-  type: ClusterIP
-  selector:
-    app: watchlist
-  ports:
-    - protocol: TCP
-      port: 3000
-      targetPort: 3000
----
 ########################
 #### watchlist db ######
 ########################
@@ -145,3 +84,67 @@ spec:
     - protocol: TCP
       port: 27017
       targetPort: 27017
+
+---
+
+########################
+###### watchlist  ######
+########################
+
+# network policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-port-3000
+  namespace: esd-project
+spec:
+  podSelector:
+    matchLabels:
+      app: watchlist
+  policyTypes:
+  - Ingress
+  ingress:
+  - from: []
+    ports:
+    - protocol: TCP
+      port: 3000
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: watchlist-deployment
+  namespace: esd-project
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: watchlist
+  template:
+    metadata:
+      labels:
+        app: watchlist
+    spec:
+      containers:
+      - name: watchlist
+        image: docker.io/chernise/esdproject-watchlist:latest
+        command: ["npm", "start"]
+        ports:
+        - containerPort: 3000
+        env:
+        - name: DB_URL
+          value: "watchlist-db:27017"  # changed here
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: watchlist
+  namespace: esd-project
+spec: 
+  type: ClusterIP
+  selector:
+    app: watchlist
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
