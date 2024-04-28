@@ -252,8 +252,12 @@ const CommentsAndNewsTabs = ({
                           return (
                             <Card
                               key={index}
-                              className="card-blog card-plain"
-                              style={{ borderColor: "white" }}
+                              className="my-2"
+                              color="dark"
+                              inverse
+                              style={{
+                                width: '18rem'
+                              }}
                             >
                               <CardBody>
                                 {/* <h6 className="category text-warning">{companySymbol}</h6> */}
