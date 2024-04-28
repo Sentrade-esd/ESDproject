@@ -60,7 +60,7 @@ jobs:
             echo $name
             echo $zone
 
-            gcloud compute disks delete $curr_disk_name --zone=$curr_disk_zone --quiet
+            gcloud compute disks delete $name --zone=$zone --quiet
 
           done < <(gcloud compute disks list --format="value(name,LOCATION)")
         
