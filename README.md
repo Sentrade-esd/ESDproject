@@ -1,4 +1,4 @@
-# ESDproject
+# SenTrade
 
 No special installations required! dockerfile scripts will handle all dependancies
 
